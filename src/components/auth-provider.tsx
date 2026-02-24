@@ -24,44 +24,78 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     const fetchUserData = async (userId: string) => {
-        const { data, error } = await supabase
-            .from('team')
-            .select('role, agency_id')
-            .eq('id', userId)
-            .single()
+        console.log('fetchUserData: START for', userId)
+        try {
+            const { data, error } = await supabase
+                .from('team')
+                .select('role, agency_id')
+                .eq('id', userId)
+                .single()
 
-        if (data && !error) {
-            setRole(data.role as Role)
-            setAgencyId(data.agency_id)
+            if (error) {
+                console.error('fetchUserData: ERROR', error)
+            } else if (data) {
+                console.log('fetchUserData: SUCCESS', data.role)
+                setRole(data.role as Role)
+                setAgencyId(data.agency_id)
+            } else {
+                console.warn('fetchUserData: NO DATA FOUND')
+            }
+        } catch (err) {
+            console.error('fetchUserData: UNEXPECTED EXCEPTION', err)
+        } finally {
+            console.log('fetchUserData: END')
         }
     }
 
     useEffect(() => {
+        let isSubscribed = true
+        console.log('AuthProvider: useEffect INIT')
+
         // Get initial session
         supabase.auth.getSession().then(async ({ data: { session } }) => {
+            if (!isSubscribed) return
+            console.log('AuthProvider: getSession result', { hasSession: !!session })
+
             setSession(session)
             const currentUser = session?.user ?? null
             setUser(currentUser)
+
             if (currentUser) {
                 await fetchUserData(currentUser.id)
             }
-            setLoading(false)
+
+            if (isSubscribed) {
+                setLoading(false)
+                console.log('AuthProvider: loading set to FALSE (getSession)')
+            }
         })
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!isSubscribed) return
+            console.log('AuthProvider: onAuthStateChange', event, { hasSession: !!session })
+
             setSession(session)
             const currentUser = session?.user ?? null
             setUser(currentUser)
+
             if (currentUser) {
                 await fetchUserData(currentUser.id)
             } else {
                 setAgencyId(null)
             }
-            setLoading(false)
+
+            if (isSubscribed) {
+                setLoading(false)
+                console.log('AuthProvider: loading set to FALSE (onAuthStateChange)')
+            }
         })
 
-        return () => subscription.unsubscribe()
+        return () => {
+            isSubscribed = false
+            subscription.unsubscribe()
+        }
     }, [])
 
     const signOut = async () => {
