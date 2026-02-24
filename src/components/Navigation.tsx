@@ -59,17 +59,17 @@ export function Navigation() {
 
     if (isMobile) {
         return (
-            <div className="fixed bottom-0 left-0 right-0 z-50 hyper-glass border-t-0 rounded-t-3xl pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.04)]">
-                <div className="flex justify-around items-center h-20 px-2 overflow-x-auto no-scrollbar">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t pb-safe">
+                <div className="flex justify-around items-center h-16 px-2 overflow-x-auto no-scrollbar">
                     {filteredNavItems.filter((item) => !item.mobileHidden).map((item) => {
                         const isActive = location.pathname.startsWith(item.path)
                         const Icon = item.icon
                         return (
                             <Link key={item.path} to={item.path}
-                                className={cn('flex flex-col items-center justify-center min-w-[70px] h-full space-y-1 transition-all duration-300 rounded-2xl shrink-0 px-2',
-                                    isActive ? 'text-electric-blue bg-electric-blue/10 scale-105' : 'text-muted-foreground hover:text-pure-black dark:hover:text-off-white')}>
-                                <Icon className={cn('h-5 w-5', isActive && 'fill-electric-blue/20')} />
-                                <span className="text-[9px] font-bold tracking-wide text-center leading-tight truncate w-full">{item.title}</span>
+                                className={cn('flex flex-col items-center justify-center min-w-[70px] h-full space-y-1 transition-all duration-200 shrink-0 px-2',
+                                    isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground')}>
+                                <Icon className={cn('h-5 w-5', isActive && 'text-primary')} />
+                                <span className="text-[10px] font-medium text-center leading-tight truncate w-full">{item.title}</span>
                             </Link>
                         )
                     })}
@@ -79,15 +79,15 @@ export function Navigation() {
     }
 
     return (
-        <div className="w-64 bg-porcelain dark:bg-pure-black border-r border-black/5 dark:border-white/5 flex flex-col h-screen fixed left-0 top-0 z-50">
-            <div className="h-28 flex flex-col justify-center px-8 border-b border-black/5 dark:border-white/5 bg-white/50 dark:bg-black/20 backdrop-blur-sm">
-                <div className="flex items-center gap-3 text-pure-black dark:text-off-white">
-                    <div className="w-10 h-10 rounded-2xl bg-[#0F172A] dark:bg-[#94785C] flex items-center justify-center shadow-2xl shadow-black/20 text-white transition-transform hover:scale-105 duration-300">
-                        <Car className="h-6 w-6" />
+        <div className="w-64 bg-background border-r flex flex-col h-screen fixed left-0 top-0 z-50">
+            <div className="h-16 flex items-center px-6 border-b">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                        <Car className="h-5 w-5" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-xl font-black leading-none">AutoGestão</span>
-                        <span className="text-[10px] font-bold text-electric-blue tracking-widest uppercase mt-0.5">Flux Control</span>
+                        <span className="text-lg font-bold leading-none">AutoGestão</span>
+                        <span className="text-[10px] text-muted-foreground uppercase mt-0.5">Flux Control</span>
                     </div>
                 </div>
             </div>
@@ -97,66 +97,64 @@ export function Navigation() {
                     const Icon = item.icon
                     return (
                         <Link key={item.path} to={item.path}
-                            className={cn('flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all duration-300 group font-bold text-sm',
-                                isActive ? 'bg-white dark:bg-white/10 text-electric-blue shadow-sm border border-black/5 dark:border-white/5' : 'text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-pure-black dark:hover:text-off-white')}>
-                            <Icon className={cn('h-4 w-4 transition-transform group-hover:scale-110', isActive ? 'text-electric-blue fill-electric-blue/10' : 'text-muted-foreground')} />
+                            className={cn('flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group text-sm font-medium',
+                                isActive ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}>
+                            <Icon className={cn('h-4 w-4', isActive ? 'text-foreground' : 'text-muted-foreground')} />
                             {item.title}
                         </Link>
                     )
                 })}
             </nav>
-            <div className="p-6 mt-auto shrink-0">
+            <div className="p-4 mt-auto shrink-0 border-t">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/50 dark:bg-white/5 border border-black/5 dark:border-white/5 backdrop-blur-md cursor-pointer hover:bg-white dark:hover:bg-white/10 transition-colors shadow-sm group">
-                            <Avatar className="w-10 h-10 border-2 border-white dark:border-pure-black shadow-sm group-hover:scale-105 transition-transform">
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                            <Avatar className="w-9 h-9">
                                 {user?.user_metadata?.avatar_url && (
                                     <AvatarImage src={user.user_metadata.avatar_url} />
                                 )}
-                                <AvatarFallback className="bg-electric-blue text-white font-bold">
+                                <AvatarFallback>
                                     {user?.email?.[0].toUpperCase() || 'A'}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-sm font-bold text-pure-black dark:text-off-white leading-tight truncate">
+                                <span className="text-sm font-medium leading-tight truncate">
                                     {user?.user_metadata?.full_name || 'Alex Gerente'}
                                 </span>
-                                <span className="text-[10px] font-bold text-electric-blue uppercase tracking-wider">{roleTranslations[role]}</span>
+                                <span className="text-xs text-muted-foreground">{roleTranslations[role]}</span>
                             </div>
                         </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" side="right" className="w-56 mb-4 ml-2 rounded-2xl border-black/5 dark:border-white/5 hyper-glass">
-                        <DropdownMenuLabel className="font-extrabold text-xs text-muted-foreground uppercase tracking-widest p-3">
+                    <DropdownMenuContent align="end" side="right" className="w-56 mb-2 ml-2">
+                        <DropdownMenuLabel className="font-normal text-xs text-muted-foreground uppercase tracking-wider p-2">
                             Minha Conta
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-black/5 dark:bg-white/5" />
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={() => navigate('/settings')}
-                            className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:bg-black/5 dark:focus:bg-white/5"
+                            className="cursor-pointer"
                         >
-                            <UserIcon className="w-4 h-4 text-electric-blue" />
-                            <span className="font-bold text-sm">Meu Perfil</span>
+                            <UserIcon className="w-4 h-4 mr-2" />
+                            <span>Meu Perfil</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => navigate('/settings')}
-                            className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:bg-black/5 dark:focus:bg-white/5"
+                            className="cursor-pointer"
                         >
-                            <Settings className="w-4 h-4 text-electric-blue" />
-                            <span className="font-bold text-sm">Configurações</span>
+                            <Settings className="w-4 h-4 mr-2" />
+                            <span>Configurações</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-black/5 dark:bg-white/5" />
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={() => signOut()}
-                            className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-mars-orange/10 transition-colors focus:bg-mars-orange/10 text-mars-orange"
+                            className="cursor-pointer text-destructive focus:text-destructive"
                         >
-                            <LogOut className="w-4 h-4" />
-                            <span className="font-bold text-sm">Sair do Sistema</span>
+                            <LogOut className="w-4 h-4 mr-2" />
+                            <span>Sair do Sistema</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-
-
         </div>
     )
 }
