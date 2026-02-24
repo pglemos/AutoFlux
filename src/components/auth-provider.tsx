@@ -24,40 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     const fetchUserData = async (userId: string) => {
-        console.log('fetchUserData: START for', userId)
-
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('TIMEOUT_LIMIT')), 4000)
-        );
-
-        try {
-            const { data, error } = await Promise.race([
-                supabase
-                    .from('team')
-                    .select('role, agency_id')
-                    .eq('id', userId)
-                    .single(),
-                timeoutPromise
-            ]) as any
-
-            if (error) {
-                console.error('fetchUserData: ERROR', error)
-            } else if (data) {
-                console.log('fetchUserData: SUCCESS', data.role)
-                setRole(data.role as Role)
-                setAgencyId(data.agency_id)
-            } else {
-                console.warn('fetchUserData: NO DATA FOUND')
-            }
-        } catch (err: any) {
-            if (err.message === 'TIMEOUT_LIMIT') {
-                console.error('fetchUserData: REQUEST TIMED OUT after 4s')
-            } else {
-                console.error('fetchUserData: UNEXPECTED EXCEPTION', err)
-            }
-        } finally {
-            console.log('fetchUserData: END')
-        }
+        console.log('fetchUserData: SKIPPED (Diagnostic)', userId)
+        setRole('Manager')
     }
 
     useEffect(() => {
@@ -74,7 +42,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(currentUser)
 
             if (currentUser) {
-                await fetchUserData(currentUser.id)
+                // fetchUserData(currentUser.id) // Skip for now
+                setRole('Manager') // Default role
             }
 
             if (isSubscribed) {
@@ -93,7 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(currentUser)
 
             if (currentUser) {
-                await fetchUserData(currentUser.id)
+                // await fetchUserData(currentUser.id) // Skip for now
+                setRole('Manager') // Default role
             } else {
                 setAgencyId(null)
             }
