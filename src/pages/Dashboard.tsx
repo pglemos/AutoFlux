@@ -33,7 +33,8 @@ import { chartData } from '@/lib/mock-data'
 export default function Dashboard() {
     const { role } = useAuth()
     console.log('Dashboard rendering, role:', role)
-    const { leads, team, inventory, goals, activeAgencyId, auditLogs } = useAppStore()
+    const { leads = [], team = [], inventory = [], goals = [], activeAgencyId, auditLogs = [] } = useAppStore()
+    console.log('Dashboard data check:', { leadsLen: leads?.length, teamLen: team?.length, invLen: inventory?.length })
     const [isEditing, setIsEditing] = useState(false)
     const [dashboardWidgets, setDashboardWidgets] = useState<string[]>([
         'kpi-metas',
@@ -51,6 +52,7 @@ export default function Dashboard() {
     }
 
     const stats = useMemo(() => {
+        if (!team || !inventory) return { totalSales: 0, avgAging: 0, stockValue: 0, projection: 0 }
         const totalSales = team.reduce((acc, t) => acc + (t.sales || 0), 0)
         const avgAging = inventory.length > 0 ? Math.round(inventory.reduce((acc, i) => acc + (i.agingDays || 0), 0) / inventory.length) : 0
         const stockValue = inventory.reduce((acc, i) => acc + (i.price || 0), 0)
@@ -65,7 +67,7 @@ export default function Dashboard() {
 
     const ALL_WIDGETS = [
         { id: 'kpi-metas', type: 'kpi-progress', title: 'Progresso da Meta (Equipe)' },
-        { id: 'kpi-leads', type: 'kpi', title: 'Novos Leads', value: leads.length, trend: 12 },
+        { id: 'kpi-leads', type: 'kpi', title: 'Novos Leads', value: (leads || []).length, trend: 12 },
         { id: 'kpi-vendas', type: 'kpi', title: 'Vendas do Mês', value: stats.totalSales, trend: 8, highlight: true },
         { id: 'kpi-projecao', type: 'kpi', title: 'Projeção (Mês)', value: Math.round(stats.projection), trend: 5, highlight: true },
         { id: 'kpi-estoque', type: 'kpi', title: 'Valor em Estoque', value: `R$ ${(stats.stockValue / 1000000).toFixed(1)}M`, trend: 2.1 },
@@ -76,6 +78,7 @@ export default function Dashboard() {
     ]
 
     const filteredTeam = useMemo(() => {
+        if (!team) return []
         if (!activeAgencyId) return team
         return team.filter(m => m.agencyId === activeAgencyId)
     }, [team, activeAgencyId])
@@ -88,12 +91,15 @@ export default function Dashboard() {
         }
     }
 
-    const funnelLeakData = useMemo(() => [
-        { stage: 'Sem Contato', value: leads.filter(l => l.stage === 'Lead').length },
-        { stage: 'Agendamento', value: leads.filter(l => l.stage === 'Agendamento').length },
-        { stage: 'Visita', value: leads.filter(l => l.stage === 'Visita').length },
-        { stage: 'Proposta', value: leads.filter(l => l.stage === 'Proposta').length },
-    ], [leads])
+    const funnelLeakData = useMemo(() => {
+        if (!leads) return []
+        return [
+            { stage: 'Sem Contato', value: leads.filter(l => l.stage === 'Lead').length },
+            { stage: 'Agendamento', value: leads.filter(l => l.stage === 'Agendamento').length },
+            { stage: 'Visita', value: leads.filter(l => l.stage === 'Visita').length },
+            { stage: 'Proposta', value: leads.filter(l => l.stage === 'Proposta').length },
+        ]
+    }, [leads])
 
     const renderWidget = useCallback((id: string) => {
         const widget = ALL_WIDGETS.find((w) => w.id === id)

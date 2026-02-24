@@ -55,17 +55,19 @@ const BentoCard = ({ children, className, delay = 0 }: { children: React.ReactNo
 
 export default function AdminDashboard() {
     console.log('AdminDashboard rendering')
-    const { agencies, team, leads } = useAppStore()
+    const { agencies = [], team = [], leads = [] } = useAppStore()
     const [hoveredAgency, setHoveredAgency] = useState<string | null>(null)
 
     const globalStats = useMemo(() => {
-        const totalRevenue = adminSystemPerformance[adminSystemPerformance.length - 1].revenue
+        const perf = adminSystemPerformance || []
+        const latestPerf = perf.length > 0 ? perf[perf.length - 1] : { revenue: 0 }
+        const totalRevenue = latestPerf.revenue || 0
         const revenueTrend = 19.9
-        const totalAgencies = agencies.length || 28 // fallback if empty initially
-        const totalUsers = team.length || 156
-        const totalLeads = leads.length || 6200
+        const totalAgenciesCount = agencies.length || 28
+        const totalUsersCount = team.length || 156
+        const totalLeadsCount = leads.length || 6200
 
-        return { revenue: totalRevenue, revenueTrend, agencies: totalAgencies, users: totalUsers, leads: totalLeads }
+        return { revenue: totalRevenue, revenueTrend, agencies: totalAgenciesCount, users: totalUsersCount, leads: totalLeadsCount }
     }, [agencies, team, leads])
 
     const formatCurrency = (val: number) => {
