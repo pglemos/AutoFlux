@@ -38,23 +38,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
             setSession(session)
             const currentUser = session?.user ?? null
             setUser(currentUser)
             if (currentUser) {
-                fetchUserData(currentUser.id)
+                await fetchUserData(currentUser.id)
             }
             setLoading(false)
         })
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setSession(session)
             const currentUser = session?.user ?? null
             setUser(currentUser)
             if (currentUser) {
-                fetchUserData(currentUser.id)
+                await fetchUserData(currentUser.id)
             } else {
                 setAgencyId(null)
             }
