@@ -65,7 +65,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                         <p className="text-muted-foreground font-medium mt-1">Defina objetivos claros e acompanhe a evolução em tempo real.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" className="rounded-xl font-bold h-11 border-black/10 dark:border-white/10 bg-white dark:bg-[#111]">
+                        <Button variant="outline" className="rounded-xl font-bold h-11 border-black/10 dark:border-white/10 bg-white dark:bg-pure-black">
                             <BarChart3 className="w-4 h-4 mr-2" /> Relatório Completo
                         </Button>
                     </div>
@@ -74,7 +74,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {currentStats.map((stat) => (
-                    <Card key={stat.title} className="border-none shadow-sm bg-white dark:bg-[#111] rounded-3xl overflow-hidden relative group">
+                    <Card key={stat.title} className="border-none shadow-sm bg-white dark:bg-pure-black rounded-3xl overflow-hidden relative group">
                         <CardContent className="p-6 flex items-center gap-4">
                             <div className={cn("p-3 rounded-2xl bg-black/5 dark:bg-white/5", stat.color)}>
                                 <stat.icon className="w-6 h-6" />
@@ -93,7 +93,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-4 space-y-6">
-                    <Card className="border-none shadow-xl bg-white dark:bg-[#111] rounded-3xl overflow-hidden">
+                    <Card className="border-none shadow-xl bg-white dark:bg-pure-black rounded-3xl overflow-hidden">
                         <CardHeader className="p-8 pb-4">
                             <CardTitle className="text-xl font-extrabold text-pure-black dark:text-off-white flex items-center gap-2">
                                 <Plus className="w-5 h-5 text-electric-blue" /> Nova Meta
@@ -102,19 +102,19 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                         </CardHeader>
                         <CardContent className="p-8 pt-4 space-y-6">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tipo de Meta</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white">Tipo de Meta</Label>
                                 <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-xl">
                                     <Button
                                         variant={type === 'Equipe' ? 'default' : 'ghost'}
                                         onClick={() => setType('Equipe')}
-                                        className={cn("flex-1 rounded-lg font-bold text-xs h-9", type === 'Equipe' ? "bg-white dark:bg-black text-pure-black dark:text-off-white shadow-sm" : "text-muted-foreground")}
+                                        className={cn("flex-1 rounded-lg font-bold text-xs h-9", type === 'Equipe' ? "bg-white dark:bg-pure-black text-pure-black dark:text-off-white shadow-sm" : "text-muted-foreground")}
                                     >
                                         <Users className="w-3.5 h-3.5 mr-2" /> Equipe
                                     </Button>
                                     <Button
                                         variant={type === 'Individual' ? 'default' : 'ghost'}
                                         onClick={() => setType('Individual')}
-                                        className={cn("flex-1 rounded-lg font-bold text-xs h-9", type === 'Individual' ? "bg-white dark:bg-black text-pure-black dark:text-off-white shadow-sm" : "text-muted-foreground")}
+                                        className={cn("flex-1 rounded-lg font-bold text-xs h-9", type === 'Individual' ? "bg-white dark:bg-pure-black text-pure-black dark:text-off-white shadow-sm" : "text-muted-foreground")}
                                     >
                                         <User className="w-3.5 h-3.5 mr-2" /> Individual
                                     </Button>
@@ -123,7 +123,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
 
                             {type === 'Individual' && (
                                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Selecionar Vendedor</Label>
+                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white">Selecionar Vendedor</Label>
                                     <Select value={targetId} onValueChange={setTargetId}>
                                         <SelectTrigger className="h-11 rounded-xl bg-black/5 dark:bg-white/5 border-none font-bold">
                                             <SelectValue placeholder="Escolha um vendededor..." />
@@ -138,7 +138,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                             )}
 
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Objetivo (Vendas)</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white">Objetivo (Vendas)</Label>
                                 <div className="relative">
                                     <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input
@@ -166,7 +166,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                 </div>
 
                 <div className="lg:col-span-8">
-                    <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden min-h-[500px] flex flex-col">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden min-h-[500px] flex flex-col">
                         <CardHeader className="p-8 border-b border-black/5 dark:border-white/5 flex flex-row items-center justify-between bg-black/[0.02] dark:bg-white/[0.02]">
                             <div>
                                 <CardTitle className="text-xl font-extrabold text-pure-black dark:text-off-white">Metas Ativas</CardTitle>
