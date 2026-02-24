@@ -95,34 +95,37 @@ export default function Settings() {
                 <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
                     <span className="text-electric-blue">Configurações</span>
                 </h1>
-                <p className="text-muted-foreground font-medium mt-1">Gerencie preferências, usuários e permissões do AutoGestão.</p>
+                <div className="flex items-center justify-between mt-1">
+                    <p className="text-muted-foreground font-medium">Gerencie preferências, usuários e permissões do AutoGestão.</p>
+                    <span className="text-3xl font-signature text-[#94785C] opacity-60">Luz Direção Consultoria</span>
+                </div>
             </div>
 
             <Tabs defaultValue="general" className="w-full">
                 <TabsList className="bg-white/50 dark:bg-black/50 p-1 rounded-2xl border border-white/30 dark:border-white/5 mb-8 backdrop-blur-xl">
-                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <SettingsIcon className="w-4 h-4 mr-2" />Geral
                     </TabsTrigger>
-                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         {role === 'Admin' ? <Building2 className="w-4 h-4 mr-2" /> : <Users className="w-4 h-4 mr-2" />}
                         {role === 'Admin' ? 'Agência' : 'Usuários'}
                     </TabsTrigger>
-                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <ShieldCheck className="w-4 h-4 mr-2" />Permissões
                     </TabsTrigger>
-                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Plug className="w-4 h-4 mr-2" />Integrações
                     </TabsTrigger>
-                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Target className="w-4 h-4 mr-2" />Metas
                     </TabsTrigger>
-                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <FileSignature className="w-4 h-4 mr-2" />Comissões
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="general" className="space-y-6 animate-in fade-in-50 duration-500">
-                    <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Moon className="w-5 h-5 text-electric-blue" /> Aparência
@@ -139,7 +142,7 @@ export default function Settings() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Shield className="w-5 h-5 text-slate-500" /> Controle de Acesso (RBAC)
@@ -167,7 +170,7 @@ export default function Settings() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Zap className="w-5 h-5 text-electric-blue" /> Regras de Negócio
@@ -188,7 +191,7 @@ export default function Settings() {
                 <TabsContent value="users" className="space-y-6 animate-in fade-in-50 duration-500">
                     {role === 'Admin' ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card className="md:col-span-1 border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden border border-black/5 dark:border-white/5">
+                            <Card className="md:col-span-1 border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden border border-black/5 dark:border-white/5">
                                 <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
                                     <div>
                                         <CardTitle className="text-lg font-extrabold text-electric-blue">Agências</CardTitle>
@@ -253,7 +256,7 @@ export default function Settings() {
                                 </div>
                             </Card>
 
-                            <Card className="md:col-span-2 border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden min-h-[500px]">
+                            <Card className="md:col-span-2 border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden min-h-[500px]">
                                 {selectedAgencyId ? (
                                     <>
                                         <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
@@ -324,7 +327,7 @@ export default function Settings() {
                             </Card>
                         </div>
                     ) : (
-                        <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden">
+                        <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
                             <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
                                 <div>
                                     <CardTitle className="text-lg font-extrabold">Gerenciamento de Time</CardTitle>
@@ -381,7 +384,7 @@ export default function Settings() {
                 </TabsContent>
 
                 <TabsContent value="agencies" className="space-y-6 animate-in fade-in-50 duration-500">
-                    <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
                         <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
                             <div>
                                 <CardTitle className="text-lg font-extrabold">Unidades / Agências</CardTitle>
@@ -431,7 +434,7 @@ export default function Settings() {
                 </TabsContent>
 
                 <TabsContent value="permissions" className="space-y-6 animate-in fade-in-50 duration-500">
-                    <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
                         <CardHeader className="border-b border-black/5 dark:border-white/5 pb-6">
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <ShieldCheck className="w-5 h-5 text-mars-orange" /> Matriz de Permissões
@@ -478,7 +481,7 @@ export default function Settings() {
                 </TabsContent>
 
                 <TabsContent value="integrations" className="space-y-6 animate-in fade-in-50 duration-500">
-                    <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
                         <CardHeader>
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Link2 className="w-5 h-5 text-electric-blue" /> Ecossistema Conectado

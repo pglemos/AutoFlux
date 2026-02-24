@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
     Activity,
     Building2,
@@ -9,19 +9,23 @@ import {
     Zap,
     ArrowUpRight,
     ArrowDownRight,
-    Search
+    Search,
+    ChevronRight,
+    Database,
+    Cpu,
+    Network
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import {
     AreaChart,
     Area,
-    BarChart,
-    Bar,
     XAxis,
     YAxis,
     Tooltip,
     ResponsiveContainer,
-    CartesianGrid
+    CartesianGrid,
+    BarChart,
+    Bar,
+    Cell
 } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { Badge } from '@/components/ui/badge'
@@ -31,23 +35,36 @@ import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
 import useAppStore from '@/stores/main'
 
+const BentoCard = ({ children, className, delay = 0 }: { children: React.ReactNode, className?: string, delay?: number }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay, ease: [0.23, 1, 0.32, 1] }}
+        className={cn(
+            "relative overflow-hidden rounded-[2rem] bg-[#0A0A0A] border border-white/[0.05]",
+            "after:absolute after:inset-0 after:rounded-[2rem] after:ring-1 after:ring-inset after:ring-white/[0.02]",
+            "hover:border-white/[0.1] transition-colors duration-500",
+            className
+        )}
+    >
+        {/* Subtle top glare */}
+        <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/[0.1] to-transparent" />
+        {children}
+    </motion.div>
+)
+
 export default function AdminDashboard() {
     const { agencies, team, leads } = useAppStore()
+    const [hoveredAgency, setHoveredAgency] = useState<string | null>(null)
 
     const globalStats = useMemo(() => {
         const totalRevenue = adminSystemPerformance[adminSystemPerformance.length - 1].revenue
-        const revenueTrend = 19.9 // Mock trend comparing current month to prev
-        const totalAgencies = agencies.length
-        const totalUsers = team.length
-        const totalLeads = leads.length
+        const revenueTrend = 19.9
+        const totalAgencies = agencies.length || 28 // fallback if empty initially
+        const totalUsers = team.length || 156
+        const totalLeads = leads.length || 6200
 
-        return {
-            revenue: totalRevenue,
-            revenueTrend,
-            agencies: totalAgencies,
-            users: totalUsers,
-            leads: totalLeads
-        }
+        return { revenue: totalRevenue, revenueTrend, agencies: totalAgencies, users: totalUsers, leads: totalLeads }
     }, [agencies, team, leads])
 
     const formatCurrency = (val: number) => {
@@ -55,216 +72,297 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="space-y-8 max-w-[1400px] mx-auto pb-12 text-white min-h-screen">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-12">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-electric-blue shadow-[0_0_12px_var(--electric-blue)] animate-pulse"></div>
-                        <span className="text-[9px] font-black tracking-[0.4em] text-electric-blue uppercase">Central de Comando</span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl lg:text-5xl font-extrabold tracking-[-0.03em] leading-none mb-2">
-                        Visão <span className="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-teal-400">Omnisciente</span>.
-                    </h1>
-                    <p className="text-muted-foreground font-medium text-sm md:text-base max-w-xl">
-                        Monitoramento em tempo real da performance global de todas as operações e agências associadas ao ecossistema.
-                    </p>
-                </div>
-
-                <div className="flex flex-col items-start md:items-end gap-4 w-full md:w-auto">
-                    <div className="relative w-full md:w-72 group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-focus-within:text-electric-blue transition-colors" />
-                        <Input
-                            placeholder="Buscar agência, usuário ou transação..."
-                            className="pl-10 h-12 bg-white/5 border-white/10 text-white rounded-2xl focus-visible:ring-1 focus-visible:ring-electric-blue transition-all"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Global KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <GlobalKpiCard
-                    title="Receita Global (Mês)"
-                    value={formatCurrency(globalStats.revenue)}
-                    trend={globalStats.revenueTrend}
-                    icon={<Globe className="w-5 h-5 text-electric-blue" />}
-                    highlight
-                />
-                <GlobalKpiCard
-                    title="Agências Ativas"
-                    value={globalStats.agencies.toString()}
-                    trend={5.2}
-                    icon={<Building2 className="w-5 h-5 text-teal-400" />}
-                />
-                <GlobalKpiCard
-                    title="Volume de Leads"
-                    value={globalStats.leads.toString()}
-                    trend={12.4}
-                    icon={<Zap className="w-5 h-5 text-amber-400" />}
-                />
-                <GlobalKpiCard
-                    title="Times Operacionais"
-                    value={globalStats.users.toString()}
-                    trend={2.1}
-                    icon={<Users className="w-5 h-5 text-indigo-400" />}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Performance Chart */}
-                <Card className="lg:col-span-2 border-white/10 bg-black/80 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden relative group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-electric-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                    <CardHeader className="pb-2 border-b border-white/5 flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-electric-blue" />
-                                Ecossistema Financeiro
-                            </CardTitle>
-                            <CardDescription className="text-white/50 text-xs mt-1">Evolução de receita agregada das agências</CardDescription>
+        <div className="space-y-6 max-w-[1600px] mx-auto pb-12 text-white min-h-screen font-sans selection:bg-electric-blue/30 p-2 md:p-6">
+            {/* Header Section */}
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pt-4">
+                <div className="space-y-2">
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}
+                        className="flex items-center gap-3"
+                    >
+                        <div className="relative flex h-2 w-2 items-center justify-center">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-electric-blue opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-electric-blue"></span>
                         </div>
-                        <Badge variant="outline" className="border-white/10 bg-white/5 text-white/70 font-mono text-[10px]">ULT. 6 MESES</Badge>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <ChartContainer config={{ revenue: { label: 'Receita', color: 'var(--electric-blue)' } }}>
-                            <div className="h-[320px] w-full min-w-0">
-                                <ResponsiveContainer width="99%" height={320}>
+                        <span className="text-[10px] font-bold tracking-[0.3em] text-electric-blue uppercase">AutoGestão</span>
+                        <span className="text-2xl font-signature text-white/40 ml-2">by Luz Direção</span>
+                    </motion.div>
+                    <motion.h1
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+                        className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none"
+                    >
+                        Global <span className="text-white/40">Command</span>
+                    </motion.h1>
+                </div>
+
+                <motion.div
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+                    className="relative w-full md:w-80 group isolate"
+                >
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-electric-blue/20 to-transparent rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <div className="relative">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-electric-blue transition-colors" />
+                        <Input
+                            placeholder="Buscar no ecossistema..."
+                            className="bg-[#0A0A0A] border-white/10 h-12 pl-11 rounded-2xl text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-electric-blue/50 focus-visible:border-electric-blue/50 transition-all font-medium"
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                            <kbd className="hidden md:inline-flex h-5 items-center gap-1 rounded border border-white/10 bg-white/5 px-1.5 font-mono text-[10px] font-medium text-white/40">⌘K</kbd>
+                        </div>
+                    </div>
+                </motion.div>
+            </header>
+
+            {/* Bento Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 auto-rows-[minmax(120px,_auto)]">
+
+                {/* 1. Hero Revenue Metric (Col Span 8, Row Span 2) */}
+                <BentoCard className="md:col-span-8 row-span-2 group" delay={0.1}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-electric-blue/10 via-transparent to-transparent opacity-50" />
+                    {/* Abstract background rings */}
+                    <div className="absolute -right-20 -top-20 w-96 h-96 rounded-full border border-electric-blue/10 opacity-50 blur-[1px]" />
+                    <div className="absolute -right-10 -top-10 w-96 h-96 rounded-full border border-electric-blue/5 opacity-50 blur-[2px]" />
+
+                    <div className="relative h-full p-8 flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2 bg-white/5 rounded-full px-3 py-1.5 border border-white/10 backdrop-blur-md">
+                                <Globe className="w-3.5 h-3.5 text-electric-blue" />
+                                <span className="text-[10px] font-bold tracking-widest uppercase text-white/70">Receita Total Agregada</span>
+                            </div>
+                            <div className="flex items-center text-[11px] font-bold px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                                <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
+                                {globalStats.revenueTrend}% mensais
+                            </div>
+                        </div>
+
+                        <div className="mt-8">
+                            <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60">
+                                {formatCurrency(globalStats.revenue).replace('R$', '').trim()}
+                            </h2>
+                            <p className="text-white/40 font-mono text-sm mt-2 ml-1">BRL / Acumulado YTD</p>
+                        </div>
+
+                        <div className="mt-8 flex items-center gap-6">
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3, 4].map(i => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0A0A0A] bg-zinc-800 flex items-center justify-center overflow-hidden">
+                                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Admin${i}`} alt="Avatar" className="w-full h-full object-cover" />
+                                    </div>
+                                ))}
+                                <div className="w-10 h-10 rounded-full border-2 border-[#0A0A0A] bg-white/5 flex items-center justify-center text-[10px] font-bold text-white/50 backdrop-blur-sm">
+                                    +{globalStats.users - 4}
+                                </div>
+                            </div>
+                            <div className="h-8 w-px bg-white/10" />
+                            <div className="flex items-center gap-2 group cursor-pointer transition-opacity hover:opacity-80">
+                                <div className="w-10 h-10 rounded-full bg-electric-blue/10 flex items-center justify-center border border-electric-blue/20">
+                                    <Building2 className="w-4 h-4 text-electric-blue" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold">{globalStats.agencies} Agências</p>
+                                    <p className="text-[10px] text-white/40 uppercase tracking-wider">Operando Hoje</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </BentoCard>
+
+                {/* 2. System Load/Health (Col Span 4, Row Span 1) */}
+                <BentoCard className="md:col-span-4 row-span-1" delay={0.2}>
+                    <div className="p-6 h-full flex flex-col justify-between">
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-[10px] font-bold tracking-widest uppercase text-white/50 flex items-center gap-2">
+                                <Cpu className="w-3.5 h-3.5" /> Status do Core
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                <span className="text-[10px] font-bold text-emerald-500 uppercase">Estável</span>
+                            </div>
+                        </div>
+                        <div className="flex items-end gap-3">
+                            <h3 className="text-4xl font-extrabold font-mono tracking-tighter">99.9</h3>
+                            <span className="text-white/40 font-bold mb-1">% Uptime</span>
+                        </div>
+                        <div className="mt-4 flex gap-1 h-8 items-end">
+                            {Array.from({ length: 20 }).map((_, i) => {
+                                const height = 20 + Math.random() * 80;
+                                return (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ height: `${height}%` }}
+                                        animate={{ height: `${height * (0.8 + Math.random() * 0.4)}%` }}
+                                        transition={{ repeat: Infinity, duration: 1.5 + Math.random(), repeatType: "reverse" }}
+                                        className="flex-1 rounded-sm bg-emerald-500/20"
+                                    />
+                                );
+                            })}
+                        </div>
+                    </div>
+                </BentoCard>
+
+                {/* 3. Global Leads Volumetric (Col Span 4, Row Span 1) */}
+                <BentoCard className="md:col-span-4 row-span-1" delay={0.3}>
+                    <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-50" />
+                    <div className="p-6 h-full flex flex-col justify-between relative z-10">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-[10px] font-bold tracking-widest uppercase text-white/50 flex items-center gap-2">
+                                <Network className="w-3.5 h-3.5" /> Tráfego de Leads
+                            </span>
+                        </div>
+                        <div className="flex items-end gap-4">
+                            <h3 className="text-4xl font-extrabold font-mono tracking-tighter">{globalStats.leads}</h3>
+                            <div className="flex items-center text-[10px] font-bold text-amber-400 mb-1">
+                                <ArrowUpRight className="w-3 h-3 mr-0.5" /> +12.4%
+                            </div>
+                        </div>
+                        <p className="text-[10px] text-white/40 font-mono mt-1">Leads processados nos últimos 30 dias</p>
+                    </div>
+                </BentoCard>
+
+                {/* 4. Evolution Area Chart (Col Span 8, Row Span 2) */}
+                <BentoCard className="md:col-span-8 row-span-2" delay={0.4}>
+                    <div className="p-6 h-full flex flex-col">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 className="text-sm font-bold text-white mb-1">Trajetória de Crescimento</h3>
+                                <p className="text-xs text-white/40">Evolução de faturamento agregado (6 meses)</p>
+                            </div>
+                        </div>
+                        <div className="flex-1 min-h-[200px] -ml-4">
+                            <ChartContainer config={{ revenue: { label: 'Receita', color: 'var(--electric-blue)' } }}>
+                                <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={adminSystemPerformance} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                                         <defs>
-                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="0%" stopColor="#2563EB" stopOpacity={0.5} />
-                                                <stop offset="100%" stopColor="#2563EB" stopOpacity={0} />
+                                            <linearGradient id="colorRevenueGradient" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="#2563EB" stopOpacity={0.6} />
+                                                <stop offset="100%" stopColor="#2563EB" stopOpacity={0.05} />
                                             </linearGradient>
                                         </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }} dy={10} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 600 }} dy={10} />
                                         <YAxis
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
-                                            tickFormatter={(val) => `R$${(val / 1000000).toFixed(1)}M`}
-                                            width={60}
+                                            tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 600 }}
+                                            tickFormatter={(val) => `R$${(val / 1000000)}M`}
+                                            width={50}
                                         />
                                         <Tooltip
-                                            content={<ChartTooltipContent
-                                                formatter={(val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val)}
-                                            />}
+                                            content={<ChartTooltipContent formatter={(val: number) => formatCurrency(val)} />}
                                             cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: '4 4' }}
                                         />
-                                        <Area type="monotone" dataKey="revenue" stroke="#2563EB" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" animationDuration={1500} />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="revenue"
+                                            stroke="#2563EB"
+                                            strokeWidth={3}
+                                            fill="url(#colorRevenueGradient)"
+                                            animationDuration={1500}
+                                        />
                                     </AreaChart>
                                 </ResponsiveContainer>
+                            </ChartContainer>
+                        </div>
+                    </div>
+                </BentoCard>
+
+                {/* 5. Agency Leaderboard (Col Span 4, Row Span 3) */}
+                <BentoCard className="md:col-span-4 row-span-3" delay={0.5}>
+                    <div className="p-6 h-full flex flex-col">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                                    Top Performers
+                                </h3>
+                                <p className="text-xs text-white/40">Ranking global de agências</p>
                             </div>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
+                            <button className="text-[10px] font-bold text-white/50 hover:text-white transition-colors flex items-center">
+                                Ver Todas <ChevronRight className="w-3 h-3 ml-0.5" />
+                            </button>
+                        </div>
 
-                {/* Top Agencies */}
-                <Card className="border-white/10 bg-black/80 backdrop-blur-xl rounded-[2rem] shadow-2xl flex flex-col">
-                    <CardHeader className="pb-4 border-b border-white/5">
-                        <CardTitle className="text-sm font-bold uppercase tracking-widest text-white/80 flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-emerald-400" /> Top Agências
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6 flex-1 flex flex-col gap-4">
-                        {adminAgencyRanks.map((agency, i) => (
-                            <motion.div
-                                key={agency.id}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className={cn(
-                                        "w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shadow-inner",
-                                        i === 0 ? "bg-amber-500/20 text-amber-500 border border-amber-500/30" :
-                                            i === 1 ? "bg-slate-300/20 text-slate-300 border border-slate-300/30" :
-                                                i === 2 ? "bg-amber-700/20 text-amber-600 border border-amber-700/30" :
-                                                    "bg-white/5 text-white/50"
-                                    )}>
-                                        #{i + 1}
+                        <div className="flex-1 flex flex-col gap-3">
+                            {adminAgencyRanks.map((agency, i) => (
+                                <motion.div
+                                    key={agency.id}
+                                    onHoverStart={() => setHoveredAgency(agency.id)}
+                                    onHoverEnd={() => setHoveredAgency(null)}
+                                    className={cn(
+                                        "group relative flex items-center justify-between p-3.5 rounded-2xl transition-all duration-300",
+                                        "bg-white/[0.02] border border-transparent hover:bg-white/[0.04] hover:border-white/[0.08]"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={cn(
+                                            "w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs font-mono transition-transform group-hover:scale-110",
+                                            i === 0 ? "bg-amber-500/10 text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)] border border-amber-500/20" :
+                                                i === 1 ? "bg-zinc-300/10 text-zinc-300 border border-zinc-300/20" :
+                                                    i === 2 ? "bg-amber-700/10 text-amber-700 border border-amber-700/20" :
+                                                        "bg-white/5 text-white/30 border border-white/5"
+                                        )}>
+                                            0{i + 1}
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-white/90 group-hover:text-white transition-colors">{agency.name}</p>
+                                            <p className="text-[10px] text-white/40 font-mono mt-0.5">{formatCurrency(agency.revenue)}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-white leading-tight">{agency.name}</p>
-                                        <p className="text-[10px] text-white/50 font-mono mt-0.5">{formatCurrency(agency.revenue)}</p>
-                                    </div>
-                                </div>
-                                <Badge variant="secondary" className={cn(
-                                    "font-mono text-[10px] border-none",
-                                    agency.growth > 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-mars-orange/10 text-mars-orange"
-                                )}>
-                                    {agency.growth > 0 ? '+' : ''}{agency.growth}%
-                                </Badge>
-                            </motion.div>
-                        ))}
-                    </CardContent>
-                </Card>
 
-                {/* Security & Audit Feed */}
-                <Card className="lg:col-span-3 border-white/10 bg-black/80 backdrop-blur-xl rounded-[2rem] shadow-2xl">
-                    <CardHeader className="pb-4 border-b border-white/5 flex flex-row items-center justify-between">
-                        <CardTitle className="text-sm font-bold uppercase tracking-widest text-white/80 flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4 text-indigo-400" /> Log de Auditoria Global
-                        </CardTitle>
-                        <Badge variant="outline" className="border-indigo-500/30 bg-indigo-500/10 text-indigo-300 font-mono text-[10px] animate-pulse">
-                            MONITORAMENTO ATIVO
-                        </Badge>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {mockAuditLogs.map((log) => (
-                                <div key={log.id} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <span className="text-[10px] uppercase tracking-wider text-white/40 font-bold">{log.date}</span>
-                                        <Badge variant="secondary" className="bg-white/5 text-white/60 hover:bg-white/10 border-none text-[9px] h-5">
-                                            {log.user}
+                                    <div className="text-right">
+                                        <Badge variant="secondary" className={cn(
+                                            "font-mono text-[9px] border-none px-1.5 py-0",
+                                            agency.growth > 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-mars-orange/10 text-mars-orange"
+                                        )}>
+                                            {agency.growth > 0 ? '+' : ''}{agency.growth}%
                                         </Badge>
+                                        <div className="w-12 h-1 bg-white/5 rounded-full mt-2 ml-auto overflow-hidden">
+                                            <motion.div
+                                                className={cn("h-full rounded-full", i === 0 ? "bg-amber-500" : "bg-white/20")}
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${agency.score}%` }}
+                                                transition={{ duration: 1, delay: 0.6 + (i * 0.1) }}
+                                            />
+                                        </div>
                                     </div>
-                                    <h4 className="text-sm font-bold text-white mb-1">{log.action}</h4>
-                                    <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{log.detail}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </BentoCard>
+
+                {/* 6. Security & Audit Mini-Feed (Col Span 8, Row Span 1) */}
+                <BentoCard className="md:col-span-8 row-span-1" delay={0.6}>
+                    <div className="p-6 h-full flex flex-col justify-center">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-white/50 flex items-center gap-2">
+                                <Database className="w-3.5 h-3.5" /> Trilhas de Auditoria Recentes
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                <span className="relative flex h-1.5 w-1.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-electric-blue opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-electric-blue"></span>
+                                </span>
+                                <span className="text-[9px] font-mono text-electric-blue">LIVE MONITOR</span>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            {mockAuditLogs.map((log, i) => (
+                                <div key={log.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 relative overflow-hidden group">
+                                    <div className="absolute inset-x-0 bottom-0 h-0.5 bg-white/5 group-hover:bg-electric-blue/30 transition-colors" />
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-[9px] font-mono text-white/40">{log.user.split(' ')[0]}</span>
+                                        <span className="text-[8px] uppercase font-bold text-white/20">{log.date.split(',')[0]}</span>
+                                    </div>
+                                    <p className="text-[11px] font-bold text-white/80 line-clamp-1 mb-0.5">{log.action}</p>
+                                    <p className="text-[9px] text-white/40 line-clamp-1">{log.detail}</p>
                                 </div>
                             ))}
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </BentoCard>
+
             </div>
         </div>
-    )
-}
-
-function GlobalKpiCard({ title, value, trend, icon, highlight = false }: {
-    title: string; value: string; trend: number; icon: React.ReactNode; highlight?: boolean
-}) {
-    const isPositive = trend >= 0
-    return (
-        <Card className={cn(
-            'border-white/10 backdrop-blur-xl rounded-[2rem] overflow-hidden relative group transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl',
-            highlight ? 'bg-gradient-to-br from-electric-blue/10 to-black ring-1 ring-inset ring-electric-blue/30' : 'bg-black/80'
-        )}>
-            {highlight && <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-electric-blue to-transparent opacity-50" />}
-
-            <CardContent className="p-6 flex flex-col h-full z-10 relative">
-                <div className="flex justify-between items-start mb-6">
-                    <div className={cn(
-                        "w-10 h-10 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110",
-                        highlight ? "bg-electric-blue/20 shadow-[0_0_15px_rgba(37,99,235,0.3)]" : "bg-white/5"
-                    )}>
-                        {icon}
-                    </div>
-                    <div className={cn(
-                        "flex items-center text-[10px] font-bold px-2 py-1 rounded-lg backdrop-blur-md",
-                        isPositive ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" : "text-mars-orange bg-mars-orange/10 border border-mars-orange/20"
-                    )}>
-                        {isPositive ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
-                        {Math.abs(trend)}%
-                    </div>
-                </div>
-
-                <div className="mt-auto">
-                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1.5">{title}</p>
-                    <h3 className="text-3xl font-extrabold tracking-tighter text-white font-mono">{value}</h3>
-                </div>
-            </CardContent>
-        </Card>
     )
 }

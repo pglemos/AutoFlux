@@ -155,6 +155,12 @@ export function Navigation() {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
+            {/* Endorsement Signature */}
+            <div className="px-6 py-4 mt-auto border-t border-black/5 dark:border-white/5 opacity-40 hover:opacity-100 transition-opacity duration-500">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Approved by</p>
+                <p className="text-3xl font-signature text-electric-blue/70 dark:text-off-white/70 -rotate-2">Luz Direção Consultoria</p>
+            </div>
         </div>
     )
 }
