@@ -1,5 +1,4 @@
 <div align="center">
-<img width="1200" height="475" alt="AutoFlux Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 
 # AutoFlux - High-Performance Dealer OS
 
@@ -7,6 +6,8 @@
 [![React 19](https://img.shields.io/badge/React-19.0-blue?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Backend-Supabase-green?style=flat-square&logo=supabase)](https://supabase.com/)
+
+[View App in AI Studio](https://ai.studio/apps/626d9552-45cc-4d3b-9c51-9ef21386510c)
 
 AutoFlux is a premium, multi-tenant operating system designed for car dealerships and automotive consultancies. It focuses on maximizing sales performance through LeadOps, automated SLAs, and AI-driven diagnostics.
 
