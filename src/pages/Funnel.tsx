@@ -11,12 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import useAppStore, { LeadStage, Lead } from '@/stores/main'
+import { useAuth } from '@/components/auth-provider'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 
 const STAGES: LeadStage[] = ['Lead', 'Contato', 'Agendamento', 'Visita', 'Proposta', 'Venda']
 
 export default function Funnel() {
-  const { leads, addLead, updateLead, deleteLead, team, commissionRules, addCommission, chainedFunnel } = useAppStore()
+  const { role } = useAuth()
+  const { leads, addLead, updateLead, deleteLead, team, commissionRules, addCommission, chainedFunnel, activeAgencyId } = useAppStore()
   const [lossDialogOpen, setLossDialogOpen] = useState(false)
   const [blockDialogOpen, setBlockDialogOpen] = useState(false)
   const [leadDialogOpen, setLeadDialogOpen] = useState(false)
@@ -101,6 +103,14 @@ export default function Funnel() {
   const filteredLeads = leads.filter((l) => {
     if (sourceFilter !== 'all' && l.source !== sourceFilter) return false
     if (sellerFilter !== 'all' && l.sellerId !== sellerFilter) return false
+
+    // Filter by active agency if Admin
+    if (role === 'Admin' && activeAgencyId) {
+      const seller = team.find(t => t.id === l.sellerId)
+      // Note: Assuming TeamMember will have agencyId soon, for now just a placeholder
+      // if (seller?.agencyId !== activeAgencyId) return false
+    }
+
     return true
   })
 
@@ -146,7 +156,9 @@ export default function Funnel() {
                 <div key={stage} className="w-[320px] flex flex-col h-full bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-[2.5rem] overflow-hidden shrink-0">
                   <div className="p-6 flex justify-between items-center shrink-0">
                     <h3 className="font-extrabold text-sm uppercase tracking-wider text-pure-black dark:text-off-white">{stage}</h3>
-                    <Badge variant="secondary" className="font-mono-numbers bg-black/5 dark:bg-white/10 text-pure-black dark:text-white border-none rounded-xl px-3 py-1">{stageLeads.length}</Badge>
+                    <Badge variant="secondary" className="font-mono-numbers bg-black/5 dark:bg-white/10 text-pure-black dark:text-white border-none rounded-xl px-3 py-1">
+                      {stageLeads.length}
+                    </Badge>
                   </div>
 
                   <Droppable droppableId={stage}>
@@ -255,7 +267,8 @@ function LeadCard({ lead, sellerName, onLost, onEdit, onDelete, isDragging }: {
             <div className="font-extrabold text-[15px] truncate text-pure-black dark:text-off-white">{lead.name}</div>
           </div>
           <Badge variant="outline" className="text-[10px] px-2.5 py-1 h-7 font-mono-numbers border-none rounded-xl font-bold bg-black/5 dark:bg-white/10 text-muted-foreground shrink-0">
-            <Clock className="w-3 h-3 mr-1.5 inline" />{lead.slaMinutes}m
+            <Clock className="w-3 h-3 mr-1.5 inline" />
+            {lead.slaMinutes}m
           </Badge>
         </div>
 

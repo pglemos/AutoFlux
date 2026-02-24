@@ -27,17 +27,31 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { mockInventory } from '@/lib/mock-data'
+import { useAuth } from '@/components/auth-provider'
+import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Inventory() {
+    const { role } = useAuth()
+    const { activeAgencyId } = useAppStore()
     const [searchTerm, setSearchTerm] = useState('')
     const [view, setView] = useState<'grid' | 'list'>('grid')
 
-    const filteredInventory = mockInventory.filter((item) =>
-        item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.plate.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const filteredInventory = mockInventory.filter((item) => {
+        const matchesSearch = item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.plate.toLowerCase().includes(searchTerm.toLowerCase())
+
+        if (!matchesSearch) return false
+
+        // Filter by active agency if Admin
+        if (role === 'Admin' && activeAgencyId) {
+            // Note: Assuming inventory item will have agencyId soon
+            // if (item.agencyId !== activeAgencyId) return false
+        }
+
+        return true
+    })
 
     const stats = [
         { title: 'Total em Estoque', value: 'R$ 4.3M', trend: '+5.2%', icon: CircleDollarSign, color: 'text-emerald-500' },
@@ -159,7 +173,9 @@ export default function Inventory() {
                                     <CardContent className="p-6 space-y-4">
                                         <div>
                                             <h4 className="font-black text-xl text-pure-black dark:text-off-white group-hover:text-electric-blue transition-colors">{item.model}</h4>
-                                            <p className="text-sm font-bold text-muted-foreground">{item.year} • Automático</p>
+                                            <p className="text-sm font-bold text-muted-foreground">
+                                                {item.year} • Automático
+                                            </p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 pt-2">
                                             <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">

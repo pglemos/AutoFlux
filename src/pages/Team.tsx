@@ -29,23 +29,35 @@ import { toast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import useAppStore, { TeamMember } from '@/stores/main'
+import { useAuth } from '@/components/auth-provider'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function Team() {
-    const { team, leads, goals, addTeamMember, updateTeamMember, deleteTeamMember } = useAppStore()
+    const { role } = useAuth()
+    const { team, leads, goals, addTeamMember, updateTeamMember, deleteTeamMember, activeAgencyId } = useAppStore()
     const [open, setOpen] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [search, setSearch] = useState('')
     const [form, setForm] = useState({ name: '', role: '', email: '', phone: '' })
 
     const filteredTeam = useMemo(() => {
-        return team.filter(m =>
-            m.name.toLowerCase().includes(search.toLowerCase()) ||
-            m.role.toLowerCase().includes(search.toLowerCase())
-        ).sort((a, b) => b.sales - a.sales)
-    }, [team, search])
+        return team.filter(m => {
+            const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) ||
+                m.role.toLowerCase().includes(search.toLowerCase())
+
+            if (!matchesSearch) return false
+
+            // Filter by active agency if Admin
+            if (role === 'Admin' && activeAgencyId) {
+                // Note: Assuming TeamMember will have agencyId soon
+                // if (m.agencyId !== activeAgencyId) return false
+            }
+
+            return true
+        }).sort((a, b) => b.sales - a.sales)
+    }, [team, search, role, activeAgencyId])
 
     const stats = useMemo(() => {
         const totalSales = team.reduce((a, m) => a + m.sales, 0)

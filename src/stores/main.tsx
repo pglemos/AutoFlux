@@ -147,11 +147,15 @@ export interface AppState {
 
     permissions: Record<string, string[]>
     togglePermission: (role: string, path: string) => void
+
+    activeAgencyId: string | null
+    setActiveAgencyId: (id: string | null) => void
 }
 
 const AppContext = createContext<AppState | undefined>(undefined)
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
+    const [activeAgencyId, setActiveAgencyId] = useState<string | null>(null)
     const [tasks, setTasks] = useState<Task[]>([
         {
             id: 't1',
@@ -338,6 +342,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             team, addTeamMember, updateTeamMember, deleteTeamMember,
             leads, addLead, updateLead, deleteLead,
             permissions, togglePermission,
+            activeAgencyId, setActiveAgencyId,
         }),
         [
             tasks, addTask, updateTask, deleteTask,
@@ -351,6 +356,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             team, addTeamMember, updateTeamMember, deleteTeamMember,
             leads, addLead, updateLead, deleteLead,
             permissions, togglePermission,
+            activeAgencyId, setActiveAgencyId,
         ],
     )
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
     ArrowUpRight,
     ArrowDownRight,
@@ -26,6 +26,7 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
+import { useAuth } from '@/components/auth-provider'
 
 const funnelLeakData = [
     { stage: 'Leads', value: 142 },
@@ -48,8 +49,22 @@ const ALL_WIDGETS = [
 ]
 
 export default function Dashboard() {
-    const { dashboardWidgets, setDashboardWidgets, goals, team } = useAppStore()
+    const { role } = useAuth()
+    const { dashboardWidgets, setDashboardWidgets, goals, team, leads, activeAgencyId } = useAppStore()
     const [isEditing, setIsEditing] = useState(false)
+
+    // Filter data based on active agency (if Admin)
+    const filteredLeads = useMemo(() => {
+        if (role !== 'Admin' || !activeAgencyId) return leads
+        // Placeholder for agency-based lead filtering
+        return leads
+    }, [leads, activeAgencyId, role])
+
+    const filteredTeam = useMemo(() => {
+        if (role !== 'Admin' || !activeAgencyId) return team
+        // Placeholder for agency-based team filtering
+        return team
+    }, [team, activeAgencyId, role])
 
     const toggleWidget = (id: string) => {
         if (dashboardWidgets.includes(id))
@@ -109,21 +124,23 @@ export default function Dashboard() {
                             <CardTitle className="text-lg font-extrabold text-pure-black dark:text-off-white">Evolução de Vendas</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1">
-                            <ChartContainer config={{ vendas: { label: 'Vendas', color: 'var(--electric-blue)' } }} className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                        <defs>
-                                            <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4} />
-                                                <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontWeight: 600 }} fontSize={12} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontWeight: 600 }} fontSize={12} />
-                                        <Tooltip content={<ChartTooltipContent />} />
-                                        <Area type="monotone" dataKey="vendas" stroke="#2563EB" strokeWidth={4} fillOpacity={1} fill="url(#colorVendas)" />
-                                    </AreaChart>
-                                </ResponsiveContainer>
+                            <ChartContainer config={{ vendas: { label: 'Vendas', color: 'var(--electric-blue)' } }}>
+                                <div className="h-[300px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4} />
+                                                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontWeight: 600 }} fontSize={12} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontWeight: 600 }} fontSize={12} />
+                                            <Tooltip content={<ChartTooltipContent />} />
+                                            <Area type="monotone" dataKey="vendas" stroke="#2563EB" strokeWidth={4} fillOpacity={1} fill="url(#colorVendas)" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </ChartContainer>
                         </CardContent>
                     </Card>
@@ -146,15 +163,17 @@ export default function Dashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 min-h-[250px]">
-                            <ChartContainer config={{ value: { label: 'Volume', color: 'var(--mars-orange)' } }} className="h-full w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={funnelLeakData} layout="vertical" margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                        <XAxis type="number" hide />
-                                        <YAxis dataKey="stage" type="category" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontWeight: 600, fontSize: 10 }} width={60} />
-                                        <Tooltip content={<ChartTooltipContent />} cursor={{ fill: 'var(--muted)', opacity: 0.2 }} />
-                                        <Bar dataKey="value" fill="#FF4500" radius={[0, 4, 4, 0]} barSize={24} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                            <ChartContainer config={{ value: { label: 'Volume', color: 'var(--mars-orange)' } }}>
+                                <div className="h-full w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={funnelLeakData} layout="vertical" margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <XAxis type="number" hide />
+                                            <YAxis dataKey="stage" type="category" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontWeight: 600, fontSize: 10 }} width={60} />
+                                            <Tooltip content={<ChartTooltipContent />} cursor={{ fill: 'var(--muted)', opacity: 0.2 }} />
+                                            <Bar dataKey="value" fill="#FF4500" radius={[0, 4, 4, 0]} barSize={24} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </ChartContainer>
                         </CardContent>
                     </Card>
@@ -175,7 +194,7 @@ export default function Dashboard() {
                             <CardTitle className="text-sm font-bold uppercase tracking-widest text-pure-black dark:text-off-white">Ranking de Vendedores</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {[...team].sort((a, b) => b.sales - a.sales).slice(0, 3).map((t, i) => (
+                            {[...filteredTeam].sort((a, b) => b.sales - a.sales).slice(0, 3).map((t, i) => (
                                 <div key={t.id} className="flex justify-between items-center bg-white/40 dark:bg-black/40 p-3 rounded-2xl border border-white/20">
                                     <div className="flex items-center gap-3">
                                         <span className="font-extrabold text-muted-foreground">{i + 1}º</span>
@@ -208,7 +227,9 @@ export default function Dashboard() {
                         Sintetizando fluidez <span className="text-electric-blue">orgânica</span> com rigidez <span className="text-mars-orange">digital</span>.
                     </h1>
                     <div className="flex flex-wrap gap-3 mt-6">
-                        <Badge variant="outline" className="rounded-lg font-mono text-[10px] uppercase text-muted-foreground bg-white/50 dark:bg-black/50 border-[0.5px] px-3 py-1 font-bold">VERSÃO 2094</Badge>
+                        <Badge variant="outline" className="rounded-lg font-mono text-[10px] uppercase text-muted-foreground bg-white/50 dark:bg-black/50 border-[0.5px] px-3 py-1 font-bold">
+                            VERSÃO 2094
+                        </Badge>
                         <Button variant={isEditing ? 'default' : 'outline'} size="sm" onClick={() => setIsEditing(!isEditing)}
                             className={cn('rounded-lg h-7 text-[10px] font-bold uppercase tracking-widest transition-all', isEditing ? 'bg-electric-blue text-white' : 'bg-white/50 dark:bg-black/50')}>
                             <Settings2 className="w-3 h-3 mr-2" /> {isEditing ? 'Concluir Edição' : 'Personalizar Dashboard'}

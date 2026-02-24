@@ -2,6 +2,7 @@ import { Bell, Search, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { AgencySelector } from './AgencySelector'
 import {
     Dialog,
     DialogContent,
@@ -59,6 +60,7 @@ export function Header() {
                         className="w-full bg-white/50 dark:bg-black/50 border-white/20 pl-10 focus-visible:ring-electric-blue rounded-full shadow-inner h-10 transition-all hover:bg-white/80 dark:hover:bg-black/80"
                     />
                 </div>
+                {!isMobile && <AgencySelector />}
             </div>
             <div className="flex items-center gap-3 sm:gap-4">
                 <DropdownMenu>
