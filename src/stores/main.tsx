@@ -46,11 +46,17 @@ export interface Goal {
     amount: number
 }
 
+export interface Agency {
+    id: string
+    name: string
+}
+
 export interface User {
     id: string
     name: string
     email: string
-    role: 'Owner' | 'Manager' | 'Seller' | 'RH' | 'Consultoria'
+    role: 'Owner' | 'Manager' | 'Seller' | 'RH' | 'Admin'
+    agencyId?: string
 }
 
 export interface TeamMember {
@@ -124,6 +130,11 @@ export interface AppState {
     updateUser: (id: string, user: Partial<User>) => void
     deleteUser: (id: string) => void
 
+    agencies: Agency[]
+    addAgency: (agency: Omit<Agency, 'id'>) => void
+    updateAgency: (id: string, agency: Partial<Agency>) => void
+    deleteAgency: (id: string) => void
+
     team: TeamMember[]
     addTeamMember: (member: Omit<TeamMember, 'id'>) => void
     updateTeamMember: (id: string, member: Partial<TeamMember>) => void
@@ -133,6 +144,9 @@ export interface AppState {
     addLead: (lead: Omit<Lead, 'id'>) => void
     updateLead: (id: string, lead: Partial<Lead>) => void
     deleteLead: (id: string) => void
+
+    permissions: Record<string, string[]>
+    togglePermission: (role: string, path: string) => void
 }
 
 const AppContext = createContext<AppState | undefined>(undefined)
@@ -181,8 +195,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     const [chainedFunnel, setChainedFunnel] = useState(true)
 
     const [users, setUsers] = useState<User[]>([
-        { id: 'u1', name: 'Admin Dono', email: 'admin@loja.com', role: 'Owner' },
-        { id: 'u2', name: 'Alex Gerente', email: 'alex@loja.com', role: 'Manager' },
+        { id: 'u1', name: 'Admin Dono', email: 'admin@loja.com', role: 'Owner', agencyId: 'a1' },
+        { id: 'u2', name: 'Alex Gerente', email: 'alex@loja.com', role: 'Manager', agencyId: 'a1' },
+    ])
+
+    const [agencies, setAgencies] = useState<Agency[]>([
+        { id: 'a1', name: 'Agência Matriz' },
+        { id: 'a2', name: 'Agência Serrana' },
     ])
 
     const [team, setTeam] = useState<TeamMember[]>([
@@ -191,7 +210,6 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         { id: 'T-03', name: 'Leandro', role: 'SDR', conversion: 12.0, execution: 85, sales: 4, avatar: 'male&seed=3' },
         { id: 'T-04', name: 'Venda Loja', role: 'Loja', conversion: 15.3, execution: 88, sales: 5, avatar: 'female&seed=4' },
     ])
-
     const [leads, setLeads] = useState<Lead[]>([
         { id: 'L-101', name: 'Carlos Silva', car: 'Porsche 911', stage: 'Lead', slaMinutes: 5, source: 'Internet', value: 850000, score: 92, sellerId: 'T-01' },
         { id: 'L-102', name: 'Ana Oliveira', car: 'BMW X5', stage: 'Contato', slaMinutes: 15, source: 'Internet', value: 420000, score: 85, sellerId: 'T-02' },
@@ -199,6 +217,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         { id: 'L-104', name: 'Juliana Costa', car: 'Mercedes C300', stage: 'Visita', slaMinutes: 120, source: 'Internet', value: 350000, score: 78, sellerId: 'T-03' },
         { id: 'L-105', name: 'Fernando Lima', car: 'Volvo XC60', stage: 'Proposta', slaMinutes: 300, source: 'Carteira', value: 390000, score: 88, sellerId: 'T-02' },
     ])
+
+    const [permissions, setPermissions] = useState<Record<string, string[]>>({
+        Admin: ['/dashboard', '/relatorio-matinal', '/metas', '/tarefas', '/leads', '/funnel', '/agenda', '/inventory', '/financeiro', '/relatorios/performance-vendas', '/relatorios/vendas-cruzados', '/relatorios/performance-vendedores', '/reports/stock', '/team', '/configuracoes/comissoes', '/training', '/communication', '/ia-diagnostics', '/settings'],
+        Owner: ['/dashboard', '/relatorio-matinal', '/metas', '/tarefas', '/leads', '/funnel', '/agenda', '/inventory', '/financeiro', '/relatorios/performance-vendas', '/relatorios/vendas-cruzados', '/relatorios/performance-vendedores', '/reports/stock', '/team', '/configuracoes/comissoes', '/training', '/communication', '/ia-diagnostics', '/settings'],
+        Manager: ['/dashboard', '/relatorio-matinal', '/metas', '/tarefas', '/leads', '/funnel', '/agenda', '/inventory', '/financeiro', '/relatorios/performance-vendas', '/relatorios/vendas-cruzados', '/relatorios/performance-vendedores', '/reports/stock', '/team', '/configuracoes/comissoes', '/training', '/communication', '/ia-diagnostics', '/settings'],
+        Seller: ['/dashboard', '/relatorio-matinal', '/metas', '/tarefas', '/leads', '/funnel', '/agenda'],
+        RH: ['/dashboard', '/team', '/financeiro', '/configuracoes/comissoes', '/settings'],
+    })
 
     const addTask = useCallback(
         (task: Omit<Task, 'id' | 'status'>) =>
@@ -249,6 +275,20 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     )
     const deleteUser = useCallback((id: string) => setUsers((prev) => prev.filter((u) => u.id !== id)), [])
 
+    const addAgency = useCallback(
+        (agency: Omit<Agency, 'id'>) => setAgencies((prev) => [...prev, { ...agency, id: Math.random().toString() }]),
+        [],
+    )
+    const updateAgency = useCallback(
+        (id: string, updates: Partial<Agency>) =>
+            setAgencies((prev) => prev.map((a) => (a.id === id ? { ...a, ...updates } : a))),
+        [],
+    )
+    const deleteAgency = useCallback((id: string) => {
+        setAgencies((prev) => prev.filter((a) => a.id !== id))
+        setUsers((prev) => prev.map(u => u.agencyId === id ? { ...u, agencyId: undefined } : u))
+    }, [])
+
     const addTeamMember = useCallback(
         (member: Omit<TeamMember, 'id'>) => setTeam((prev) => [...prev, { ...member, id: Math.random().toString() }]),
         [],
@@ -271,6 +311,16 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     )
     const deleteLead = useCallback((id: string) => setLeads((prev) => prev.filter((l) => l.id !== id)), [])
 
+    const togglePermission = useCallback((role: string, path: string) => {
+        setPermissions((prev) => {
+            const current = prev[role] || []
+            if (current.includes(path)) {
+                return { ...prev, [role]: current.filter((p) => p !== path) }
+            }
+            return { ...prev, [role]: [...current, path] }
+        })
+    }, [])
+
     const value = useMemo(
         () => ({
             tasks, addTask, updateTask, deleteTask,
@@ -284,8 +334,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
                 setCalendarIntegrations((prev) => ({ ...prev, [provider]: connected })),
             chainedFunnel, setChainedFunnel,
             users, addUser, updateUser, deleteUser,
+            agencies, addAgency, updateAgency, deleteAgency,
             team, addTeamMember, updateTeamMember, deleteTeamMember,
             leads, addLead, updateLead, deleteLead,
+            permissions, togglePermission,
         }),
         [
             tasks, addTask, updateTask, deleteTask,
@@ -295,8 +347,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             goals, setGoal, deleteGoal,
             calendarIntegrations, chainedFunnel,
             users, addUser, updateUser, deleteUser,
+            agencies, addAgency, updateAgency, deleteAgency,
             team, addTeamMember, updateTeamMember, deleteTeamMember,
             leads, addLead, updateLead, deleteLead,
+            permissions, togglePermission,
         ],
     )
 

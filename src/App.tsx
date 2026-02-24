@@ -1,10 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { ThemeProvider } from '@/components/theme-provider'
-import { AuthProvider } from '@/components/auth-provider'
+import { AuthProvider, useAuth } from '@/components/auth-provider'
 import { AppStoreProvider } from '@/stores/main'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from '@/components/ui/toaster'
 import Layout from './components/Layout'
+import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Funnel from './pages/Funnel'
 import Leads from './pages/Leads'
@@ -26,6 +27,25 @@ import Training from './pages/Training'
 import Communication from './pages/Communication'
 import NotFound from './pages/NotFound'
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+  const location = useLocation()
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  return <>{children}</>
+}
+
 export default function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="autoperf-theme">
@@ -34,7 +54,15 @@ export default function App() {
           <TooltipProvider>
             <Router>
               <Routes>
-                <Route path="/" element={<Layout />}>
+                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Layout />
+                    </ProtectedRoute>
+                  }
+                >
                   <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="relatorio-matinal" element={<MorningReport />} />

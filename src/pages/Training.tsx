@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'
 
 export default function Training() {
@@ -93,8 +94,16 @@ export default function Training() {
                         </CardContent>
                     </Card>
 
-                    <h3 className="text-xl font-extrabold text-pure-black dark:text-off-white mt-8 mb-4">
-                        Playbooks de Vendas
+                    <div className="relative mb-8">
+                        <Input
+                            placeholder="Buscar treinamentos ou playbooks..."
+                            className="h-12 pl-12 rounded-2xl bg-white dark:bg-[#111] border-none shadow-sm focus-visible:ring-yellow-500/50"
+                        />
+                        <PlayCircle className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    </div>
+
+                    <h3 className="text-xl font-extrabold text-pure-black dark:text-off-white mb-4 flex items-center gap-2">
+                        Playbooks de Vendas <Badge className="bg-yellow-500 text-white font-bold border-none">PREMIUM</Badge>
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
@@ -102,28 +111,37 @@ export default function Training() {
                                 title: 'Contorno de Objeções: Preço vs Valor',
                                 level: 'Intermediário',
                                 time: '12 min',
+                                progress: 100,
                             },
                             {
                                 title: 'Script de Qualificação Rápida (SDR)',
                                 level: 'Iniciante',
                                 time: '8 min',
+                                progress: 45,
                             },
                             {
                                 title: 'Técnicas de Fechamento Agressivo',
                                 level: 'Avançado',
                                 time: '20 min',
+                                progress: 0,
                             },
                             {
                                 title: 'Como criar senso de urgência autêntico',
                                 level: 'Intermediário',
                                 time: '15 min',
+                                progress: 10,
                             },
                         ].map((playbook, i) => (
                             <Card
                                 key={i}
-                                className="border-none bg-white dark:bg-[#111] shadow-sm hover:shadow-md transition-shadow rounded-3xl overflow-hidden group cursor-pointer"
+                                className="border-none bg-white dark:bg-[#111] shadow-sm hover:shadow-md transition-shadow rounded-3xl overflow-hidden group cursor-pointer relative"
                                 onClick={() => handlePlay(playbook.title)}
                             >
+                                {playbook.progress === 100 && (
+                                    <div className="absolute top-3 right-3 z-10">
+                                        <Badge className="bg-green-500/20 text-green-600 border-none font-bold text-[8px] uppercase tracking-tighter">Concluído</Badge>
+                                    </div>
+                                )}
                                 <CardContent className="p-5 flex flex-col justify-between h-full">
                                     <div className="mb-4">
                                         <Badge
@@ -136,17 +154,24 @@ export default function Training() {
                                             {playbook.title}
                                         </h4>
                                     </div>
-                                    <div className="flex justify-between items-center mt-auto">
-                                        <span className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
-                                            <PlayCircle className="w-3 h-3" /> {playbook.time}
-                                        </span>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 rounded-full bg-electric-blue/10 text-electric-blue group-hover:bg-electric-blue group-hover:text-white transition-colors"
-                                        >
-                                            <PlayCircle className="w-4 h-4" />
-                                        </Button>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
+                                            <span>Progresso</span>
+                                            <span>{playbook.progress}%</span>
+                                        </div>
+                                        <Progress value={playbook.progress} className="h-1 bg-black/5 dark:bg-white/10 [&>div]:bg-yellow-500" />
+                                        <div className="flex justify-between items-center pt-2">
+                                            <span className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
+                                                <PlayCircle className="w-3 h-3" /> {playbook.time}
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 rounded-full bg-yellow-500/10 text-yellow-600 group-hover:bg-yellow-500 group-hover:text-white transition-colors"
+                                            >
+                                                <PlayCircle className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>

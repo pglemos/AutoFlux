@@ -1,15 +1,24 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
     LayoutDashboard, Filter, CalendarDays, Car, Users, Settings,
     BarChart3, Wallet, PieChart, CheckSquare, Presentation, Target,
-    Activity, FileSignature, BookOpen, MessageSquare, Bot,
+    Activity, FileSignature, BookOpen, MessageSquare, Bot, LogOut, User as UserIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth, Role } from '@/components/auth-provider'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import useAppStore from '@/stores/main'
 
-const navItems = [
+export const navItems = [
     { title: 'Painel', path: '/dashboard', icon: LayoutDashboard },
     { title: 'Matinal', path: '/relatorio-matinal', icon: Presentation },
     { title: 'Metas', path: '/metas', icon: Target },
@@ -32,19 +41,20 @@ const navItems = [
 ]
 
 const roleTranslations: Record<Role, string> = {
-    Owner: 'Dono', Manager: 'Gestor', Seller: 'Vendedor', RH: 'RH', Consultoria: 'Consultoria',
+    Owner: 'Dono', Manager: 'Gestor', Seller: 'Vendedor', RH: 'RH', Admin: 'Admin',
 }
 
 export function Navigation() {
     const location = useLocation()
+    const navigate = useNavigate()
     const isMobile = useIsMobile()
-    const { role } = useAuth()
+    const { role, user, signOut } = useAuth()
+    const { permissions } = useAppStore()
 
     const filteredNavItems = navItems.filter((item) => {
-        if (role === 'Seller' && ['/inventory', '/settings', '/reports/stock', '/financeiro', '/relatorios/performance-vendas', '/relatorios/performance-vendedores', '/configuracoes/comissoes', '/relatorios/vendas-cruzados', '/ia-diagnostics'].includes(item.path)) return false
-        if (role === 'RH' && !['/team', '/settings', '/dashboard', '/financeiro', '/configuracoes/comissoes'].includes(item.path)) return false
-        if (role === 'Consultoria' && !['/dashboard', '/relatorio-matinal', '/team', '/reports/stock', '/relatorios/performance-vendas', '/relatorios/performance-vendedores', '/relatorios/vendas-cruzados'].includes(item.path)) return false
-        return true
+        if (role === 'Admin') return true
+        const allowedPaths = permissions[role] || []
+        return allowedPaths.includes(item.path)
     })
 
     if (isMobile) {
@@ -93,15 +103,54 @@ export function Navigation() {
                 })}
             </nav>
             <div className="p-6 mt-auto shrink-0">
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/50 dark:bg-white/5 border border-black/5 dark:border-white/5 backdrop-blur-md cursor-pointer hover:bg-white dark:hover:bg-white/10 transition-colors shadow-sm">
-                    <Avatar className="w-10 h-10 border-2 border-white dark:border-pure-black shadow-sm">
-                        <AvatarImage src="https://img.usecurling.com/ppl/thumbnail?gender=male&seed=99" />
-                    </Avatar>
-                    <div className="flex flex-col">
-                        <span className="text-sm font-bold text-pure-black dark:text-off-white leading-tight">Alex Gerente</span>
-                        <span className="text-[10px] font-bold text-electric-blue uppercase tracking-wider">{roleTranslations[role]}</span>
-                    </div>
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/50 dark:bg-white/5 border border-black/5 dark:border-white/5 backdrop-blur-md cursor-pointer hover:bg-white dark:hover:bg-white/10 transition-colors shadow-sm group">
+                            <Avatar className="w-10 h-10 border-2 border-white dark:border-pure-black shadow-sm group-hover:scale-105 transition-transform">
+                                {user?.user_metadata?.avatar_url && (
+                                    <AvatarImage src={user.user_metadata.avatar_url} />
+                                )}
+                                <AvatarFallback className="bg-electric-blue text-white font-bold">
+                                    {user?.email?.[0].toUpperCase() || 'A'}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-bold text-pure-black dark:text-off-white leading-tight truncate">
+                                    {user?.user_metadata?.full_name || 'Alex Gerente'}
+                                </span>
+                                <span className="text-[10px] font-bold text-electric-blue uppercase tracking-wider">{roleTranslations[role]}</span>
+                            </div>
+                        </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" side="right" className="w-56 mb-4 ml-2 rounded-2xl border-black/5 dark:border-white/5 hyper-glass">
+                        <DropdownMenuLabel className="font-extrabold text-xs text-muted-foreground uppercase tracking-widest p-3">
+                            Minha Conta
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-black/5 dark:bg-white/5" />
+                        <DropdownMenuItem
+                            onClick={() => navigate('/settings')}
+                            className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:bg-black/5 dark:focus:bg-white/5"
+                        >
+                            <UserIcon className="w-4 h-4 text-electric-blue" />
+                            <span className="font-bold text-sm">Meu Perfil</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => navigate('/settings')}
+                            className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:bg-black/5 dark:focus:bg-white/5"
+                        >
+                            <Settings className="w-4 h-4 text-electric-blue" />
+                            <span className="font-bold text-sm">Configurações</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-black/5 dark:bg-white/5" />
+                        <DropdownMenuItem
+                            onClick={() => signOut()}
+                            className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-mars-orange/10 transition-colors focus:bg-mars-orange/10 text-mars-orange"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            <span className="font-bold text-sm">Sair do Sistema</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
     )

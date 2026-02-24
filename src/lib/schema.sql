@@ -1,4 +1,4 @@
--- AutoFlux CRM & Management System Schema
+-- AutoGestão CRM & Management System Schema
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS team (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
-    role TEXT,
+    role TEXT, -- Owner, Manager, Seller, RH, Admin
     conversion NUMERIC(5,2) DEFAULT 0,
     execution NUMERIC(5,2) DEFAULT 0,
     sales INTEGER DEFAULT 0,

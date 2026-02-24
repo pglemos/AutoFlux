@@ -10,10 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
+import { cn } from '@/lib/utils'
 
-export default function CommissionRules() {
+export default function CommissionRules({ standalone = true }: { standalone?: boolean }) {
     const { commissionRules, addCommissionRule, deleteCommissionRule, team } = useAppStore()
     const [open, setOpen] = useState(false)
+    const [editingRuleId, setEditingRuleId] = useState<string | null>(null)
     const [sellerId, setSellerId] = useState('all')
     const [vehicleType, setVehicleType] = useState('all')
     const [marginMin, setMarginMin] = useState('')
@@ -22,34 +24,64 @@ export default function CommissionRules() {
 
     const handleSave = () => {
         if (!percentage) return
-        addCommissionRule({
+        const ruleData = {
             sellerId: sellerId === 'all' ? undefined : sellerId,
             vehicleType: vehicleType === 'all' ? undefined : vehicleType,
             marginMin: marginMin ? Number(marginMin) : undefined,
             marginMax: marginMax ? Number(marginMax) : undefined,
             percentage: Number(percentage),
-        })
-        toast({ title: 'Regra Criada', description: 'Nova regra de comissão adicionada.' })
+        }
+
+        if (editingRuleId) {
+            // Since the store only has add and delete, we'll simulate update by delete + add
+            // or just notify that update isn't fully in store but we'll reflect in UI
+            deleteCommissionRule(editingRuleId)
+            addCommissionRule(ruleData)
+            toast({ title: 'Regra Atualizada', description: 'A regra de comissão foi modificada com sucesso.' })
+        } else {
+            addCommissionRule(ruleData)
+            toast({ title: 'Regra Criada', description: 'Nova regra de comissão adicionada.' })
+        }
+
         setOpen(false)
+        setEditingRuleId(null)
         setSellerId('all'); setVehicleType('all'); setMarginMin(''); setMarginMax(''); setPercentage('')
     }
 
+    const handleEdit = (rule: any) => {
+        setEditingRuleId(rule.id)
+        setSellerId(rule.sellerId || 'all')
+        setVehicleType(rule.vehicleType || 'all')
+        setMarginMin(rule.marginMin?.toString() || '')
+        setMarginMax(rule.marginMax?.toString() || '')
+        setPercentage(rule.percentage.toString())
+        setOpen(true)
+    }
+
+    const handleNew = () => {
+        setEditingRuleId(null)
+        setSellerId('all'); setVehicleType('all'); setMarginMin(''); setMarginMax(''); setPercentage('')
+        setOpen(true)
+    }
+
     return (
-        <div className="space-y-8 max-w-5xl mx-auto pb-12">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
-                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">CONFIGURAÇÃO</span>
+        <div className={cn("space-y-8 max-w-5xl mx-auto pb-12", !standalone && "max-w-none pb-0")}>
+            {standalone && (
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
+                            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">CONFIGURAÇÃO</span>
+                        </div>
+                        <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
+                            Regras de <span className="text-electric-blue">Comissão</span>
+                        </h1>
                     </div>
-                    <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
-                        Regras de <span className="text-electric-blue">Comissão</span>
-                    </h1>
+                    <Button onClick={handleNew} className="rounded-full px-6 h-11 font-bold bg-pure-black text-white dark:bg-white dark:text-pure-black shadow-elevation hover:scale-105 transition-transform">
+                        <Plus className="w-4 h-4 mr-2" /> Nova Regra
+                    </Button>
                 </div>
-                <Button onClick={() => setOpen(true)} className="rounded-full px-6 h-11 font-bold bg-pure-black text-white dark:bg-white dark:text-pure-black shadow-elevation">
-                    <Plus className="w-4 h-4 mr-2" /> Nova Regra
-                </Button>
-            </div>
+            )}
 
             <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl overflow-hidden">
                 <CardHeader className="border-b border-black/5 dark:border-white/5 pb-5">
@@ -82,8 +114,16 @@ export default function CommissionRules() {
                                     <TableCell className="font-bold text-sm py-4 text-muted-foreground">{rule.marginMax != null ? `${rule.marginMax}%` : '-'}</TableCell>
                                     <TableCell className="py-4"><Badge variant="secondary" className="font-mono-numbers bg-electric-blue/10 text-electric-blue border-none font-bold">{rule.percentage}%</Badge></TableCell>
                                     <TableCell className="py-4 pr-6">
-                                        <Button variant="ghost" size="icon" onClick={() => { deleteCommissionRule(rule.id); toast({ title: 'Regra Removida' }) }}
-                                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-mars-orange"><Trash2 className="h-4 w-4" /></Button>
+                                        <div className="flex items-center gap-2">
+                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(rule)}
+                                                className="h-8 w-8 rounded-full text-muted-foreground hover:text-electric-blue hover:bg-electric-blue/10">
+                                                <FileSignature className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => { deleteCommissionRule(rule.id); toast({ title: 'Regra Removida' }) }}
+                                                className="h-8 w-8 rounded-full text-muted-foreground hover:text-mars-orange hover:bg-mars-orange/10">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -96,8 +136,10 @@ export default function CommissionRules() {
             </Card>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-[450px] rounded-3xl">
-                    <DialogHeader><DialogTitle className="font-extrabold text-xl text-pure-black dark:text-off-white">Nova Regra de Comissão</DialogTitle></DialogHeader>
+                <DialogContent className="sm:max-w-[450px] rounded-3xl border-none shadow-2xl">
+                    <DialogHeader><DialogTitle className="font-extrabold text-2xl text-pure-black dark:text-off-white">
+                        {editingRuleId ? 'Editar Regra' : 'Nova Regra de Comissão'}
+                    </DialogTitle></DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Vendedor</Label>
                             <Select value={sellerId} onValueChange={setSellerId}><SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>

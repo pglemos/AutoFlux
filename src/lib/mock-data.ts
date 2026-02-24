@@ -488,3 +488,19 @@ export const mockAuditLogs = [
         date: 'Ontem, 08:00',
     },
 ]
+
+export const mockYearlySales = [
+    { month: 'Jan', sales: 1200000, margin: 950000 },
+    { month: 'Fev', sales: 1450000, margin: 1100000 },
+    { month: 'Mar', sales: 1800000, margin: 1400000 },
+    { month: 'Abr', sales: 1600000, margin: 1250000 },
+    { month: 'Mai', sales: 2100000, margin: 1650000 },
+    { month: 'Jun', sales: 1900000, margin: 1500000 },
+]
+
+export const mockCategorySales = [
+    { category: 'SUV Luxury', value: 4500000 },
+    { category: 'Sports', value: 3800000 },
+    { category: 'Sedan Premium', value: 2900000 },
+    { category: 'Electric', value: 1800000 },
+]
