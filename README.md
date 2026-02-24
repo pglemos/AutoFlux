@@ -10,7 +10,6 @@
 
 AutoFlux is a premium, multi-tenant operating system designed for car dealerships and automotive consultancies. It focuses on maximizing sales performance through LeadOps, automated SLAs, and AI-driven diagnostics.
 
-[View App in AI Studio](https://ai.studio/apps/626d9552-45cc-4d3b-9c51-9ef21386510c)
 
 </div>
 
