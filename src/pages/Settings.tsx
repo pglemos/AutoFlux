@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import GoalManagement from './GoalManagement'
 import CommissionRules from './CommissionRules'
+import Communication from './Communication'
 import { Plus, Building2, Pencil, Trash2, ChevronRight, UserPlus2 } from 'lucide-react'
 
 export default function Settings() {
@@ -96,24 +97,24 @@ export default function Settings() {
             </div>
 
             <Tabs defaultValue="general" className="w-full">
-                <TabsList className="bg-white/50 dark:bg-black/50 p-1 rounded-2xl border border-white/30 dark:border-white/5 mb-8 backdrop-blur-xl">
-                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                <TabsList className="bg-black/5 dark:bg-white/5 p-1 rounded-2xl border border-black/5 dark:border-white/5 mb-8 backdrop-blur-xl">
+                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <SettingsIcon className="w-4 h-4 mr-2" />Geral
                     </TabsTrigger>
-                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         {role === 'Admin' ? <Building2 className="w-4 h-4 mr-2" /> : <Users className="w-4 h-4 mr-2" />}
                         {role === 'Admin' ? 'Agência' : 'Usuários'}
                     </TabsTrigger>
-                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <ShieldCheck className="w-4 h-4 mr-2" />Permissões
                     </TabsTrigger>
-                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Plug className="w-4 h-4 mr-2" />Integrações
                     </TabsTrigger>
-                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Target className="w-4 h-4 mr-2" />Metas
                     </TabsTrigger>
-                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <FileSignature className="w-4 h-4 mr-2" />Comissões
                     </TabsTrigger>
                 </TabsList>
@@ -128,7 +129,7 @@ export default function Settings() {
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 group-hover:bg-electric-blue/5 transition-colors">
                                 <div>
-                                    <Label className="font-bold text-sm dark:text-white">Modo Escuro</Label>
+                                    <Label className="font-bold text-sm text-pure-black dark:text-white">Modo Escuro</Label>
                                     <p className="text-xs text-muted-foreground font-medium mt-0.5">Alternar entre temas claro e escuro</p>
                                 </div>
                                 <Switch checked={theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)} onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} />
@@ -145,7 +146,7 @@ export default function Settings() {
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 group-hover:bg-mars-orange/5 transition-colors">
                                 <div>
-                                    <Label className="font-bold text-sm dark:text-white">Perfil Ativo de Teste</Label>
+                                    <Label className="font-bold text-sm text-pure-black dark:text-white">Perfil Ativo de Teste</Label>
                                     <p className="text-xs text-muted-foreground font-medium mt-0.5">Simular diferentes perfis de acesso</p>
                                 </div>
                                 <Select value={role} onValueChange={(v) => { setRole(v as Role); toast({ title: 'Perfil Alterado', description: `Agora você é: ${v}` }) }}>
@@ -173,7 +174,7 @@ export default function Settings() {
                         <CardContent>
                             <div className="flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 group-hover:bg-electric-blue/5 transition-colors">
                                 <div>
-                                    <Label className="font-bold text-sm dark:text-white">Chained Funnel (Funil Encadeado)</Label>
+                                    <Label className="font-bold text-sm text-pure-black dark:text-white">Chained Funnel (Funil Encadeado)</Label>
                                     <p className="text-xs text-muted-foreground font-medium mt-0.5">Impede que leads pulem etapas do funil</p>
                                 </div>
                                 <Switch checked={chainedFunnel} onCheckedChange={(v) => { setChainedFunnel(v); toast({ title: v ? 'Funil Encadeado Ativado' : 'Funil Encadeado Desativado' }) }} />
@@ -183,7 +184,7 @@ export default function Settings() {
                 </TabsContent>
 
                 <TabsContent value="automations" className="space-y-6 animate-in fade-in-50 duration-500">
-                    <AutomationSettings />
+                    <Communication />
                 </TabsContent>
 
                 <TabsContent value="users" className="space-y-6 animate-in fade-in-50 duration-500">

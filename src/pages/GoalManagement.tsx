@@ -102,7 +102,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                         </CardHeader>
                         <CardContent className="p-8 pt-4 space-y-6">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white">Tipo de Meta</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Tipo de Meta</Label>
                                 <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-xl">
                                     <Button
                                         variant={type === 'Equipe' ? 'default' : 'ghost'}
@@ -123,7 +123,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
 
                             {type === 'Individual' && (
                                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white">Selecionar Vendedor</Label>
+                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Selecionar Vendedor</Label>
                                     <Select value={targetId} onValueChange={setTargetId}>
                                         <SelectTrigger className="h-11 rounded-xl bg-black/5 dark:bg-white/5 border-none font-bold">
                                             <SelectValue placeholder="Escolha um vendededor..." />
@@ -138,7 +138,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                             )}
 
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white">Objetivo (Vendas)</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Objetivo (Vendas)</Label>
                                 <div className="relative">
                                     <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input

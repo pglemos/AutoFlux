@@ -141,17 +141,17 @@ export default function CommissionRules({ standalone = true }: { standalone?: bo
                         {editingRuleId ? 'Editar Regra' : 'Nova Regra de Comissão'}
                     </DialogTitle></DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground dark:text-off-white">Vendedor</Label>
+                        <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Vendedor</Label>
                             <Select value={sellerId} onValueChange={setSellerId}><SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                                 <SelectContent className="rounded-xl"><SelectItem value="all">Todos</SelectItem>{team.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
-                        <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground dark:text-off-white">Tipo de Veículo</Label>
+                        <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Tipo de Veículo</Label>
                             <Select value={vehicleType} onValueChange={setVehicleType}><SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                                 <SelectContent className="rounded-xl"><SelectItem value="all">Todos</SelectItem><SelectItem value="Sedan">Sedan</SelectItem><SelectItem value="SUV">SUV</SelectItem><SelectItem value="Esportivo">Esportivo</SelectItem><SelectItem value="Utilitário">Utilitário</SelectItem></SelectContent></Select></div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-pure-black dark:text-off-white">Margem Mín. %</Label><Input type="number" value={marginMin} onChange={(e) => setMarginMin(e.target.value)} className="rounded-xl" /></div>
-                            <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-pure-black dark:text-off-white">Margem Máx. %</Label><Input type="number" value={marginMax} onChange={(e) => setMarginMax(e.target.value)} className="rounded-xl" /></div>
+                            <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Margem Mín. %</Label><Input type="number" value={marginMin} onChange={(e) => setMarginMin(e.target.value)} className="rounded-xl" /></div>
+                            <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Margem Máx. %</Label><Input type="number" value={marginMax} onChange={(e) => setMarginMax(e.target.value)} className="rounded-xl" /></div>
                         </div>
-                        <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-pure-black dark:text-off-white">Percentual de Comissão</Label><Input type="number" value={percentage} onChange={(e) => setPercentage(e.target.value)} className="rounded-xl" placeholder="Ex: 15" /></div>
+                        <div className="space-y-2"><Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Percentual de Comissão</Label><Input type="number" value={percentage} onChange={(e) => setPercentage(e.target.value)} className="rounded-xl" placeholder="Ex: 15" /></div>
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
