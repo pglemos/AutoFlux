@@ -112,7 +112,7 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Performance Chart */}
-                <Card className="lg:col-span-2 border-white/10 bg-[#0A0D14]/80 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden relative group">
+                <Card className="lg:col-span-2 border-white/10 bg-black/80 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden relative group">
                     <div className="absolute inset-0 bg-gradient-to-br from-electric-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                     <CardHeader className="pb-2 border-b border-white/5 flex flex-row items-center justify-between">
                         <div>
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
                 </Card>
 
                 {/* Top Agencies */}
-                <Card className="border-white/10 bg-[#0A0D14]/80 backdrop-blur-xl rounded-[2rem] shadow-2xl flex flex-col">
+                <Card className="border-white/10 bg-black/80 backdrop-blur-xl rounded-[2rem] shadow-2xl flex flex-col">
                     <CardHeader className="pb-4 border-b border-white/5">
                         <CardTitle className="text-sm font-bold uppercase tracking-widest text-white/80 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4 text-emerald-400" /> Top Agências
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
                 </Card>
 
                 {/* Security & Audit Feed */}
-                <Card className="lg:col-span-3 border-white/10 bg-[#0A0D14]/80 backdrop-blur-xl rounded-[2rem] shadow-2xl">
+                <Card className="lg:col-span-3 border-white/10 bg-black/80 backdrop-blur-xl rounded-[2rem] shadow-2xl">
                     <CardHeader className="pb-4 border-b border-white/5 flex flex-row items-center justify-between">
                         <CardTitle className="text-sm font-bold uppercase tracking-widest text-white/80 flex items-center gap-2">
                             <ShieldCheck className="w-4 h-4 text-indigo-400" /> Log de Auditoria Global
@@ -239,7 +239,7 @@ function GlobalKpiCard({ title, value, trend, icon, highlight = false }: {
     return (
         <Card className={cn(
             'border-white/10 backdrop-blur-xl rounded-[2rem] overflow-hidden relative group transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl',
-            highlight ? 'bg-gradient-to-br from-electric-blue/10 to-[#0A0D14] ring-1 ring-inset ring-electric-blue/30' : 'bg-[#0A0D14]/80'
+            highlight ? 'bg-gradient-to-br from-electric-blue/10 to-black ring-1 ring-inset ring-electric-blue/30' : 'bg-black/80'
         )}>
             {highlight && <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-electric-blue to-transparent opacity-50" />}
 

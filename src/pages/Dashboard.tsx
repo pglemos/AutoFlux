@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import AdminDashboard from './AdminDashboard'
 import {
     ArrowUpRight,
     ArrowDownRight,
@@ -53,14 +54,19 @@ export default function Dashboard() {
     const { dashboardWidgets, setDashboardWidgets, goals, team, leads, activeAgencyId } = useAppStore()
     const [isEditing, setIsEditing] = useState(false)
 
-    // Filter data based on active agency (if Admin)
+    // Conditionally render the premium Admin Dashboard
+    if (role === 'Admin') {
+        return <AdminDashboard />
+    }
+
+    // Filter data based on active agency (if Owner)
     const filteredLeads = useMemo(() => {
-        if (role !== 'Admin' || !activeAgencyId) return leads
+        if ((role as string) !== 'Admin' || !activeAgencyId) return leads
         return leads.filter(l => l.agencyId === activeAgencyId)
     }, [leads, activeAgencyId, role])
 
     const filteredTeam = useMemo(() => {
-        if (role !== 'Admin' || !activeAgencyId) return team
+        if ((role as string) !== 'Admin' || !activeAgencyId) return team
         return team.filter(m => m.agencyId === activeAgencyId)
     }, [team, activeAgencyId, role])
 

@@ -364,7 +364,7 @@ export default function Settings() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        disabled={u.role === 'Admin' && role !== 'Admin'}
+                                                        disabled={u.role === 'Admin'}
                                                         onClick={() => { deleteUser(u.id); toast({ title: 'Usuário removido' }) }}
                                                         className="rounded-xl text-mars-orange font-bold text-xs hover:bg-mars-orange/10"
                                                     >
