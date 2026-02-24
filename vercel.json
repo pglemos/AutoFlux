@@ -10,5 +10,6 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "comment": "Triggering deployment after disabling 'Require Verified Commits'"
 }
