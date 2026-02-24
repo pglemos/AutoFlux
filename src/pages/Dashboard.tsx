@@ -229,10 +229,7 @@ export default function Dashboard() {
                     </div>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-pure-black dark:text-off-white leading-[1.1]">
                         Sintetizando fluidez <span className="text-electric-blue">orgânica</span> com rigidez <span className="text-mars-orange">digital</span>.
-                        <div className="flex items-center gap-4 mt-8 opacity-60 group hover:opacity-100 transition-all duration-500">
-                            <div className="h-[1px] w-12 bg-black/20 dark:bg-white/20"></div>
-                            <span className="text-5xl font-signature font-normal tracking-normal text-electric-blue/80 dark:text-off-white/80 pr-4 rotate-[-4deg]">Luz Direção Consultoria</span>
-                        </div>
+
                     </h1>
                     <div className="flex flex-wrap gap-3 mt-6">
                         <Badge variant="outline" className="rounded-lg font-mono text-[10px] uppercase text-muted-foreground bg-white/50 dark:bg-black/50 border-[0.5px] px-3 py-1 font-bold">

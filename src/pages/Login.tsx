@@ -126,7 +126,7 @@ export default function Login() {
                         <div className="size-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
                             <Sparkles className="size-4 text-[#94785C]" />
                         </div>
-                        <span className="tracking-tight font-signature text-3xl leading-none">Luz Direção</span>
+                        <span className="tracking-tight text-xl font-bold leading-none">AutoGestão</span>
                     </div>
                 </div>
 
@@ -148,10 +148,10 @@ export default function Login() {
                     <div className="flex flex-col items-center gap-6">
                         <div className="flex items-center gap-4 text-white/90">
                             <div className="h-[1px] w-12 bg-white/20"></div>
-                            <h1 className="text-7xl font-signature font-normal tracking-normal leading-none pr-6">Luz Direção Consultoria</h1>
+                            <h1 className="text-5xl font-black tracking-tight leading-none uppercase">AutoGestão</h1>
                             <div className="h-[1px] w-12 bg-white/20"></div>
                         </div>
-                        <span className="text-[10px] uppercase tracking-[0.6em] font-black text-[#94785C]">CONSULTORIA ESTRATÉGICA</span>
+                        <span className="text-[10px] uppercase tracking-[0.6em] font-black text-[#94785C]">CONTROLE TOTAL DE FLUXO</span>
                     </div>
                 </div>
                 <div className="relative z-20 flex items-center gap-6">
@@ -175,7 +175,7 @@ export default function Login() {
                         <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <Sparkles className="size-4 text-primary" />
                         </div>
-                        <span>LUZ DIREÇÃO</span>
+                        <span>AUTOGESTÃO</span>
                     </div>
 
                     {/* Header */}
@@ -192,7 +192,7 @@ export default function Login() {
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="consultoria@luzdirecao.com.br"
+                                    placeholder="usuario@autogestao.com.br"
                                     value={email}
                                     autoComplete="off"
                                     onChange={(e) => setEmail(e.target.value)}
@@ -238,7 +238,7 @@ export default function Login() {
                                 <Checkbox id="remember" className="border-slate-300 data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900" />
                                 <Label
                                     htmlFor="remember"
-                                    className="text-slate-400 font-signature cursor-pointer select-none"
+                                    className="text-slate-400 cursor-pointer select-none text-xs"
                                 >
                                     Manter conectado por 30 dias
                                 </Label>
@@ -291,7 +291,7 @@ export default function Login() {
 
                     {/* Sign Up Link */}
                     <div className="text-center text-xs text-slate-400 mt-10 flex flex-col items-center gap-4">
-                        <span className="text-5xl font-signature text-slate-500/50 -rotate-2">Luz Direção Consultoria</span>
+
                         <span>&copy; {new Date().getFullYear()} Todos os direitos reservados.</span>
                     </div>
                 </div>

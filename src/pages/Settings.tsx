@@ -92,13 +92,7 @@ export default function Settings() {
                     <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
                     <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">SISTEMA</span>
                 </div>
-                <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
-                    <span className="text-electric-blue">Configurações</span>
-                </h1>
-                <div className="flex items-center justify-between mt-1">
-                    <p className="text-muted-foreground font-medium">Gerencie preferências, usuários e permissões do AutoGestão.</p>
-                    <span className="text-3xl font-signature text-[#94785C] opacity-60">Luz Direção Consultoria</span>
-                </div>
+                <p className="text-muted-foreground font-medium mt-1">Gerencie preferências, usuários e permissões do AutoGestão.</p>
             </div>
 
             <Tabs defaultValue="general" className="w-full">
@@ -186,6 +180,10 @@ export default function Settings() {
                             </div>
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                <TabsContent value="automations" className="space-y-6 animate-in fade-in-50 duration-500">
+                    <AutomationSettings />
                 </TabsContent>
 
                 <TabsContent value="users" className="space-y-6 animate-in fade-in-50 duration-500">

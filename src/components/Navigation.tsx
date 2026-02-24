@@ -85,9 +85,9 @@ export function Navigation() {
                     <div className="w-10 h-10 rounded-2xl bg-[#0F172A] dark:bg-[#94785C] flex items-center justify-center shadow-2xl shadow-black/20 text-white transition-transform hover:scale-105 duration-300">
                         <Car className="h-6 w-6" />
                     </div>
-                    <div className="flex flex-col translate-y-1">
-                        <span className="text-4xl font-signature leading-none pr-2">Luz Direção</span>
-                        <span className="text-[8px] font-black text-electric-blue tracking-[0.3em] uppercase mt-0 opacity-80 pl-2">Consultoria</span>
+                    <div className="flex flex-col">
+                        <span className="text-xl font-black leading-none">AutoGestão</span>
+                        <span className="text-[10px] font-bold text-electric-blue tracking-widest uppercase mt-0.5">Flux Control</span>
                     </div>
                 </div>
             </div>
@@ -156,11 +156,7 @@ export function Navigation() {
                 </DropdownMenu>
             </div>
 
-            {/* Endorsement Signature */}
-            <div className="px-6 py-4 mt-auto border-t border-black/5 dark:border-white/5 opacity-40 hover:opacity-100 transition-opacity duration-500">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Approved by</p>
-                <p className="text-3xl font-signature text-electric-blue/70 dark:text-off-white/70 -rotate-2">Luz Direção Consultoria</p>
-            </div>
+
         </div>
     )
 }

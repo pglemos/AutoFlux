@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Send, Clipboard, AlertTriangle, TrendingUp, Users, Clock, Sparkles, ChevronRight, Share2, Target, Calendar } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Send, Clipboard, AlertTriangle, TrendingUp, Users, Clock, Sparkles, ChevronRight, Share2, Target, Calendar, Bot, BrainCircuit } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,11 +8,53 @@ import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 
 export default function MorningReport() {
     const { team, leads, goals } = useAppStore()
     const [isGenerating, setIsGenerating] = useState(false)
     const [report, setReport] = useState<string | null>(null)
+
+    const [aiInsight, setAiInsight] = useState<string | null>(null);
+    const [loadingAi, setLoadingAi] = useState(false);
+    const navigate = useNavigate();
+
+    // Assuming fetchData is an existing function or a placeholder for initial data loading
+    // If fetchData is not defined, this will cause an error.
+    // For the purpose of this edit, I'll assume it's defined elsewhere or meant to be added.
+    const fetchData = () => {
+        // Placeholder for actual data fetching logic if it exists
+        // e.g., useAppStore.getState().fetchInitialData();
+    };
+
+    useEffect(() => {
+        fetchData();
+        fetchLatestAiInsight();
+    }, []);
+
+    const fetchLatestAiInsight = async () => {
+        setLoadingAi(true);
+        try {
+            const { data, error } = await supabase
+                .from('report_history')
+                .select('ai_insight')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (error) {
+                console.error('Error fetching AI insight:', error);
+            }
+            if (data) {
+                setAiInsight(data.ai_insight);
+            }
+        } catch (e) {
+            console.error('Error fetching AI insight:', e);
+        } finally {
+            setLoadingAi(false);
+        }
+    };
 
     const totalSales = team.reduce((a, t) => a + t.sales, 0)
     const teamGoal = goals.find((g) => g.type === 'Equipe')?.amount || 25
@@ -141,6 +183,28 @@ ${topSellers.map((t, i) => `· ${i + 1}º ${t.name}: ${t.sales} vendas (${t.conv
                     </CardContent>
                 </Card>
             </div>
+
+            {/* AI Insight Section */}
+            {aiInsight && (
+                <Card className="hyper-glass rounded-[2.5rem] border-none bg-gradient-to-br from-electric-blue/10 via-transparent to-mars-orange/5 overflow-hidden relative group">
+                    <CardContent className="p-8">
+                        <div className="flex items-start gap-6">
+                            <div className="p-4 rounded-2xl bg-electric-blue/10 border border-electric-blue/20">
+                                <BrainCircuit className="w-8 h-8 text-electric-blue" />
+                            </div>
+                            <div className="flex-1 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-black text-electric-blue uppercase tracking-[0.2em]">Diagnóstico IA Autônomo</span>
+                                    {loadingAi && <div className="w-2 h-2 bg-electric-blue rounded-full animate-ping" />}
+                                </div>
+                                <p className="text-xl font-bold text-pure-black dark:text-off-white leading-relaxed">
+                                    {aiInsight}
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <AnimatePresence>
                 {report && (

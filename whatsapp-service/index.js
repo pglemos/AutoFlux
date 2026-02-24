@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const { Client, LocalAuth } = require('whatsapp-web.js');
@@ -11,8 +11,8 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
-const SUPABASE_URL = process.env.SUPABASE_URL || '';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || '';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -57,6 +57,22 @@ app.get('/api/whatsapp/status', (req, res) => {
         connected: isConnected,
         qr: isConnected ? null : qrImage
     });
+});
+
+app.post('/api/whatsapp/restart', async (req, res) => {
+    console.log('Restarting WhatsApp Client...');
+    try {
+        if (client) {
+            await client.destroy();
+        }
+        isConnected = false;
+        qrImage = '';
+        client.initialize();
+        res.json({ success: true, message: 'Client restart initiated' });
+    } catch (error) {
+        console.error('Failed to restart client:', error);
+        res.status(500).json({ error: 'Failed to restart client' });
+    }
 });
 
 app.post('/api/whatsapp/send', async (req, res) => {

@@ -148,8 +148,9 @@ export default function Privacy() {
 
                     {/* Footer Inside Content */}
                     <div className="pt-16 border-t border-slate-200 dark:border-white/10 flex items-center justify-between opacity-50">
-                        <div className="flex items-center gap-1 opacity-80">
-                            <span className="text-3xl font-signature text-[#94785C]">Luz Direção Consultoria</span>
+                        <div className="flex items-center gap-3">
+                            <Sparkles className="size-4 text-[#94785C]" />
+                            <span className="text-[10px] font-black tracking-[0.5em] uppercase">LUZ DIREÇÃO</span>
                         </div>
                         <span className="text-[9px] font-bold uppercase tracking-widest truncate">© 2026 Data & Privacy Operations</span>
                     </div>
