@@ -32,9 +32,7 @@ import { chartData } from '@/lib/mock-data'
 
 export default function Dashboard() {
     const { role } = useAuth()
-    console.log('Dashboard rendering, role:', role)
     const { leads = [], team = [], inventory = [], goals = [], activeAgencyId, auditLogs = [] } = useAppStore()
-    console.log('Dashboard data check:', { leadsLen: leads?.length, teamLen: team?.length, invLen: inventory?.length })
     const [isEditing, setIsEditing] = useState(false)
     const [dashboardWidgets, setDashboardWidgets] = useState<string[]>([
         'kpi-metas',

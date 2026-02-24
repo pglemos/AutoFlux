@@ -7,7 +7,7 @@ export type Role = 'Owner' | 'Manager' | 'Seller' | 'RH' | 'Admin'
 type AuthContextType = {
     user: User | null
     session: Session | null
-    role: Role
+    role: Role | null
     agencyId: string | null
     loading: boolean
     setRole: (role: Role) => void
@@ -19,58 +19,81 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [session, setSession] = useState<Session | null>(null)
-    const [role, setRole] = useState<Role>('Manager')
+    const [role, setRole] = useState<Role | null>(null) // Updated to allow null
     const [agencyId, setAgencyId] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
 
     const fetchUserData = async (userId: string) => {
-        console.log('fetchUserData: SKIPPED (Diagnostic)', userId)
-        setRole('Manager')
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('TIMEOUT_LIMIT')), 4000)
+        );
+
+        try {
+            const { data, error } = await Promise.race([
+                supabase
+                    .from('team')
+                    .select('role, agency_id')
+                    .eq('id', userId)
+                    .single(),
+                timeoutPromise
+            ]) as any
+
+            if (!error && data) {
+                setRole(data.role as Role)
+                setAgencyId(data.agency_id)
+            } else {
+                // If no data or error, set role and agencyId to null
+                setRole(null)
+                setAgencyId(null)
+            }
+        } catch (err) {
+            console.error('fetchUserData error:', err)
+            // On error, also set role and agencyId to null
+            setRole(null)
+            setAgencyId(null)
+        }
     }
 
     useEffect(() => {
         let isSubscribed = true
-        console.log('AuthProvider: useEffect INIT')
 
         // Get initial session
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (!isSubscribed) return
-            console.log('AuthProvider: getSession result', { hasSession: !!session })
 
             setSession(session)
             const currentUser = session?.user ?? null
             setUser(currentUser)
 
             if (currentUser) {
-                // fetchUserData(currentUser.id) // Skip for now
-                setRole('Manager') // Default role
+                await fetchUserData(currentUser.id)
+            } else {
+                setRole(null)
+                setAgencyId(null)
             }
 
             if (isSubscribed) {
                 setLoading(false)
-                console.log('AuthProvider: loading set to FALSE (getSession)')
             }
         })
 
         // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!isSubscribed) return
-            console.log('AuthProvider: onAuthStateChange', event, { hasSession: !!session })
 
             setSession(session)
             const currentUser = session?.user ?? null
             setUser(currentUser)
 
             if (currentUser) {
-                // await fetchUserData(currentUser.id) // Skip for now
-                setRole('Manager') // Default role
+                await fetchUserData(currentUser.id)
             } else {
+                setRole(null)
                 setAgencyId(null)
             }
 
             if (isSubscribed) {
                 setLoading(false)
-                console.log('AuthProvider: loading set to FALSE (onAuthStateChange)')
             }
         })
 
