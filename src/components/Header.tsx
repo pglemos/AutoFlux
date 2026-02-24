@@ -1,0 +1,160 @@
+import { Bell, Search, Zap } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useIsMobile } from '@/hooks/use-mobile'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from '@/components/ui/dialog'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { toast } from '@/hooks/use-toast'
+import { mockNotifications } from '@/lib/mock-data'
+import { useState } from 'react'
+import useAppStore from '@/stores/main'
+
+export function Header() {
+    const isMobile = useIsMobile()
+    const [open, setOpen] = useState(false)
+    const [activity, setActivity] = useState('')
+    const { addTask } = useAppStore()
+
+    const handleQuickLog = () => {
+        toast({
+            title: 'Atividade Registrada',
+            description: 'O log da atividade foi salvo com sucesso (SLA < 10s).',
+        })
+        setOpen(false)
+    }
+
+    return (
+        <header className="h-16 hyper-glass sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 transition-all border-b-0 sm:rounded-b-3xl sm:mx-2 sm:mt-2 shadow-sm">
+            <div className="flex items-center flex-1 gap-4">
+                {isMobile && (
+                    <div className="font-extrabold text-lg text-pure-black dark:text-off-white tracking-tight">
+                        AutoPerf
+                    </div>
+                )}
+                <div className="relative max-w-md w-full hidden sm:block">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Buscar leads, clientes, estoque..."
+                        className="w-full bg-white/50 dark:bg-black/50 border-white/20 pl-10 focus-visible:ring-electric-blue rounded-full shadow-inner h-10 transition-all hover:bg-white/80 dark:hover:bg-black/80"
+                    />
+                </div>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative rounded-full hover:bg-white/50 dark:hover:bg-black/50"
+                        >
+                            <Bell className="h-5 w-5 text-pure-black dark:text-off-white" />
+                            <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-mars-orange animate-pulse"></span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        align="end"
+                        className="w-80 rounded-2xl p-2 bg-white/90 dark:bg-black/90 backdrop-blur-xl"
+                    >
+                        <div className="font-extrabold text-sm p-2 mb-2 border-b border-black/5 dark:border-white/5 text-pure-black dark:text-off-white">
+                            Central de Notificações
+                        </div>
+                        {mockNotifications.map((n) => (
+                            <DropdownMenuItem
+                                key={n.id}
+                                className="flex flex-col items-start p-3 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 gap-1 focus:bg-black/5 dark:focus:bg-white/5"
+                            >
+                                <div className="flex items-center gap-2 w-full">
+                                    <div className="w-2 h-2 rounded-full bg-mars-orange shrink-0"></div>
+                                    <span className="font-bold text-sm text-pure-black dark:text-off-white">
+                                        {n.title}
+                                    </span>
+                                </div>
+                                <span className="text-xs text-muted-foreground ml-4 leading-tight">
+                                    {n.description}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground ml-4 mt-1 font-bold uppercase tracking-widest">
+                                    {n.time}
+                                </span>
+                            </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="hidden sm:flex bg-electric-blue text-white hover:bg-electric-blue/90 rounded-full px-6 shadow-lg shadow-electric-blue/20 transition-transform hover:scale-105 active:scale-95 duration-200 font-bold">
+                            <Zap className="w-4 h-4 mr-2" /> Ação Rápida
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px] rounded-3xl">
+                        <DialogHeader>
+                            <DialogTitle className="font-extrabold text-xl">
+                                Registro de Atividade (Ação Rápida)
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                                <Label>Lead / Cliente</Label>
+                                <Select>
+                                    <SelectTrigger className="rounded-xl">
+                                        <SelectValue placeholder="Selecione o lead" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl">
+                                        <SelectItem value="l1">
+                                            Carlos Silva - Porsche 911
+                                        </SelectItem>
+                                        <SelectItem value="l2">Ana Oliveira - BMW X5</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Tipo de Atividade</Label>
+                                <Select value={activity} onValueChange={setActivity}>
+                                    <SelectTrigger className="rounded-xl">
+                                        <SelectValue placeholder="O que aconteceu?" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl">
+                                        <SelectItem value="call">Tentativa de Contato</SelectItem>
+                                        <SelectItem value="schedule">Retorno Agendado</SelectItem>
+                                        <SelectItem value="visit_done">Visita Realizada</SelectItem>
+                                        <SelectItem value="proposal">Proposta Enviada</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                onClick={handleQuickLog}
+                                disabled={!activity}
+                                className="w-full rounded-xl bg-pure-black text-white hover:bg-pure-black/80 dark:bg-white dark:text-pure-black font-bold"
+                            >
+                                Salvar Atividade
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </header>
+    )
+}
