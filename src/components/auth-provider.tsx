@@ -25,12 +25,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const fetchUserData = async (userId: string) => {
         console.log('fetchUserData: START for', userId)
+
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('TIMEOUT_LIMIT')), 4000)
+        );
+
         try {
-            const { data, error } = await supabase
-                .from('team')
-                .select('role, agency_id')
-                .eq('id', userId)
-                .single()
+            const { data, error } = await Promise.race([
+                supabase
+                    .from('team')
+                    .select('role, agency_id')
+                    .eq('id', userId)
+                    .single(),
+                timeoutPromise
+            ]) as any
 
             if (error) {
                 console.error('fetchUserData: ERROR', error)
@@ -41,8 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } else {
                 console.warn('fetchUserData: NO DATA FOUND')
             }
-        } catch (err) {
-            console.error('fetchUserData: UNEXPECTED EXCEPTION', err)
+        } catch (err: any) {
+            if (err.message === 'TIMEOUT_LIMIT') {
+                console.error('fetchUserData: REQUEST TIMED OUT after 4s')
+            } else {
+                console.error('fetchUserData: UNEXPECTED EXCEPTION', err)
+            }
         } finally {
             console.log('fetchUserData: END')
         }
