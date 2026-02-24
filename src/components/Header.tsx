@@ -107,9 +107,9 @@ export function Header() {
                             <Zap className="w-4 h-4 mr-2" /> Ação Rápida
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px] rounded-3xl">
+                    <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle className="font-extrabold text-xl">
+                            <DialogTitle>
                                 Registro de Atividade (Ação Rápida)
                             </DialogTitle>
                         </DialogHeader>

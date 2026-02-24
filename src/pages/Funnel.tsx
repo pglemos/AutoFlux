@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Clock, AlertTriangle, ShieldAlert, Plus, Edit2, Trash2 } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Clock, AlertTriangle, ShieldAlert, Plus, Edit2, Trash2, GripVertical } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import useAppStore, { LeadStage, Lead } from '@/stores/main'
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 
 const STAGES: LeadStage[] = ['Lead', 'Contato', 'Agendamento', 'Visita', 'Proposta', 'Venda']
 
@@ -25,27 +26,45 @@ export default function Funnel() {
   const [sellerFilter, setSellerFilter] = useState('all')
   const [form, setForm] = useState<Partial<Lead>>({ name: '', car: '', source: 'Internet', sellerId: '', value: 0 })
 
-  const moveLead = (id: string, newStage: LeadStage) => {
+  const processMove = useCallback((id: string, newStage: LeadStage) => {
     const lead = leads.find((l) => l.id === id)
     if (!lead) return
+
     if (chainedFunnel) {
       const currentIndex = STAGES.indexOf(lead.stage)
       const targetIndex = STAGES.indexOf(newStage)
-      if (targetIndex > currentIndex + 1) { setBlockDialogOpen(true); return }
+      if (targetIndex > currentIndex + 1) {
+        setBlockDialogOpen(true)
+        return
+      }
     }
+
     updateLead(id, { stage: newStage, stagnantDays: 0 })
     toast({ title: 'Avanço no Funil', description: `Lead movido para ${newStage}.` })
+
     if (newStage === 'Venda') {
       const marginPerc = 10
       const marginValue = lead.value * (marginPerc / 100)
       let comissionPerc = 15
-      const rule = commissionRules.find((r) => (r.marginMin === undefined || marginPerc >= r.marginMin) && (r.marginMax === undefined || marginPerc <= r.marginMax))
+      const rule = commissionRules.find((r) =>
+        (r.marginMin === undefined || marginPerc >= r.marginMin) &&
+        (r.marginMax === undefined || marginPerc <= r.marginMax)
+      )
       if (rule) comissionPerc = rule.percentage
       const comission = marginValue * (comissionPerc / 100)
       const sellerName = team.find((t) => t.id === lead.sellerId)?.name || 'Vendedor Desconhecido'
       addCommission({ seller: sellerName, car: lead.car, date: new Date().toLocaleDateString('pt-BR'), margin: `${marginPerc.toFixed(1)}%`, comission })
       toast({ title: 'Venda Concluída!', description: `Comissão gerada automaticamente.` })
     }
+  }, [leads, chainedFunnel, updateLead, commissionRules, team, addCommission])
+
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result
+    if (!destination) return
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return
+
+    const newStage = destination.droppableId as LeadStage
+    processMove(draggableId, newStage)
   }
 
   const handleLost = () => {
@@ -57,15 +76,25 @@ export default function Funnel() {
   }
 
   const openLeadDialog = (lead?: Lead) => {
-    if (lead) { setSelectedLeadId(lead.id); setForm(lead) }
-    else { setSelectedLeadId(null); setForm({ name: '', car: '', source: 'Internet', sellerId: '', value: 0, stage: 'Lead' }) }
+    if (lead) {
+      setSelectedLeadId(lead.id)
+      setForm(lead)
+    } else {
+      setSelectedLeadId(null)
+      setForm({ name: '', car: '', source: 'Internet', sellerId: '', value: 0, stage: 'Lead' })
+    }
     setLeadDialogOpen(true)
   }
 
   const saveLead = () => {
     if (!form.name || !form.car) return
-    if (selectedLeadId) { updateLead(selectedLeadId, form); toast({ title: 'Lead Atualizado' }) }
-    else { addLead({ ...(form as any), score: 80, slaMinutes: 0 }); toast({ title: 'Lead Adicionado' }) }
+    if (selectedLeadId) {
+      updateLead(selectedLeadId, form)
+      toast({ title: 'Lead Atualizado' })
+    } else {
+      addLead({ ...(form as any), score: 80, slaMinutes: 0 })
+      toast({ title: 'Lead Adicionado' })
+    }
     setLeadDialogOpen(false)
   }
 
@@ -76,14 +105,14 @@ export default function Funnel() {
   })
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col max-w-[1600px] mx-auto">
+    <div className="h-[calc(100vh-8rem)] flex flex-col max-w-[1600px] mx-auto pb-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 shrink-0 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-mars-orange animate-pulse"></div>
-            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">CHAINED FUNNEL</span>
+            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">KAIZEN CRM</span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">Fluidez do <span className="text-electric-blue">Funil</span></h1>
+          <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">Pipeline de <span className="text-electric-blue">Vendas</span></h1>
         </div>
         <div className="flex flex-wrap gap-3">
           <Select value={sourceFilter} onValueChange={setSourceFilter}>
@@ -108,113 +137,147 @@ export default function Funnel() {
         </div>
       </div>
 
-      <ScrollArea className="flex-1 w-full whitespace-nowrap pb-4">
-        <div className="flex gap-4 h-full inline-flex items-start p-1">
-          {STAGES.map((stage) => {
-            const stageLeads = filteredLeads.filter((l) => l.stage === stage)
-            return (
-              <div key={stage} className="w-[320px] flex flex-col h-full bg-white/30 dark:bg-black/30 backdrop-blur-md rounded-3xl border border-white/50 dark:border-white/5 shadow-sm">
-                <div className="p-5 flex justify-between items-center shrink-0">
-                  <h3 className="font-extrabold text-sm uppercase tracking-wider text-pure-black dark:text-off-white">{stage}</h3>
-                  <Badge variant="secondary" className="font-mono-numbers bg-black/5 dark:bg-white/10 text-pure-black dark:text-white border-none rounded-lg px-2.5">{stageLeads.length}</Badge>
-                </div>
-                <ScrollArea className="flex-1 px-4 pb-4">
-                  <div className="space-y-3">
-                    {stageLeads.map((lead) => (
-                      <LeadCard key={lead.id} lead={lead} sellerName={team.find((t) => t.id === lead.sellerId)?.name}
-                        onMove={(s) => moveLead(lead.id, s)} onLost={() => { setSelectedLeadId(lead.id); setLossDialogOpen(true) }}
-                        onEdit={() => openLeadDialog(lead)} onDelete={() => deleteLead(lead.id)} />
-                    ))}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <ScrollArea className="flex-1 w-full whitespace-nowrap">
+          <div className="flex gap-6 h-[calc(100vh-18rem)] inline-flex items-start p-1 min-w-full">
+            {STAGES.map((stage) => {
+              const stageLeads = filteredLeads.filter((l) => l.stage === stage)
+              return (
+                <div key={stage} className="w-[320px] flex flex-col h-full bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-[2.5rem] overflow-hidden shrink-0">
+                  <div className="p-6 flex justify-between items-center shrink-0">
+                    <h3 className="font-extrabold text-sm uppercase tracking-wider text-pure-black dark:text-off-white">{stage}</h3>
+                    <Badge variant="secondary" className="font-mono-numbers bg-black/5 dark:bg-white/10 text-pure-black dark:text-white border-none rounded-xl px-3 py-1">{stageLeads.length}</Badge>
                   </div>
-                </ScrollArea>
-              </div>
-            )
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+
+                  <Droppable droppableId={stage}>
+                    {(provided, snapshot) => (
+                      <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className={cn("flex-1 px-4 pb-4 space-y-4 transition-colors rounded-b-[2.5rem]", snapshot.isDraggingOver ? "bg-electric-blue/5" : "bg-transparent")}
+                      >
+                        {stageLeads.map((lead, index) => (
+                          <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={snapshot.isDragging ? "z-50" : ""}
+                              >
+                                <LeadCard
+                                  lead={lead}
+                                  sellerName={team.find((t) => t.id === lead.sellerId)?.name}
+                                  onLost={() => { setSelectedLeadId(lead.id); setLossDialogOpen(true) }}
+                                  onEdit={() => openLeadDialog(lead)}
+                                  onDelete={() => deleteLead(lead.id)}
+                                  isDragging={snapshot.isDragging}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </div>
+              )
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </DragDropContext>
 
       <Dialog open={leadDialogOpen} onOpenChange={setLeadDialogOpen}>
-        <DialogContent className="sm:max-w-[400px] rounded-3xl">
-          <DialogHeader><DialogTitle className="font-extrabold text-xl">{selectedLeadId ? 'Editar Lead' : 'Novo Lead'}</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader><DialogTitle>{selectedLeadId ? 'Editar Lead' : 'Novo Lead'}</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2"><Label>Nome</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl" /></div>
             <div className="space-y-2"><Label>Veículo de Interesse</Label><Input value={form.car} onChange={(e) => setForm({ ...form, car: e.target.value })} className="rounded-xl" /></div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Origem</Label>
                 <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v })}><SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="Internet">Internet</SelectItem><SelectItem value="Porta">Porta</SelectItem><SelectItem value="Carteira">Carteira</SelectItem></SelectContent></Select>
+                  <SelectContent className="rounded-xl"><SelectItem value="Internet">Internet</SelectItem><SelectItem value="Porta">Porta</SelectItem><SelectItem value="Carteira">Carteira</SelectItem></SelectContent></Select>
               </div>
               <div className="space-y-2"><Label>Valor (R$)</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: Number(e.target.value) })} className="rounded-xl" /></div>
             </div>
             <div className="space-y-2"><Label>Vendedor Responsável</Label>
               <Select value={form.sellerId} onValueChange={(v) => setForm({ ...form, sellerId: v })}><SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                <SelectContent>{team.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select>
+                <SelectContent className="rounded-xl">{team.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select>
             </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setLeadDialogOpen(false)} className="rounded-xl font-bold">Cancelar</Button>
-            <Button onClick={saveLead} disabled={!form.name || !form.car} className="rounded-xl font-bold bg-electric-blue text-white">Salvar</Button>
+            <Button onClick={saveLead} disabled={!form.name || !form.car} className="rounded-xl font-bold bg-electric-blue text-white shadow-lg shadow-electric-blue/20">Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={lossDialogOpen} onOpenChange={setLossDialogOpen}>
-        <DialogContent className="rounded-3xl sm:max-w-[400px]">
-          <DialogHeader><DialogTitle className="flex items-center gap-2 text-mars-orange font-extrabold text-xl"><AlertTriangle className="h-5 w-5" /> Motivo de Perda</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader><DialogTitle className="flex items-center gap-3 text-mars-orange"><AlertTriangle className="h-6 w-6" /> Registro de Perda</DialogTitle></DialogHeader>
           <div className="py-4 space-y-2">
+            <Label className="font-bold text-muted-foreground">Qual o motivo da desistência?</Label>
             <Select onValueChange={setLossReason}><SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione o motivo" /></SelectTrigger>
-              <SelectContent><SelectItem value="Preço">Preço alto</SelectItem><SelectItem value="Financiamento">Reprovado no Financiamento</SelectItem><SelectItem value="Concorrente">Comprou no Concorrente</SelectItem><SelectItem value="Sem Contato">Não atende / Sem Contato</SelectItem></SelectContent></Select>
+              <SelectContent className="rounded-xl"><SelectItem value="Preço">Preço alto</SelectItem><SelectItem value="Financiamento">Reprovado no Financiamento</SelectItem><SelectItem value="Concorrente">Comprou no Concorrente</SelectItem><SelectItem value="Sem Contato">Não atende / Sem Contato</SelectItem></SelectContent></Select>
           </div>
-          <DialogFooter><Button onClick={handleLost} disabled={!lossReason} className="rounded-xl font-bold bg-mars-orange text-white w-full">Confirmar Perda</Button></DialogFooter>
+          <DialogFooter><Button onClick={handleLost} disabled={!lossReason} className="rounded-xl font-bold bg-mars-orange text-white w-full shadow-lg shadow-mars-orange/20">Confirmar Perda</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
-        <DialogContent className="rounded-3xl sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-mars-orange font-extrabold text-xl"><ShieldAlert className="h-5 w-5" /> Avanço Bloqueado</DialogTitle>
-            <DialogDescription className="font-semibold text-muted-foreground mt-2">A política de <strong>Chained Funnel</strong> está ativa. Você não pode pular etapas.</DialogDescription>
+            <DialogTitle className="flex items-center gap-3 text-mars-orange"><ShieldAlert className="h-6 w-6" /> Processo Interrompido</DialogTitle>
+            <DialogDescription className="font-semibold text-muted-foreground mt-4 leading-relaxed">
+              A política de <strong>Chained Funnel</strong> está ativa. <br /><br />
+              A conformidade do processo exige que o lead passe por todas as etapas obrigatórias. Pular etapas compromete a integridade dos dados e o SLA de atendimento.
+            </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4"><Button onClick={() => setBlockDialogOpen(false)} className="w-full rounded-xl font-bold bg-pure-black text-white">Entendido</Button></DialogFooter>
+          <DialogFooter className="mt-6"><Button onClick={() => setBlockDialogOpen(false)} className="w-full rounded-xl font-bold bg-pure-black text-white hover:bg-pure-black/90 dark:bg-white dark:text-pure-black">Entendido, vou seguir o fluxo</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   )
 }
 
-function LeadCard({ lead, sellerName, onMove, onLost, onEdit, onDelete }: {
-  lead: Lead; sellerName?: string; onMove: (s: LeadStage) => void; onLost: () => void; onEdit: () => void; onDelete: () => void
+function LeadCard({ lead, sellerName, onLost, onEdit, onDelete, isDragging }: {
+  lead: Lead; sellerName?: string; onLost: () => void; onEdit: () => void; onDelete: () => void; isDragging?: boolean
 }) {
   return (
-    <Card className={cn('shadow-sm transition-all duration-300 group rounded-2xl overflow-hidden relative',
-      lead.stagnantDays && lead.stagnantDays >= 2 ? 'border border-mars-orange/50 bg-mars-orange/[0.02]' : 'border-none bg-white dark:bg-[#111] hover:shadow-md')}>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div className="font-extrabold text-sm truncate pr-2 text-pure-black dark:text-off-white">{lead.name}</div>
-          <Badge variant="outline" className="text-[10px] px-2 py-0.5 h-6 font-mono-numbers border-none rounded-lg font-bold bg-black/5 dark:bg-white/10 text-muted-foreground">
-            <Clock className="w-3 h-3 mr-1 inline" />{lead.slaMinutes}m
+    <Card className={cn('shadow-elevation transition-all duration-300 group rounded-[2rem] overflow-hidden relative border-none bg-white dark:bg-[#0a0a0a]',
+      isDragging ? 'shadow-2xl scale-105 border-electric-blue/30 ring-2 ring-electric-blue/20' : '',
+      lead.stagnantDays && lead.stagnantDays >= 2 ? 'ring-2 ring-mars-orange/50' : '')}>
+      <CardContent className="p-5">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3 flex-1 overflow-hidden">
+            <GripVertical className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+            <div className="font-extrabold text-[15px] truncate text-pure-black dark:text-off-white">{lead.name}</div>
+          </div>
+          <Badge variant="outline" className="text-[10px] px-2.5 py-1 h-7 font-mono-numbers border-none rounded-xl font-bold bg-black/5 dark:bg-white/10 text-muted-foreground shrink-0">
+            <Clock className="w-3 h-3 mr-1.5 inline" />{lead.slaMinutes}m
           </Badge>
         </div>
-        <div className="text-xs text-muted-foreground mb-3 font-bold flex flex-col gap-1.5">
-          <div className="flex justify-between items-center">
-            <span className="text-electric-blue bg-electric-blue/10 px-1.5 py-0.5 rounded-md">{lead.car}</span>
-            <span className="font-mono-numbers text-pure-black dark:text-off-white">R$ {lead.value / 1000}k</span>
+
+        <div className="space-y-3 mb-5">
+          <div className="flex justify-between items-center bg-black/[0.03] dark:bg-white/[0.03] p-3 rounded-2xl">
+            <span className="text-electric-blue font-bold text-xs">{lead.car}</span>
+            <span className="font-mono-numbers font-extrabold text-sm text-pure-black dark:text-off-white">R$ {(lead.value / 1000).toLocaleString()}k</span>
           </div>
-          <span className="text-[9px] uppercase tracking-widest">Resp: {sellerName || 'N/A'} • {lead.source}</span>
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest px-1">
+            <span className="bg-muted px-1.5 py-0.5 rounded italic lowercase">{lead.source}</span>
+            <span className="opacity-40">•</span>
+            <span>{sellerName || 'S/ Vendedor'}</span>
+          </div>
         </div>
-        <div className="flex justify-between items-center mt-2 pt-3 border-t border-black/5 dark:border-white/5">
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onEdit() }} className="h-7 w-7 rounded-full text-muted-foreground hover:text-electric-blue"><Edit2 className="h-3 w-3" /></Button>
-            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDelete() }} className="h-7 w-7 rounded-full text-muted-foreground hover:text-mars-orange"><Trash2 className="h-3 w-3" /></Button>
+
+        <div className="flex justify-between items-center pt-4 border-t border-black/5 dark:border-white/5">
+          <div className="flex gap-2">
+            <Button variant="ghost" size="icon" onClick={onEdit} className="h-9 w-9 rounded-xl text-muted-foreground hover:text-electric-blue hover:bg-electric-blue/10"><Edit2 className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" onClick={onDelete} className="h-9 w-9 rounded-xl text-muted-foreground hover:text-mars-orange hover:bg-mars-orange/10"><Trash2 className="h-4 w-4" /></Button>
           </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button size="sm" variant="ghost" className="h-7 text-[10px] px-2 font-bold rounded-lg text-mars-orange hover:bg-mars-orange/10" onClick={(e) => { e.stopPropagation(); onLost() }}>Perda</Button>
-            {lead.stage !== 'Venda' && (
-              <Button size="sm" variant="secondary" className="h-7 text-[10px] px-3 font-bold rounded-lg bg-electric-blue text-white hover:bg-electric-blue/90 shadow-sm"
-                onClick={(e) => { e.stopPropagation(); const currentIndex = STAGES.indexOf(lead.stage); if (currentIndex < STAGES.length - 1) onMove(STAGES[currentIndex + 1]) }}>Avançar</Button>
-            )}
-          </div>
+          <Button size="sm" variant="ghost" className="h-9 text-[11px] px-4 font-extrabold rounded-xl text-mars-orange hover:bg-mars-orange/10 transition-colors" onClick={onLost}>Declarar Perda</Button>
         </div>
       </CardContent>
     </Card>
