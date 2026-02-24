@@ -138,8 +138,8 @@ export default function Funnel() {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <ScrollArea className="flex-1 w-full whitespace-nowrap">
-          <div className="flex gap-6 h-[calc(100vh-18rem)] inline-flex items-start p-1 min-w-full">
+        <div className="flex-1 overflow-x-auto overflow-y-hidden no-scrollbar pb-4">
+          <div className="flex gap-4 h-full min-w-max px-1">
             {STAGES.map((stage) => {
               const stageLeads = filteredLeads.filter((l) => l.stage === stage)
               return (
@@ -185,8 +185,7 @@ export default function Funnel() {
               )
             })}
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        </div>
       </DragDropContext>
 
       <Dialog open={leadDialogOpen} onOpenChange={setLeadDialogOpen}>
