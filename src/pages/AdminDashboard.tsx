@@ -54,6 +54,7 @@ const BentoCard = ({ children, className, delay = 0 }: { children: React.ReactNo
 )
 
 export default function AdminDashboard() {
+    console.log('AdminDashboard rendering')
     const { agencies, team, leads } = useAppStore()
     const [hoveredAgency, setHoveredAgency] = useState<string | null>(null)
 
