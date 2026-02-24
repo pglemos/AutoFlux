@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider, useAuth } from '@/components/auth-provider'
@@ -33,7 +34,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
   const location = useLocation()
 
+  console.log('ProtectedRoute:', { loading, hasUser: !!user, path: location.pathname })
+
   if (loading) {
+    console.log('ProtectedRoute: Rendering Spinner')
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -42,13 +46,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
+    console.log('ProtectedRoute: No user, redirecting to login')
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  console.log('ProtectedRoute: rendering children')
   return <>{children}</>
 }
 
 export default function App() {
+  console.log('App Rendering [INIT]')
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="autoperf-theme">
       <AuthProvider>
