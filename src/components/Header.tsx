@@ -48,9 +48,9 @@ export function Header() {
         <header className="h-16 hyper-glass sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 transition-all border-b-0 sm:rounded-b-3xl sm:mx-2 sm:mt-2 shadow-sm">
             <div className="flex items-center flex-1 gap-4">
                 {isMobile && (
-                    <div className="flex flex-col">
-                        <span className="font-black text-xs tracking-[0.3em] uppercase text-[#0F172A] dark:text-off-white">LUZ DIREÇÃO</span>
-                        <span className="text-[8px] font-bold text-[#94785C] tracking-[0.2em] uppercase opacity-80">Consultoria</span>
+                    <div className="flex flex-col translate-y-1">
+                        <span className="text-3xl font-signature leading-none pr-1">Luz Direção</span>
+                        <span className="text-[7px] font-black text-electric-blue tracking-[0.3em] uppercase mt-0 opacity-80 pl-1">Consultoria</span>
                     </div>
                 )}
                 <div className="relative max-w-md w-full hidden sm:block">

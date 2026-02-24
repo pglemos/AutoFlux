@@ -291,7 +291,7 @@ export default function Login() {
 
                     {/* Sign Up Link */}
                     <div className="text-center text-xs text-slate-400 mt-10">
-                        &copy; {new Date().getFullYear()} LUZ DIREÇÃO CONSULTORIA. Todos os direitos reservados.
+                        &copy; {new Date().getFullYear()} AutoGestão. Todos os direitos reservados.
                     </div>
                 </div>
 

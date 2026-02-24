@@ -129,8 +129,8 @@ export default function Dashboard() {
                         </CardHeader>
                         <CardContent className="flex-1">
                             <ChartContainer config={{ vendas: { label: 'Vendas', color: 'var(--electric-blue)' } }}>
-                                <div className="h-[300px] w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                <div className="h-[300px] w-full min-w-0">
+                                    <ResponsiveContainer width="99%" height={300}>
                                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                             <defs>
                                                 <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
@@ -168,8 +168,8 @@ export default function Dashboard() {
                         </CardHeader>
                         <CardContent className="flex-1 min-h-[250px]">
                             <ChartContainer config={{ value: { label: 'Volume', color: 'var(--mars-orange)' } }}>
-                                <div className="h-full w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                <div className="h-[250px] w-full min-w-0">
+                                    <ResponsiveContainer width="99%" height={250}>
                                         <BarChart data={funnelLeakData} layout="vertical" margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                             <XAxis type="number" hide />
                                             <YAxis dataKey="stage" type="category" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontWeight: 600, fontSize: 10 }} width={60} />
@@ -229,9 +229,9 @@ export default function Dashboard() {
                     </div>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-pure-black dark:text-off-white leading-[1.1]">
                         Sintetizando fluidez <span className="text-electric-blue">orgânica</span> com rigidez <span className="text-mars-orange">digital</span>.
-                        <div className="flex items-center gap-4 mt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-500">
-                            <div className="h-[1px] w-8 bg-black/20 dark:bg-white/20"></div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">LUZ DIREÇÃO CONSULTORIA</span>
+                        <div className="flex items-center gap-4 mt-8 opacity-60 group hover:opacity-100 transition-all duration-500">
+                            <div className="h-[1px] w-12 bg-black/20 dark:bg-white/20"></div>
+                            <span className="text-5xl font-signature font-normal tracking-normal text-electric-blue/80 dark:text-off-white/80 pr-4 rotate-[-4deg]">Luz Direção Consultoria</span>
                         </div>
                     </h1>
                     <div className="flex flex-wrap gap-3 mt-6">

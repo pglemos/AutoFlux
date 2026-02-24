@@ -89,34 +89,34 @@ export default function Settings() {
         <div className="space-y-8 max-w-5xl mx-auto pb-12">
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-corporate-navy"></div>
+                    <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
                     <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">SISTEMA</span>
                 </div>
                 <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
-                    <span className="text-corporate-navy">Configurações</span>
+                    <span className="text-electric-blue">Configurações</span>
                 </h1>
-                <p className="text-muted-foreground font-medium mt-1">Gerencie preferências, usuários e permissões do LUZ DIREÇÃO.</p>
+                <p className="text-muted-foreground font-medium mt-1">Gerencie preferências, usuários e permissões do AutoGestão.</p>
             </div>
 
             <Tabs defaultValue="general" className="w-full">
                 <TabsList className="bg-white/50 dark:bg-black/50 p-1 rounded-2xl border border-white/30 dark:border-white/5 mb-8 backdrop-blur-xl">
-                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <SettingsIcon className="w-4 h-4 mr-2" />Geral
                     </TabsTrigger>
-                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         {role === 'Admin' ? <Building2 className="w-4 h-4 mr-2" /> : <Users className="w-4 h-4 mr-2" />}
                         {role === 'Admin' ? 'Agência' : 'Usuários'}
                     </TabsTrigger>
-                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <ShieldCheck className="w-4 h-4 mr-2" />Permissões
                     </TabsTrigger>
-                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Plug className="w-4 h-4 mr-2" />Integrações
                     </TabsTrigger>
-                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Target className="w-4 h-4 mr-2" />Metas
                     </TabsTrigger>
-                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:shadow-sm px-6">
+                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-[#111] data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <FileSignature className="w-4 h-4 mr-2" />Comissões
                     </TabsTrigger>
                 </TabsList>
@@ -131,10 +131,10 @@ export default function Settings() {
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 group-hover:bg-electric-blue/5 transition-colors">
                                 <div>
-                                    <Label className="font-bold text-sm">Modo Escuro</Label>
+                                    <Label className="font-bold text-sm dark:text-white">Modo Escuro</Label>
                                     <p className="text-xs text-muted-foreground font-medium mt-0.5">Alternar entre temas claro e escuro</p>
                                 </div>
-                                <Switch checked={theme === 'dark'} onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} />
+                                <Switch checked={theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)} onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} />
                             </div>
                         </CardContent>
                     </Card>
@@ -148,7 +148,7 @@ export default function Settings() {
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 group-hover:bg-mars-orange/5 transition-colors">
                                 <div>
-                                    <Label className="font-bold text-sm">Perfil Ativo de Teste</Label>
+                                    <Label className="font-bold text-sm dark:text-white">Perfil Ativo de Teste</Label>
                                     <p className="text-xs text-muted-foreground font-medium mt-0.5">Simular diferentes perfis de acesso</p>
                                 </div>
                                 <Select value={role} onValueChange={(v) => { setRole(v as Role); toast({ title: 'Perfil Alterado', description: `Agora você é: ${v}` }) }}>
@@ -170,13 +170,13 @@ export default function Settings() {
                     <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
-                                <Zap className="w-5 h-5 text-corporate-navy" /> Regras de Negócio
+                                <Zap className="w-5 h-5 text-electric-blue" /> Regras de Negócio
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 group-hover:bg-electric-blue/5 transition-colors">
                                 <div>
-                                    <Label className="font-bold text-sm">Chained Funnel (Funil Encadeado)</Label>
+                                    <Label className="font-bold text-sm dark:text-white">Chained Funnel (Funil Encadeado)</Label>
                                     <p className="text-xs text-muted-foreground font-medium mt-0.5">Impede que leads pulem etapas do funil</p>
                                 </div>
                                 <Switch checked={chainedFunnel} onCheckedChange={(v) => { setChainedFunnel(v); toast({ title: v ? 'Funil Encadeado Ativado' : 'Funil Encadeado Desativado' }) }} />
@@ -206,7 +206,7 @@ export default function Settings() {
                                             className={cn(
                                                 "flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all group",
                                                 selectedAgencyId === agency.id
-                                                    ? "bg-corporate-navy text-white shadow-lg"
+                                                    ? "bg-electric-blue text-white shadow-lg"
                                                     : "hover:bg-black/5 dark:hover:bg-white/5"
                                             )}
                                         >
@@ -264,7 +264,7 @@ export default function Settings() {
                                                 </CardTitle>
                                                 <CardDescription className="font-medium">Gerencie os membros desta agência.</CardDescription>
                                             </div>
-                                            <Button onClick={() => setUserOpen(true)} className="rounded-xl font-bold bg-corporate-navy text-white shadow-lg hover:bg-corporate-navy/90">
+                                            <Button onClick={() => setUserOpen(true)} className="rounded-xl font-bold bg-electric-blue text-white shadow-lg hover:bg-electric-blue/90">
                                                 <UserPlus2 className="w-4 h-4 mr-2" /> Novo Usuário
                                             </Button>
                                         </CardHeader>
@@ -541,14 +541,14 @@ export default function Settings() {
                                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2">Agendas Externas</h4>
                                 <div className="flex items-center justify-between p-5 rounded-3xl bg-black/5 dark:bg-white/5 group hover:bg-electric-blue/5 transition-all">
                                     <div>
-                                        <Label className="font-bold text-sm">Google Calendar</Label>
+                                        <Label className="font-bold text-sm dark:text-white">Google Calendar</Label>
                                         <p className="text-[10px] text-muted-foreground font-medium">Sincronizar visitas automaticamente</p>
                                     </div>
                                     <Switch checked={calendarIntegrations.google} onCheckedChange={(v) => setCalendarIntegration('google', v)} />
                                 </div>
                                 <div className="flex items-center justify-between p-5 rounded-3xl bg-black/5 dark:bg-white/5 group hover:bg-electric-blue/5 transition-all">
                                     <div>
-                                        <Label className="font-bold text-sm">Outlook Calendar</Label>
+                                        <Label className="font-bold text-sm dark:text-white">Outlook Calendar</Label>
                                         <p className="text-[10px] text-muted-foreground font-medium">Integração com ecossistema Microsoft</p>
                                     </div>
                                     <Switch checked={calendarIntegrations.outlook} onCheckedChange={(v) => setCalendarIntegration('outlook', v)} />

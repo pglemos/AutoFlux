@@ -85,9 +85,9 @@ export function Navigation() {
                     <div className="w-10 h-10 rounded-2xl bg-[#0F172A] dark:bg-[#94785C] flex items-center justify-center shadow-2xl shadow-black/20 text-white transition-transform hover:scale-105 duration-300">
                         <Car className="h-6 w-6" />
                     </div>
-                    <div className="flex flex-col">
-                        <span className="text-lg font-black tracking-[0.2em] uppercase leading-none">LUZ DIREÇÃO</span>
-                        <span className="text-[9px] font-black text-[#94785C] tracking-[0.3em] uppercase mt-1 opacity-80">Consultoria</span>
+                    <div className="flex flex-col translate-y-1">
+                        <span className="text-4xl font-signature leading-none pr-2">Luz Direção</span>
+                        <span className="text-[8px] font-black text-electric-blue tracking-[0.3em] uppercase mt-0 opacity-80 pl-2">Consultoria</span>
                     </div>
                 </div>
             </div>

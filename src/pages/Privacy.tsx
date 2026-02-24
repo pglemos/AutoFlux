@@ -11,7 +11,7 @@ export default function Privacy() {
         {
             icon: FileText,
             title: "1. Introdução e Base Legal (LGPD)",
-            content: "A LUZ DIREÇÃO CONSULTORIA ('Operadora' ou 'Controladora', dependendo do contexto) está estritamente comprometida com a proteção e a privacidade dos dados de seus usuários e clientes. Esta Política de Privacidade foi elaborada em total conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD), o Marco Civil da Internet (Lei nº 12.965/2014) e as normativas de proteção de dados aplicáveis. O objetivo deste documento é detalhar como coletamos, processamos, armazenamos e protegemos seus dados dentro da nossa infraestrutura."
+            content: "A AutoGestão ('Operadora' ou 'Controladora', dependendo do contexto) está estritamente comprometida com a proteção e a privacidade dos dados de seus usuários e clientes. Esta Política de Privacidade foi elaborada em total conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD), o Marco Civil da Internet (Lei nº 12.965/2014) e as normativas de proteção de dados aplicáveis. O objetivo deste documento é detalhar como coletamos, processamos, armazenamos e protegemos seus dados dentro da nossa infraestrutura."
         },
         {
             icon: Database,
