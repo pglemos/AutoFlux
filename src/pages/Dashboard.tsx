@@ -56,14 +56,12 @@ export default function Dashboard() {
     // Filter data based on active agency (if Admin)
     const filteredLeads = useMemo(() => {
         if (role !== 'Admin' || !activeAgencyId) return leads
-        // Placeholder for agency-based lead filtering
-        return leads
+        return leads.filter(l => l.agencyId === activeAgencyId)
     }, [leads, activeAgencyId, role])
 
     const filteredTeam = useMemo(() => {
         if (role !== 'Admin' || !activeAgencyId) return team
-        // Placeholder for agency-based team filtering
-        return team
+        return team.filter(m => m.agencyId === activeAgencyId)
     }, [team, activeAgencyId, role])
 
     const toggleWidget = (id: string) => {
@@ -82,7 +80,7 @@ export default function Dashboard() {
             const progress = teamGoal > 0 ? Math.min((currentSales / teamGoal) * 100, 100) : 0
             return (
                 <div key={id} className="relative group">
-                    <Card className="border-none shadow-sm transition-all duration-300 hover:shadow-md h-full bg-white dark:bg-[#111] rounded-3xl">
+                    <Card className="border-none shadow-sm transition-all duration-300 hover:shadow-md h-full bg-white dark:bg-black rounded-3xl">
                         <CardContent className="p-4 flex flex-col justify-between h-full">
                             <p className="text-[9px] font-bold text-muted-foreground mb-2 uppercase tracking-widest truncate">{widget.title}</p>
                             <div className="mt-auto flex flex-col gap-2">
@@ -219,12 +217,16 @@ export default function Dashboard() {
         <div className="space-y-8 max-w-7xl mx-auto pb-12">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-12">
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-mars-orange animate-pulse"></div>
-                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">VERSÃO DE AVALIAÇÃO</span>
+                    <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#94785C] shadow-[0_0_8px_#94785C]"></div>
+                        <span className="text-[9px] font-black tracking-[0.3em] text-[#94785C] uppercase">Terminal de Estratégia</span>
                     </div>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-pure-black dark:text-off-white leading-[1.1]">
                         Sintetizando fluidez <span className="text-electric-blue">orgânica</span> com rigidez <span className="text-mars-orange">digital</span>.
+                        <div className="flex items-center gap-4 mt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-500">
+                            <div className="h-[1px] w-8 bg-black/20 dark:bg-white/20"></div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em]">LUZ DIREÇÃO CONSULTORIA</span>
+                        </div>
                     </h1>
                     <div className="flex flex-wrap gap-3 mt-6">
                         <Badge variant="outline" className="rounded-lg font-mono text-[10px] uppercase text-muted-foreground bg-white/50 dark:bg-black/50 border-[0.5px] px-3 py-1 font-bold">
@@ -279,7 +281,7 @@ function KpiCard({ title, value, trend, isPercentage, reverseColor = false, high
     const isPositiveTrend = trend > 0
     const showGood = reverseColor ? !isPositiveTrend : isPositiveTrend
     return (
-        <Card className={cn('border-none shadow-sm transition-all duration-300 hover:shadow-md h-full', highlight ? 'bg-electric-blue/[0.03] dark:bg-electric-blue/10 ring-1 ring-inset ring-electric-blue/20' : 'bg-white dark:bg-[#111]', 'rounded-3xl')}>
+        <Card className={cn('border-none shadow-sm transition-all duration-300 hover:shadow-md h-full', highlight ? 'bg-electric-blue/[0.03] dark:bg-electric-blue/10 ring-1 ring-inset ring-electric-blue/20' : 'bg-white dark:bg-black', 'rounded-3xl')}>
             <CardContent className="p-4 flex flex-col justify-between h-full">
                 <p className="text-[9px] font-bold text-muted-foreground mb-2 uppercase tracking-widest truncate">{title}</p>
                 <div className="flex items-end justify-between mt-auto gap-2">

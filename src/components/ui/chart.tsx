@@ -44,5 +44,7 @@ function ChartTooltipContent({ active, payload, label }: any) {
     )
 }
 
-export { ChartContainer, ChartTooltipContent }
+import { Tooltip as ChartTooltip } from 'recharts'
+
+export { ChartContainer, ChartTooltip, ChartTooltipContent }
 export type { ChartConfig }

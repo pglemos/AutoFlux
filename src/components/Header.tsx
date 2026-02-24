@@ -48,8 +48,9 @@ export function Header() {
         <header className="h-16 hyper-glass sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 transition-all border-b-0 sm:rounded-b-3xl sm:mx-2 sm:mt-2 shadow-sm">
             <div className="flex items-center flex-1 gap-4">
                 {isMobile && (
-                    <div className="font-extrabold text-lg text-pure-black dark:text-off-white tracking-tight">
-                        AutoPerf
+                    <div className="flex flex-col">
+                        <span className="font-black text-xs tracking-[0.3em] uppercase text-[#0F172A] dark:text-off-white">LUZ DIREÇÃO</span>
+                        <span className="text-[8px] font-bold text-[#94785C] tracking-[0.2em] uppercase opacity-80">Consultoria</span>
                     </div>
                 )}
                 <div className="relative max-w-md w-full hidden sm:block">
@@ -105,8 +106,8 @@ export function Header() {
 
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
-                        <Button className="hidden sm:flex bg-electric-blue text-white hover:bg-electric-blue/90 rounded-full px-6 shadow-lg shadow-electric-blue/20 transition-transform hover:scale-105 active:scale-95 duration-200 font-bold">
-                            <Zap className="w-4 h-4 mr-2" /> Ação Rápida
+                        <Button className="hidden sm:flex bg-[#0F172A] dark:bg-[#94785C] text-white hover:opacity-90 rounded-full px-6 shadow-2xl transition-all hover:scale-105 active:scale-95 duration-200 font-black text-[10px] uppercase tracking-widest border border-white/10">
+                            <Zap className="w-3.5 h-3.5 mr-2" /> Ação Estratégica
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">

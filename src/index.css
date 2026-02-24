@@ -6,7 +6,7 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-electric-blue: #2563EB;
   --color-mars-orange: #FF4500;
-  --color-pure-black: #050505;
+  --color-pure-black: #000000;
   --color-off-white: #F5F5F7;
   --color-porcelain: #F5F5F7;
 }
@@ -19,9 +19,9 @@
   --card-foreground: 0 0% 3.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 3.9%;
-  --primary: 221.2 83.2% 53.3%;
+  --primary: 222.2 47.4% 11.2%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
+  --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
   --muted: 210 40% 96%;
   --muted-foreground: 215.4 16.3% 46.9%;
@@ -36,11 +36,11 @@
 }
 
 .dark {
-  --background: 0 0% 4%;
+  --background: 0 0% 0%;
   --foreground: 0 0% 98%;
-  --card: 0 0% 6%;
+  --card: 0 0% 0%;
   --card-foreground: 0 0% 98%;
-  --popover: 0 0% 6%;
+  --popover: 0 0% 0%;
   --popover-foreground: 0 0% 98%;
   --primary: 217.2 91.2% 59.8%;
   --primary-foreground: 222.2 47.4% 11.2%;
@@ -78,7 +78,7 @@ body {
 }
 
 .dark .hyper-glass {
-  background: rgba(17, 17, 17, 0.7);
+  background: rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
 }
@@ -99,6 +99,7 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -109,8 +110,15 @@ body {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {

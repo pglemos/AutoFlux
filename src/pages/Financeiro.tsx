@@ -46,7 +46,7 @@ export default function Financeiro() {
                     <p className="text-muted-foreground font-medium mt-1">Visão holística de margens, comissões e saúde do fluxo de caixa.</p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="rounded-2xl border-none h-12 px-6 font-bold bg-white dark:bg-[#111] shadow-sm">
+                    <Button variant="outline" className="rounded-2xl border-none h-12 px-6 font-bold bg-white dark:bg-[black] shadow-sm">
                         <Calendar className="w-4 h-4 mr-2" /> Fevereiro 2024
                     </Button>
                     <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-12 px-8 font-bold shadow-lg shadow-emerald-500/20">
@@ -57,7 +57,7 @@ export default function Financeiro() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    <Card className="border-none shadow-xl bg-white dark:bg-[#111] rounded-[2.5rem] overflow-hidden relative group">
+                    <Card className="border-none shadow-xl bg-white dark:bg-[black] rounded-[2.5rem] overflow-hidden relative group">
                         <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 rounded-full blur-[50px] -mr-16 -mt-16 pointer-events-none group-hover:bg-emerald-500/10 transition-colors"></div>
                         <CardContent className="p-8 relative z-10">
                             <div className="flex items-center justify-between mb-6">
@@ -70,7 +70,7 @@ export default function Financeiro() {
                     </Card>
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                    <Card className="border-none shadow-xl bg-white dark:bg-[#111] rounded-[2.5rem] overflow-hidden relative group">
+                    <Card className="border-none shadow-xl bg-white dark:bg-[black] rounded-[2.5rem] overflow-hidden relative group">
                         <div className="absolute top-0 right-0 w-40 h-40 bg-mars-orange/5 rounded-full blur-[50px] -mr-16 -mt-16 pointer-events-none group-hover:bg-mars-orange/10 transition-colors"></div>
                         <CardContent className="p-8 relative z-10">
                             <div className="flex items-center justify-between mb-6">
@@ -98,7 +98,7 @@ export default function Financeiro() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-[3rem] overflow-hidden">
+                <Card className="border-none bg-white dark:bg-[black] shadow-xl rounded-[3rem] overflow-hidden">
                     <CardHeader className="p-8">
                         <CardTitle className="text-xl font-black text-pure-black dark:text-off-white">Fluxo de Caixa Mensal</CardTitle>
                         <CardDescription className="font-bold text-muted-foreground">Monitoramento de entradas vs saídas em tempo real.</CardDescription>
@@ -125,7 +125,7 @@ export default function Financeiro() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-[3rem] overflow-hidden">
+                <Card className="border-none bg-white dark:bg-[black] shadow-xl rounded-[3rem] overflow-hidden">
                     <CardHeader className="p-8 border-b border-black/5 dark:border-white/5 pb-8">
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-black/5 dark:bg-white/10 rounded-[1.5rem]"><Receipt className="h-6 w-6 text-pure-black dark:text-off-white" /></div>
@@ -160,7 +160,7 @@ export default function Financeiro() {
                 </Card>
             </div>
 
-            <Card className="border-none bg-white dark:bg-[#111] shadow-2xl rounded-[3rem] overflow-hidden mt-12 bg-gradient-to-br from-white to-black/5 dark:from-[#111] dark:to-white/5">
+            <Card className="border-none bg-white dark:bg-[black] shadow-2xl rounded-[3rem] overflow-hidden mt-12 bg-gradient-to-br from-white to-black/5 dark:from-[black] dark:to-white/5">
                 <CardHeader className="p-10 border-b border-black/5 dark:border-white/10">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-5">

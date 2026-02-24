@@ -106,9 +106,7 @@ export default function Funnel() {
 
     // Filter by active agency if Admin
     if (role === 'Admin' && activeAgencyId) {
-      const seller = team.find(t => t.id === l.sellerId)
-      // Note: Assuming TeamMember will have agencyId soon, for now just a placeholder
-      // if (seller?.agencyId !== activeAgencyId) return false
+      if (l.agencyId !== activeAgencyId) return false
     }
 
     return true
@@ -257,7 +255,7 @@ function LeadCard({ lead, sellerName, onLost, onEdit, onDelete, isDragging }: {
   lead: Lead; sellerName?: string; onLost: () => void; onEdit: () => void; onDelete: () => void; isDragging?: boolean
 }) {
   return (
-    <Card className={cn('shadow-elevation transition-all duration-300 group rounded-[2rem] overflow-hidden relative border-none bg-white dark:bg-[#0a0a0a]',
+    <Card className={cn('shadow-elevation transition-all duration-300 group rounded-[2rem] overflow-hidden relative border-none bg-white dark:bg-black',
       isDragging ? 'shadow-2xl scale-105 border-electric-blue/30 ring-2 ring-electric-blue/20' : '',
       lead.stagnantDays && lead.stagnantDays >= 2 ? 'ring-2 ring-mars-orange/50' : '')}>
       <CardContent className="p-5">

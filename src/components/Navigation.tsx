@@ -80,12 +80,15 @@ export function Navigation() {
 
     return (
         <div className="w-64 bg-porcelain dark:bg-pure-black border-r border-black/5 dark:border-white/5 flex flex-col h-screen fixed left-0 top-0 z-50">
-            <div className="h-24 flex items-center px-8">
-                <div className="flex items-center gap-3 text-pure-black dark:text-off-white font-extrabold text-2xl tracking-tighter">
-                    <div className="w-8 h-8 rounded-xl bg-electric-blue flex items-center justify-center shadow-lg shadow-electric-blue/30 text-white">
-                        <Car className="h-5 w-5" />
+            <div className="h-28 flex flex-col justify-center px-8 border-b border-black/5 dark:border-white/5 bg-white/50 dark:bg-black/20 backdrop-blur-sm">
+                <div className="flex items-center gap-3 text-pure-black dark:text-off-white">
+                    <div className="w-10 h-10 rounded-2xl bg-[#0F172A] dark:bg-[#94785C] flex items-center justify-center shadow-2xl shadow-black/20 text-white transition-transform hover:scale-105 duration-300">
+                        <Car className="h-6 w-6" />
                     </div>
-                    <span>AutoPerf</span>
+                    <div className="flex flex-col">
+                        <span className="text-lg font-black tracking-[0.2em] uppercase leading-none">LUZ DIREÇÃO</span>
+                        <span className="text-[9px] font-black text-[#94785C] tracking-[0.3em] uppercase mt-1 opacity-80">Consultoria</span>
+                    </div>
                 </div>
             </div>
             <nav className="flex-1 px-4 space-y-1 overflow-y-auto mt-4 pb-4">

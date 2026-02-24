@@ -126,6 +126,7 @@ export const mockInventory = [
         marketPrice: 840000,
         suggestedPrice: 845000,
         competitivenessScore: 92,
+        agencyId: 'a1',
     },
     {
         id: 'STK-002',
@@ -140,6 +141,7 @@ export const mockInventory = [
         marketPrice: 600000,
         suggestedPrice: 590000,
         competitivenessScore: 78,
+        agencyId: 'a1',
     },
     {
         id: 'STK-003',
@@ -154,6 +156,7 @@ export const mockInventory = [
         marketPrice: 1020000,
         suggestedPrice: 1010000,
         competitivenessScore: 65,
+        agencyId: 'a2',
     },
     {
         id: 'STK-004',
@@ -168,6 +171,7 @@ export const mockInventory = [
         marketPrice: 685000,
         suggestedPrice: 685000,
         competitivenessScore: 95,
+        agencyId: 'a1',
     },
     {
         id: 'STK-005',
@@ -182,6 +186,7 @@ export const mockInventory = [
         marketPrice: 500000,
         suggestedPrice: 495000,
         competitivenessScore: 60,
+        agencyId: 'a2',
     },
 ]
 
@@ -503,4 +508,21 @@ export const mockCategorySales = [
     { category: 'Sports', value: 3800000 },
     { category: 'Sedan Premium', value: 2900000 },
     { category: 'Electric', value: 1800000 },
+]
+
+export const adminSystemPerformance = [
+    { month: 'Set', revenue: 14500000, leads: 3400, activeAgencies: 18 },
+    { month: 'Out', revenue: 16800000, leads: 4100, activeAgencies: 20 },
+    { month: 'Nov', revenue: 21500000, leads: 5200, activeAgencies: 22 },
+    { month: 'Dez', revenue: 28400000, leads: 6800, activeAgencies: 25 },
+    { month: 'Jan', revenue: 22100000, leads: 5800, activeAgencies: 25 },
+    { month: 'Fev', revenue: 26500000, leads: 6200, activeAgencies: 28 },
+]
+
+export const adminAgencyRanks = [
+    { id: 'A1', name: 'Matriz SP', revenue: 8500000, growth: 12.5, score: 98 },
+    { id: 'A2', name: 'Filial RJ', revenue: 6200000, growth: 8.2, score: 91 },
+    { id: 'A3', name: 'Curitiba Premium', revenue: 4800000, growth: 15.4, score: 88 },
+    { id: 'A4', name: 'BH Motors', revenue: 3900000, growth: -2.1, score: 82 },
+    { id: 'A5', name: 'Brasília Lux', revenue: 3100000, growth: 5.5, score: 79 },
 ]

@@ -67,6 +67,7 @@ export interface TeamMember {
     execution: number
     sales: number
     avatar: string
+    agencyId?: string
 }
 
 export type LeadStage =
@@ -91,6 +92,7 @@ export interface Lead {
     lossReason?: string
     stagnantDays?: number
     sellerId?: string
+    agencyId?: string
 }
 
 export interface AppState {
@@ -209,17 +211,22 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     ])
 
     const [team, setTeam] = useState<TeamMember[]>([
-        { id: 'T-01', name: 'Alex', role: 'Closer', conversion: 18.5, execution: 92, sales: 6, avatar: 'male&seed=1' },
-        { id: 'T-02', name: 'David', role: 'Closer', conversion: 22.1, execution: 98, sales: 5, avatar: 'male&seed=2' },
-        { id: 'T-03', name: 'Leandro', role: 'SDR', conversion: 12.0, execution: 85, sales: 4, avatar: 'male&seed=3' },
-        { id: 'T-04', name: 'Venda Loja', role: 'Loja', conversion: 15.3, execution: 88, sales: 5, avatar: 'female&seed=4' },
+        { id: 'T-01', name: 'Alex', role: 'Closer', conversion: 18.5, execution: 92, sales: 6, avatar: 'male&seed=1', agencyId: 'a1' },
+        { id: 'T-02', name: 'David', role: 'Closer', conversion: 22.1, execution: 98, sales: 5, avatar: 'male&seed=2', agencyId: 'a1' },
+        { id: 'T-03', name: 'Leandro', role: 'SDR', conversion: 12.0, execution: 85, sales: 4, avatar: 'male&seed=3', agencyId: 'a2' },
+        { id: 'T-04', name: 'Venda Loja', role: 'Loja', conversion: 15.3, execution: 88, sales: 5, avatar: 'female&seed=4', agencyId: 'a2' },
     ])
     const [leads, setLeads] = useState<Lead[]>([
-        { id: 'L-101', name: 'Carlos Silva', car: 'Porsche 911', stage: 'Lead', slaMinutes: 5, source: 'Internet', value: 850000, score: 92, sellerId: 'T-01' },
-        { id: 'L-102', name: 'Ana Oliveira', car: 'BMW X5', stage: 'Contato', slaMinutes: 15, source: 'Internet', value: 420000, score: 85, sellerId: 'T-02' },
-        { id: 'L-103', name: 'Roberto Carlos', car: 'Audi Q3', stage: 'Agendamento', slaMinutes: 45, source: 'Porta', value: 280000, score: 60, sellerId: 'T-01' },
-        { id: 'L-104', name: 'Juliana Costa', car: 'Mercedes C300', stage: 'Visita', slaMinutes: 120, source: 'Internet', value: 350000, score: 78, sellerId: 'T-03' },
-        { id: 'L-105', name: 'Fernando Lima', car: 'Volvo XC60', stage: 'Proposta', slaMinutes: 300, source: 'Carteira', value: 390000, score: 88, sellerId: 'T-02' },
+        { id: 'L-101', name: 'Carlos Silva', car: 'Porsche 911', stage: 'Lead', slaMinutes: 5, source: 'Internet', value: 850000, score: 92, sellerId: 'T-01', agencyId: 'a1' },
+        { id: 'L-102', name: 'Ana Oliveira', car: 'BMW X5', stage: 'Contato', slaMinutes: 15, source: 'Internet', value: 420000, score: 85, sellerId: 'T-02', agencyId: 'a1' },
+        { id: 'L-103', name: 'Roberto Carlos', car: 'Audi Q3', stage: 'Agendamento', slaMinutes: 45, source: 'Porta', value: 280000, score: 60, sellerId: 'T-01', agencyId: 'a1' },
+        { id: 'L-104', name: 'Juliana Costa', car: 'Mercedes C300', stage: 'Visita', slaMinutes: 120, source: 'Internet', value: 350000, score: 78, sellerId: 'T-03', agencyId: 'a2' },
+        { id: 'L-105', name: 'Fernando Lima', car: 'Volvo XC60', stage: 'Proposta', slaMinutes: 300, source: 'Carteira', value: 390000, score: 88, sellerId: 'T-02', agencyId: 'a1' },
+    ])
+    const [inventory, setInventory] = useState([
+        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1' },
+        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1' },
+        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2' },
     ])
 
     const [permissions, setPermissions] = useState<Record<string, string[]>>({

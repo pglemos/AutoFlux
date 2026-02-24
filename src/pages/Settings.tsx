@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Settings as SettingsIcon, Moon, Sun, Shield, Users, Plug, Link2, Zap, UserPlus, ShieldCheck, Target, FileSignature } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -36,6 +36,30 @@ export default function Settings() {
     const [newRole, setNewRole] = useState<Role>('Seller')
     const [newAgencyId, setNewAgencyId] = useState<string>('')
 
+    const [whatsappStatus, setWhatsappStatus] = useState<{ connected: boolean; qr: string | null }>({ connected: false, qr: null })
+    const [pollingWhatsApp, setPollingWhatsApp] = useState(false)
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout
+        if (pollingWhatsApp || !whatsappStatus.connected) {
+            interval = setInterval(async () => {
+                try {
+                    const res = await fetch('http://localhost:3001/api/whatsapp/status')
+                    if (res.ok) {
+                        const data = await res.json()
+                        setWhatsappStatus(data)
+                        if (data.connected && !whatsappStatus.connected) {
+                            toast({ title: 'WhatsApp Conectado!', description: 'O dispositivo foi pareado com sucesso.' })
+                        }
+                    }
+                } catch (error) {
+                    console.error('WhatsApp API indisponível', error)
+                }
+            }, 3000)
+        }
+        return () => clearInterval(interval)
+    }, [pollingWhatsApp, whatsappStatus.connected])
+
     const { agencies, addAgency, updateAgency, deleteAgency } = useAppStore()
 
     const handleAddUser = () => {
@@ -65,13 +89,13 @@ export default function Settings() {
         <div className="space-y-8 max-w-5xl mx-auto pb-12">
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
+                    <div className="w-2 h-2 rounded-full bg-corporate-navy"></div>
                     <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">SISTEMA</span>
                 </div>
                 <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
-                    <span className="text-electric-blue">Configurações</span>
+                    <span className="text-corporate-navy">Configurações</span>
                 </h1>
-                <p className="text-muted-foreground font-medium mt-1">Gerencie preferências, usuários e permissões do AutoGestão.</p>
+                <p className="text-muted-foreground font-medium mt-1">Gerencie preferências, usuários e permissões do LUZ DIREÇÃO.</p>
             </div>
 
             <Tabs defaultValue="general" className="w-full">
@@ -118,7 +142,7 @@ export default function Settings() {
                     <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-mars-orange" /> Controle de Acesso (RBAC)
+                                <Shield className="w-5 h-5 text-slate-500" /> Controle de Acesso (RBAC)
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -146,7 +170,7 @@ export default function Settings() {
                     <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
                             <CardTitle className="text-lg font-extrabold flex items-center gap-2">
-                                <Zap className="w-5 h-5 text-electric-blue" /> Regras de Negócio
+                                <Zap className="w-5 h-5 text-corporate-navy" /> Regras de Negócio
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -182,7 +206,7 @@ export default function Settings() {
                                             className={cn(
                                                 "flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all group",
                                                 selectedAgencyId === agency.id
-                                                    ? "bg-electric-blue text-white shadow-lg"
+                                                    ? "bg-corporate-navy text-white shadow-lg"
                                                     : "hover:bg-black/5 dark:hover:bg-white/5"
                                             )}
                                         >
@@ -240,7 +264,7 @@ export default function Settings() {
                                                 </CardTitle>
                                                 <CardDescription className="font-medium">Gerencie os membros desta agência.</CardDescription>
                                             </div>
-                                            <Button onClick={() => setUserOpen(true)} className="rounded-xl font-bold bg-electric-blue text-white shadow-lg hover:bg-electric-blue/90">
+                                            <Button onClick={() => setUserOpen(true)} className="rounded-xl font-bold bg-corporate-navy text-white shadow-lg hover:bg-corporate-navy/90">
                                                 <UserPlus2 className="w-4 h-4 mr-2" /> Novo Usuário
                                             </Button>
                                         </CardHeader>
@@ -462,6 +486,43 @@ export default function Settings() {
                             <CardDescription className="font-medium">Integrações ativas e serviços de terceiros.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            {/* WhatsApp Integration Panel */}
+                            <div className="flex flex-col p-5 rounded-3xl bg-black/5 dark:bg-white/5 group transition-all border border-transparent hover:border-green-500/20">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className={cn('w-2 h-2 rounded-full', whatsappStatus.connected ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-400 animate-pulse')}></div>
+                                        <div>
+                                            <span className="font-extrabold text-sm text-pure-black dark:text-off-white flex items-center gap-2">
+                                                WhatsApp Web
+                                            </span>
+                                            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                                                {whatsappStatus.connected ? 'Sessão Ativa' : 'Aguardando QR Code'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Badge variant={whatsappStatus.connected ? 'default' : 'secondary'} className={cn("font-bold text-[10px] uppercase border-none px-3", whatsappStatus.connected ? "bg-green-500/10 text-green-500" : "bg-black/10 dark:bg-white/10 text-muted-foreground")}>
+                                        {whatsappStatus.connected ? 'Conectado' : 'Desconectado'}
+                                    </Badge>
+                                </div>
+
+                                {!whatsappStatus.connected && (
+                                    <div className="mt-2 p-4 bg-white dark:bg-black/40 rounded-2xl flex flex-col items-center justify-center border border-dashed border-black/10 dark:border-white/10">
+                                        {whatsappStatus.qr ? (
+                                            <>
+                                                <img src={whatsappStatus.qr} alt="WhatsApp QR Code" className="w-48 h-48 rounded-lg shadow-sm mb-4" />
+                                                <p className="text-xs font-bold text-muted-foreground text-center">Escaneie o QR Code com seu WhatsApp para conectar.</p>
+                                            </>
+                                        ) : (
+                                            <div className="py-8 text-center flex flex-col items-center">
+                                                <Plug className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                                                <p className="text-xs font-bold text-muted-foreground">Iniciando servidor do WhatsApp...</p>
+                                                <Button variant="link" size="sm" onClick={() => setPollingWhatsApp(true)} className="text-[10px] mt-2 h-auto py-0">Tentar Novamente</Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
                             {mockIntegrations.map((int) => (
                                 <div key={int.name} className="flex items-center justify-between p-5 rounded-3xl bg-black/5 dark:bg-white/5 group hover:bg-electric-blue/5 transition-all">
                                     <div className="flex items-center gap-4">

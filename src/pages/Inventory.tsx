@@ -46,8 +46,7 @@ export default function Inventory() {
 
         // Filter by active agency if Admin
         if (role === 'Admin' && activeAgencyId) {
-            // Note: Assuming inventory item will have agencyId soon
-            // if (item.agencyId !== activeAgencyId) return false
+            if (item.agencyId !== activeAgencyId) return false
         }
 
         return true
@@ -94,7 +93,7 @@ export default function Inventory() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                     >
-                        <Card className="border-none shadow-sm bg-white dark:bg-[#111] rounded-3xl overflow-hidden relative group">
+                        <Card className="border-none shadow-sm bg-white dark:bg-black rounded-3xl overflow-hidden relative group">
                             <CardContent className="p-6">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className={cn("p-2 rounded-xl bg-black/5 dark:bg-white/5", stat.color)}><stat.icon className="w-4 h-4" /></div>
@@ -117,18 +116,18 @@ export default function Inventory() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                         placeholder="Buscar por modelo ou placa..."
-                        className="pl-10 h-12 bg-white dark:bg-[#111] border-none rounded-2xl font-bold shadow-sm focus-visible:ring-electric-blue"
+                        className="pl-10 h-12 bg-white dark:bg-black border-none rounded-2xl font-bold shadow-sm focus-visible:ring-electric-blue"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
-                    <Button variant="outline" className="flex-1 md:flex-none rounded-2xl h-12 px-6 font-bold border-none bg-white dark:bg-[#111] shadow-sm">
+                    <Button variant="outline" className="flex-1 md:flex-none rounded-2xl h-12 px-6 font-bold border-none bg-white dark:bg-black shadow-sm">
                         <Filter className="w-4 h-4 mr-2" /> Filtros
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="flex-1 md:flex-none rounded-2xl h-12 px-6 font-bold border-none bg-white dark:bg-[#111] shadow-sm">
+                            <Button variant="outline" className="flex-1 md:flex-none rounded-2xl h-12 px-6 font-bold border-none bg-white dark:bg-black shadow-sm">
                                 Exportar <ChevronDown className="w-4 h-4 ml-2" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -156,7 +155,7 @@ export default function Inventory() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: i * 0.05 }}
                             >
-                                <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-electric-blue/10 transition-all cursor-pointer">
+                                <Card className="border-none bg-white dark:bg-black shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-electric-blue/10 transition-all cursor-pointer">
                                     <div className="aspect-[16/10] bg-black/5 dark:bg-white/5 relative flex items-center justify-center overflow-hidden">
                                         <div className="absolute top-4 left-4 z-10">
                                             <Badge className={cn("font-bold text-[9px] uppercase border-none px-2.5",
@@ -207,7 +206,7 @@ export default function Inventory() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        <Card className="border-none bg-white dark:bg-[#111] shadow-xl rounded-3xl overflow-hidden">
+                        <Card className="border-none bg-white dark:bg-black shadow-xl rounded-3xl overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>

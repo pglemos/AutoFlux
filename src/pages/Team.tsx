@@ -51,8 +51,7 @@ export default function Team() {
 
             // Filter by active agency if Admin
             if (role === 'Admin' && activeAgencyId) {
-                // Note: Assuming TeamMember will have agencyId soon
-                // if (m.agencyId !== activeAgencyId) return false
+                if (m.agencyId !== activeAgencyId) return false
             }
 
             return true
@@ -116,7 +115,7 @@ export default function Team() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Buscar consultor..."
-                            className="pl-10 h-12 rounded-2xl bg-white dark:bg-[#111] border-black/10 dark:border-white/10 font-bold"
+                            className="pl-10 h-12 rounded-2xl bg-white dark:bg-black border-black/10 dark:border-white/10 font-bold"
                         />
                     </div>
                     <Button
@@ -200,7 +199,7 @@ export default function Team() {
 
 function SummaryCard({ title, value, trend, icon }: { title: string, value: string, trend: string, icon: any }) {
     return (
-        <Card className="border-none shadow-sm bg-white dark:bg-[#111] rounded-[2rem] overflow-hidden group">
+        <Card className="border-none shadow-sm bg-white dark:bg-black rounded-[2rem] overflow-hidden group">
             <CardContent className="p-7">
                 <div className="flex justify-between items-start mb-6">
                     <div className="p-3 bg-black/5 dark:bg-white/5 rounded-2xl group-hover:scale-110 transition-transform">{icon}</div>
@@ -228,7 +227,7 @@ function MemberCard({ member, rank, isLead, leadsCount, onEdit, onDelete }: {
     return (
         <Card className={cn(
             "border-none rounded-[2.5rem] shadow-xl overflow-hidden group transition-all hover:shadow-2xl relative",
-            isLead ? "bg-white dark:bg-[#111] ring-2 ring-electric-blue/20" : "bg-white dark:bg-[#111]"
+            isLead ? "bg-white dark:bg-black ring-2 ring-electric-blue/20" : "bg-white dark:bg-black"
         )}>
             {isLead && (
                 <div className="absolute top-6 left-6 flex items-center gap-1.5 bg-electric-blue/10 text-electric-blue px-3 py-1 rounded-full">

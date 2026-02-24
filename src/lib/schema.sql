@@ -110,3 +110,23 @@ CREATE TRIGGER update_leads_updated_at
     BEFORE UPDATE ON leads
     FOR EACH ROW
     EXECUTE PROCEDURE update_updated_at_column();
+
+-- 9. Communication Configs (Configurações de automação do WhatsApp)
+CREATE TABLE IF NOT EXISTS communication_configs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    agency_id UUID NOT NULL, -- To apply globally per agency
+    type TEXT NOT NULL, -- 'daily_report', 'weekly_report', 'monthly_report', 'opening', 'closing', 'scheduling', 'performance'
+    is_active BOOLEAN DEFAULT FALSE,
+    time_to_trigger TEXT, -- HH:MM format for scheduled triggers, e.g., '18:00'
+    days_of_week TEXT[], -- For weekly triggers, e.g., ['1', '2', '3', '4', '5'] (1=Monday)
+    target_roles TEXT[], -- 'Owner', 'Manager', etc., who should receive this
+    custom_message TEXT, -- Optional custom message template
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Trigger for communication_configs
+CREATE TRIGGER update_comm_configs_updated_at
+    BEFORE UPDATE ON communication_configs
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_updated_at_column();
