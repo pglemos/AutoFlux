@@ -7,19 +7,15 @@ import {
     Edit2,
     Users,
     Target,
-    ArrowUpRight,
     Mail,
     Phone,
     MoreHorizontal,
     Trash2,
-    MailIcon,
-    PhoneCall,
     Search,
     Shield,
-    Zap,
     Briefcase
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
