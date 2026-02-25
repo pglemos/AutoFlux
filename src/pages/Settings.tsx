@@ -21,6 +21,7 @@ import GoalManagement from './GoalManagement'
 import CommissionRules from './CommissionRules'
 import Communication from './Communication'
 import { Plus, Building2, Pencil, Trash2, ChevronRight, UserPlus2 } from 'lucide-react'
+import { WHATSAPP_API_URL } from '@/lib/config'
 
 export default function Settings() {
     const { theme, setTheme } = useTheme()
@@ -45,7 +46,7 @@ export default function Settings() {
         if (pollingWhatsApp || !whatsappStatus.connected) {
             interval = setInterval(async () => {
                 try {
-                    const res = await fetch('http://localhost:3001/api/whatsapp/status')
+                    const res = await fetch(`${WHATSAPP_API_URL}/api/whatsapp/status`)
                     if (res.ok) {
                         const data = await res.json()
                         setWhatsappStatus(data)

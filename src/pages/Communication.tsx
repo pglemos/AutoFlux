@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
 import { supabase } from '@/lib/supabase'
+import { WHATSAPP_API_URL } from '@/lib/config'
 
 type ReportType = 'morning' | 'weekly' | 'monthly';
 
@@ -47,7 +48,7 @@ export default function Communication() {
     useEffect(() => {
         const checkStatus = async () => {
             try {
-                const res = await fetch('http://localhost:3001/api/whatsapp/status')
+                const res = await fetch(`${WHATSAPP_API_URL}/api/whatsapp/status`)
                 const data = await res.json()
                 setWaStatus(data)
             } catch (err) {
@@ -511,7 +512,7 @@ export default function Communication() {
                                         <Button
                                             variant="outline"
                                             onClick={async () => {
-                                                await fetch('http://localhost:3001/api/whatsapp/restart', { method: 'POST' })
+                                                await fetch(`${WHATSAPP_API_URL}/api/whatsapp/restart`, { method: 'POST' })
                                                 toast({ title: 'Reiniciando', description: 'O serviço de WhatsApp está sendo reiniciado.' })
                                             }}
                                             className="w-full rounded-2xl h-14 border-black/10 dark:border-white/10 font-bold"
@@ -542,7 +543,7 @@ export default function Communication() {
                                                     onClick={async () => {
                                                         setIsConnecting(true)
                                                         try {
-                                                            await fetch('http://localhost:3001/api/whatsapp/restart', { method: 'POST' })
+                                                            await fetch(`${WHATSAPP_API_URL}/api/whatsapp/restart`, { method: 'POST' })
                                                             toast({ title: 'Iniciando', description: 'Aguarde o QR Code ser gerado.' })
                                                         } finally {
                                                             setIsConnecting(false)
