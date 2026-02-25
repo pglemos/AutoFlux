@@ -71,11 +71,28 @@ export default function Communication() {
         const fetchData = async () => {
             setIsLoading(true)
             try {
-                // Fetch Configs
-                const { data: configData, error: configError } = await supabase
-                    .from('automation_configs')
-                    .select('*')
-                    .eq('agency_id', activeAgencyId)
+                const [
+                    { data: configData, error: configError },
+                    { data: instanceData },
+                    { data: historyData }
+                ] = await Promise.all([
+                    // Fetch Configs
+                    supabase
+                        .from('automation_configs')
+                        .select('*')
+                        .eq('agency_id', activeAgencyId),
+                    // Fetch Instances
+                    supabase
+                        .from('communication_instances')
+                        .select('*')
+                        .eq('agency_id', activeAgencyId),
+                    // Fetch History
+                    supabase
+                        .from('report_history')
+                        .select('*, automation_configs(report_type)')
+                        .order('created_at', { ascending: false })
+                        .limit(5)
+                ])
 
                 if (configError) throw configError
 
@@ -85,21 +102,7 @@ export default function Communication() {
                 })
                 setConfigs(configMap)
 
-                // Fetch Instances
-                const { data: instanceData } = await supabase
-                    .from('communication_instances')
-                    .select('*')
-                    .eq('agency_id', activeAgencyId)
-
                 setInstances(instanceData || [])
-
-                // Fetch History
-                const { data: historyData } = await supabase
-                    .from('report_history')
-                    .select('*, automation_configs(report_type)')
-                    .order('created_at', { ascending: false })
-                    .limit(5)
-
                 setHistory(historyData || [])
 
             } catch (error) {
