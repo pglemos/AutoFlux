@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bot, Sparkles, ClipboardList, ShieldAlert, ArrowRight, Thermometer, FileText, History, Download, Filter } from 'lucide-react'
+import { Bot, Sparkles, ClipboardList, ShieldAlert, ArrowRight, Thermometer, FileText, History, Download, Filter, Wifi, WifiOff } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -7,37 +7,72 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
-import { mockAuditLogs } from '@/lib/mock-data'
 import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
+import { generateAIDiagnostic, FREE_AI_MODELS } from '@/lib/openrouter'
 
 export default function AiDiagnostics() {
-    const { team } = useAppStore()
+    const { team, auditLogs, leads, inventory, activeAgencyId, selectedAiModel } = useAppStore()
     const [isGenerating, setIsGenerating] = useState(false)
     const [diagnostic, setDiagnostic] = useState<{ text: string; actions: string[]; message: string } | null>(null)
     const [selectedSeller, setSelectedSeller] = useState('team')
     const [activeTab, setActiveTab] = useState('engine')
     const [diagnosticHistory, setDiagnosticHistory] = useState<any[]>([])
+    const [aiSource, setAiSource] = useState<'real' | 'fallback'>('real')
 
-    const generateDiagnostic = () => {
+    const generateDiagnostic = async () => {
         setIsGenerating(true)
-        setTimeout(() => {
+        const dormantLeads = leads.filter(l => (l.stagnantDays || 0) > 2).length
+        const criticalInventory = inventory.filter(i => (i.agingDays || 0) > 45).length
+        const totalSales = team.reduce((acc, t) => acc + (t.sales || 0), 0)
+        const avgAging = inventory.length > 0 ? Math.round(inventory.reduce((acc, i) => acc + (i.agingDays || 0), 0) / inventory.length) : 0
+        const targetName = selectedSeller === 'team' ? 'Toda Equipe' : team.find(t => t.id === selectedSeller)?.name || selectedSeller
+
+        try {
+            // Real AI call via OpenRouter
+            const aiResult = await generateAIDiagnostic({
+                dormantLeads,
+                criticalInventory,
+                totalLeads: leads.length,
+                totalSales,
+                teamSize: team.length,
+                targetName,
+                avgAging,
+            }, selectedAiModel)
+
             const newDiagnostic = {
                 id: Math.random().toString(),
                 date: new Date().toLocaleString('pt-BR'),
-                target: selectedSeller === 'team' ? 'Toda Equipe' : team.find(t => t.id === selectedSeller)?.name || selectedSeller,
-                text: 'A equipe apresenta uma taxa de conversão saudável em visitas, mas há um acúmulo de leads "Sem Contato" no início do funil (gargalo de D0). A margem média está 2% abaixo da meta estipulada.',
-                actions: [
-                    'Redistribuir leads estagnados há mais de 48h para a equipe de SDR.',
-                    'Revisar a política de descontos no fechamento para proteger a margem mínima.',
-                ],
-                message: 'Olá [Nome], vi que você demonstrou interesse no [Carro] ontem mas não conseguimos nos falar. Ele acabou de entrar em uma condição especial válida até amanhã. Qual o melhor horário para eu te ligar hoje?',
+                target: targetName,
+                ...aiResult,
             }
             setDiagnostic(newDiagnostic)
             setDiagnosticHistory(prev => [newDiagnostic, ...prev])
+            setAiSource('real')
+            const modelName = FREE_AI_MODELS.find(m => m.id === selectedAiModel)?.name || selectedAiModel
+            toast({ title: '🤖 IA Real Conectada', description: `Diagnóstico gerado pelo modelo ${modelName} via OpenRouter.` })
+        } catch (error) {
+            // Fallback to local logic
+            console.warn('OpenRouter API failed, using fallback:', error)
+            const newDiagnostic = {
+                id: Math.random().toString(),
+                date: new Date().toLocaleString('pt-BR'),
+                target: targetName,
+                text: `Análise local: Identificamos ${dormantLeads} leads estagnados e ${criticalInventory} veículos em estoque crítico (>45 dias). A performance de conversão está sendo impactada pelo tempo de resposta inicial.`,
+                actions: [
+                    `Priorizar contato com os ${dormantLeads} leads estagnados imediatamente.`,
+                    `Aplicar bônus de venda nos ${criticalInventory} veículos de aging alto.`,
+                    'Implementar rodízio de leads focado em tempo de resposta (SLA).'
+                ],
+                message: 'Olá, notei que temos algumas oportunidades pendentes. Vamos focar nos leads de retorno rápido hoje para tracionar o fechamento do mês?',
+            }
+            setDiagnostic(newDiagnostic)
+            setDiagnosticHistory(prev => [newDiagnostic, ...prev])
+            setAiSource('fallback')
+            toast({ title: 'Diagnóstico Local Gerado', description: 'API de IA indisponível. Usando motor de regras local.', variant: 'destructive' })
+        } finally {
             setIsGenerating(false)
-            toast({ title: 'Diagnóstico Gerado', description: 'O AI Sales Analyst concluiu a análise.' })
-        }, 1500)
+        }
     }
 
     const copyMessage = () => {
@@ -54,7 +89,13 @@ export default function AiDiagnostics() {
                     <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
                     <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">INTELIGÊNCIA ARTIFICIAL</span>
                 </div>
-                <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">Sales <span className="text-electric-blue">Analyst</span></h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">Sales <span className="text-electric-blue">Analyst</span></h1>
+                    <Badge variant="outline" className={cn("text-xs font-bold px-3 py-1 rounded-full border-none", aiSource === 'real' ? 'bg-green-500/10 text-green-600' : 'bg-yellow-500/10 text-yellow-600')}>
+                        {aiSource === 'real' ? <Wifi className="w-3 h-3 mr-1.5" /> : <WifiOff className="w-3 h-3 mr-1.5" />}
+                        {aiSource === 'real' ? 'IA Real (OpenRouter)' : 'Motor Local'}
+                    </Badge>
+                </div>
             </div>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="bg-white/50 dark:bg-black/50 p-1 rounded-2xl border border-white/30 dark:border-white/5 mb-8">
@@ -74,7 +115,9 @@ export default function AiDiagnostics() {
                                             <div className="p-2.5 bg-electric-blue/10 rounded-xl"><Bot className="h-5 w-5 text-electric-blue" /></div>
                                             <div>
                                                 <CardTitle className="text-xl font-extrabold text-pure-black dark:text-off-white">Motor de Diagnóstico</CardTitle>
-                                                <CardDescription className="font-semibold text-muted-foreground mt-1">Prompt Mestre de análise comportamental e funil.</CardDescription>
+                                                <CardDescription className="font-semibold text-muted-foreground mt-1">
+                                                    Powered by OpenRouter • {FREE_AI_MODELS.find(m => m.id === selectedAiModel)?.name || 'AI Agent'}
+                                                </CardDescription>
                                             </div>
                                         </div>
                                         <Badge variant="secondary" className="font-mono-numbers bg-black/5 dark:bg-white/10 text-muted-foreground border-none"><Thermometer className="w-3 h-3 mr-1" /> Temp: 0.3</Badge>
@@ -113,7 +156,8 @@ export default function AiDiagnostics() {
                                     {!diagnostic && !isGenerating && (
                                         <div className="h-48 flex flex-col items-center justify-center text-center p-8">
                                             <Sparkles className="h-12 w-12 text-muted-foreground/20 mb-4" />
-                                            <p className="text-sm font-bold text-muted-foreground">Clique em gerar para iniciar a análise por IA.</p>
+                                            <p className="text-sm font-bold text-muted-foreground">Clique em gerar para iniciar a análise por IA real.</p>
+                                            <p className="text-xs text-muted-foreground/60 mt-1">Modelo: {FREE_AI_MODELS.find(m => m.id === selectedAiModel)?.name || 'Selecionado'} • OpenRouter</p>
                                         </div>
                                     )}
                                 </CardContent>
@@ -198,19 +242,22 @@ export default function AiDiagnostics() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {mockAuditLogs.map((log, index) => (
+                                    {auditLogs.filter(l => !activeAgencyId || l.agencyId === activeAgencyId).slice().reverse().map((log, index) => (
                                         <TableRow key={log.id} className={cn('hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-none', index % 2 === 0 ? 'bg-transparent' : 'bg-black/[0.02] dark:bg-white/[0.02]')}>
-                                            <TableCell className="font-bold text-xs text-muted-foreground py-4 pl-6 whitespace-nowrap">{log.date}</TableCell>
-                                            <TableCell className="font-extrabold text-sm text-pure-black dark:text-off-white py-4 whitespace-nowrap">{log.user}</TableCell>
+                                            <TableCell className="font-bold text-xs text-muted-foreground py-4 pl-6 whitespace-nowrap">{log.timestamp || new Date().toLocaleString('pt-BR')}</TableCell>
+                                            <TableCell className="font-extrabold text-sm text-pure-black dark:text-off-white py-4 whitespace-nowrap">{team.find(t => t.id === log.userId)?.name || 'Sistema'}</TableCell>
                                             <TableCell className="py-4 pr-6">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    {log.action.includes('Bloqueado') || log.action.includes('Alerta') ? <ShieldAlert className="w-3.5 h-3.5 text-mars-orange shrink-0" /> : <div className="w-1.5 h-1.5 rounded-full bg-electric-blue shrink-0"></div>}
-                                                    <span className={cn('font-bold text-xs', log.action.includes('Bloqueado') || log.action.includes('Alerta') ? 'text-mars-orange' : 'text-pure-black dark:text-off-white')}>{log.action}</span>
+                                                    {log.action.includes('Bloqueado') || log.action.includes('Perdido') ? <ShieldAlert className="w-3.5 h-3.5 text-mars-orange shrink-0" /> : <div className="w-1.5 h-1.5 rounded-full bg-electric-blue shrink-0"></div>}
+                                                    <span className={cn('font-bold text-xs', log.action.includes('Bloqueado') || log.action.includes('Perdido') ? 'text-mars-orange' : 'text-pure-black dark:text-off-white')}>{log.action}</span>
                                                 </div>
-                                                <p className="text-xs text-muted-foreground font-medium leading-tight">{log.detail}</p>
+                                                <p className="text-xs text-muted-foreground font-medium leading-tight">Recurso: {log.resource}</p>
                                             </TableCell>
                                         </TableRow>
                                     ))}
+                                    {auditLogs.length === 0 && (
+                                        <TableRow><TableCell colSpan={3} className="p-12 text-center text-muted-foreground font-bold">Sem registros de auditoria no momento.</TableCell></TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </div>
