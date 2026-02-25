@@ -115,8 +115,12 @@ ${config.ai_context.includes('motivacional') ? 'Vamos pra cima! 🚀' : 'Sucesso
             }).select().single()
 
             // Log delivery attempt
-            console.log(`Delivering to ${config.recipients?.length ?? 0} recipients for ${agency.name}`)
-            results.push({ agency: agency.name, historyId: history?.id })
+            console.log(JSON.stringify({
+                event: 'delivery_attempt',
+                agencyId: agency.id,
+                recipientCount: config.recipients?.length ?? 0
+            }))
+            results.push({ agencyId: agency.id, historyId: history?.id })
         }
 
         return new Response(JSON.stringify({ success: true, processed: results.length, details: results }), {
