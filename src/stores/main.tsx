@@ -95,66 +95,126 @@ export interface Lead {
     agencyId?: string
 }
 
-export interface AppState {
+// --- Split Interfaces ---
+
+export interface TasksState {
     tasks: Task[]
     addTask: (task: Omit<Task, 'id' | 'status'>) => void
     updateTask: (id: string, updates: Partial<Task>) => void
     deleteTask: (id: string) => void
+}
 
+export interface CommissionsState {
     commissions: Commission[]
     addCommission: (commission: Omit<Commission, 'id'>) => void
-
-    dashboardWidgets: string[]
-    setDashboardWidgets: (widgets: string[]) => void
-
-    reportWidgets: string[]
-    setReportWidgets: (widgets: string[]) => void
-
     commissionRules: CommissionRule[]
     addCommissionRule: (rule: Omit<CommissionRule, 'id'>) => void
     deleteCommissionRule: (id: string) => void
+}
 
+export interface GoalsState {
     goals: Goal[]
     setGoal: (goal: Omit<Goal, 'id'>) => void
     deleteGoal: (id: string) => void
+}
 
+export interface UIState {
+    dashboardWidgets: string[]
+    setDashboardWidgets: (widgets: string[]) => void
+    reportWidgets: string[]
+    setReportWidgets: (widgets: string[]) => void
     calendarIntegrations: { google: boolean; outlook: boolean }
-    setCalendarIntegration: (
-        provider: 'google' | 'outlook',
-        connected: boolean,
-    ) => void
-
+    setCalendarIntegration: (provider: 'google' | 'outlook', connected: boolean) => void
     chainedFunnel: boolean
     setChainedFunnel: (v: boolean) => void
+}
 
+export interface UsersState {
     users: User[]
     addUser: (user: Omit<User, 'id'>) => void
     updateUser: (id: string, user: Partial<User>) => void
     deleteUser: (id: string) => void
-
     agencies: Agency[]
     addAgency: (agency: Omit<Agency, 'id'>) => void
     updateAgency: (id: string, agency: Partial<Agency>) => void
     deleteAgency: (id: string) => void
-
-    team: TeamMember[]
-    addTeamMember: (member: Omit<TeamMember, 'id'>) => void
-    updateTeamMember: (id: string, member: Partial<TeamMember>) => void
-    deleteTeamMember: (id: string) => void
-
-    leads: Lead[]
-    addLead: (lead: Omit<Lead, 'id'>) => void
-    updateLead: (id: string, lead: Partial<Lead>) => void
-    deleteLead: (id: string) => void
-
     permissions: Record<string, string[]>
     togglePermission: (role: string, path: string) => void
-
     activeAgencyId: string | null
     setActiveAgencyId: (id: string | null) => void
 }
 
-const AppContext = createContext<AppState | undefined>(undefined)
+export interface TeamState {
+    team: TeamMember[]
+    addTeamMember: (member: Omit<TeamMember, 'id'>) => void
+    updateTeamMember: (id: string, member: Partial<TeamMember>) => void
+    deleteTeamMember: (id: string) => void
+}
+
+export interface LeadsState {
+    leads: Lead[]
+    addLead: (lead: Omit<Lead, 'id'>) => void
+    updateLead: (id: string, lead: Partial<Lead>) => void
+    deleteLead: (id: string) => void
+}
+
+export interface AppState extends TasksState, CommissionsState, GoalsState, UIState, UsersState, TeamState, LeadsState {}
+
+// --- Contexts ---
+
+const TasksContext = createContext<TasksState | undefined>(undefined)
+const CommissionsContext = createContext<CommissionsState | undefined>(undefined)
+const GoalsContext = createContext<GoalsState | undefined>(undefined)
+const UIContext = createContext<UIState | undefined>(undefined)
+const UsersContext = createContext<UsersState | undefined>(undefined)
+const TeamContext = createContext<TeamState | undefined>(undefined)
+const LeadsContext = createContext<LeadsState | undefined>(undefined)
+
+// --- Hooks ---
+
+export function useTasks() {
+    const context = useContext(TasksContext)
+    if (!context) throw new Error('useTasks must be used within AppStoreProvider')
+    return context
+}
+
+export function useCommissions() {
+    const context = useContext(CommissionsContext)
+    if (!context) throw new Error('useCommissions must be used within AppStoreProvider')
+    return context
+}
+
+export function useGoals() {
+    const context = useContext(GoalsContext)
+    if (!context) throw new Error('useGoals must be used within AppStoreProvider')
+    return context
+}
+
+export function useUI() {
+    const context = useContext(UIContext)
+    if (!context) throw new Error('useUI must be used within AppStoreProvider')
+    return context
+}
+
+export function useUsers() {
+    const context = useContext(UsersContext)
+    if (!context) throw new Error('useUsers must be used within AppStoreProvider')
+    return context
+}
+
+export function useTeam() {
+    const context = useContext(TeamContext)
+    if (!context) throw new Error('useTeam must be used within AppStoreProvider')
+    return context
+}
+
+export function useLeads() {
+    const context = useContext(LeadsContext)
+    if (!context) throw new Error('useLeads must be used within AppStoreProvider')
+    return context
+}
+
+// --- Provider ---
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
     const [activeAgencyId, setActiveAgencyId] = useState<string | null>(null)
@@ -332,46 +392,77 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         })
     }, [])
 
-    const value = useMemo(
-        () => ({
-            tasks, addTask, updateTask, deleteTask,
-            commissions, addCommission,
-            dashboardWidgets, setDashboardWidgets,
-            reportWidgets, setReportWidgets,
-            commissionRules, addCommissionRule, deleteCommissionRule,
-            goals, setGoal, deleteGoal,
-            calendarIntegrations,
-            setCalendarIntegration: (provider: 'google' | 'outlook', connected: boolean) =>
-                setCalendarIntegrations((prev) => ({ ...prev, [provider]: connected })),
-            chainedFunnel, setChainedFunnel,
-            users, addUser, updateUser, deleteUser,
-            agencies, addAgency, updateAgency, deleteAgency,
-            team, addTeamMember, updateTeamMember, deleteTeamMember,
-            leads, addLead, updateLead, deleteLead,
-            permissions, togglePermission,
-            activeAgencyId, setActiveAgencyId,
-        }),
-        [
-            tasks, addTask, updateTask, deleteTask,
-            commissions, addCommission,
-            dashboardWidgets, reportWidgets,
-            commissionRules, addCommissionRule, deleteCommissionRule,
-            goals, setGoal, deleteGoal,
-            calendarIntegrations, chainedFunnel,
-            users, addUser, updateUser, deleteUser,
-            agencies, addAgency, updateAgency, deleteAgency,
-            team, addTeamMember, updateTeamMember, deleteTeamMember,
-            leads, addLead, updateLead, deleteLead,
-            permissions, togglePermission,
-            activeAgencyId, setActiveAgencyId,
-        ],
-    )
+    // --- Memoized Values ---
 
-    return React.createElement(AppContext.Provider, { value }, children)
+    const tasksValue = useMemo<TasksState>(() => ({
+        tasks, addTask, updateTask, deleteTask
+    }), [tasks, addTask, updateTask, deleteTask])
+
+    const commissionsValue = useMemo<CommissionsState>(() => ({
+        commissions, addCommission, commissionRules, addCommissionRule, deleteCommissionRule
+    }), [commissions, addCommission, commissionRules, addCommissionRule, deleteCommissionRule])
+
+    const goalsValue = useMemo<GoalsState>(() => ({
+        goals, setGoal, deleteGoal
+    }), [goals, setGoal, deleteGoal])
+
+    const uiValue = useMemo<UIState>(() => ({
+        dashboardWidgets, setDashboardWidgets,
+        reportWidgets, setReportWidgets,
+        calendarIntegrations,
+        setCalendarIntegration: (provider: 'google' | 'outlook', connected: boolean) =>
+            setCalendarIntegrations((prev) => ({ ...prev, [provider]: connected })),
+        chainedFunnel, setChainedFunnel
+    }), [dashboardWidgets, reportWidgets, calendarIntegrations, chainedFunnel])
+
+    const usersValue = useMemo<UsersState>(() => ({
+        users, addUser, updateUser, deleteUser,
+        agencies, addAgency, updateAgency, deleteAgency,
+        permissions, togglePermission,
+        activeAgencyId, setActiveAgencyId
+    }), [users, addUser, updateUser, deleteUser, agencies, addAgency, updateAgency, deleteAgency, permissions, togglePermission, activeAgencyId])
+
+    const teamValue = useMemo<TeamState>(() => ({
+        team, addTeamMember, updateTeamMember, deleteTeamMember
+    }), [team, addTeamMember, updateTeamMember, deleteTeamMember])
+
+    const leadsValue = useMemo<LeadsState>(() => ({
+        leads, addLead, updateLead, deleteLead
+    }), [leads, addLead, updateLead, deleteLead])
+
+    return React.createElement(TasksContext.Provider, { value: tasksValue },
+        React.createElement(CommissionsContext.Provider, { value: commissionsValue },
+            React.createElement(GoalsContext.Provider, { value: goalsValue },
+                React.createElement(UIContext.Provider, { value: uiValue },
+                    React.createElement(UsersContext.Provider, { value: usersValue },
+                        React.createElement(TeamContext.Provider, { value: teamValue },
+                            React.createElement(LeadsContext.Provider, { value: leadsValue },
+                                children
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
 }
 
 export default function useAppStore() {
-    const context = useContext(AppContext)
-    if (!context) throw new Error('useAppStore must be used within AppStoreProvider')
-    return context
+    const tasks = useTasks()
+    const commissions = useCommissions()
+    const goals = useGoals()
+    const ui = useUI()
+    const users = useUsers()
+    const team = useTeam()
+    const leads = useLeads()
+
+    return {
+        ...tasks,
+        ...commissions,
+        ...goals,
+        ...ui,
+        ...users,
+        ...team,
+        ...leads,
+    }
 }

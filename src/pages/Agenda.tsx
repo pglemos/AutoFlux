@@ -8,14 +8,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
-import useAppStore, { Task } from '@/stores/main'
+import { useTasks, useLeads, Task } from '@/stores/main'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, addDays, startOfWeek, isSameDay, addMonths, subMonths, isToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 export default function Agenda() {
-    const { tasks, addTask, updateTask, leads, team } = useAppStore()
+    const { tasks, addTask, updateTask } = useTasks()
+    const { leads } = useLeads()
     const [viewDate, setViewDate] = useState(new Date())
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [isDialogOpen, setIsDialogOpen] = useState(false)

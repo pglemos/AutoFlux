@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
-import useAppStore from '@/stores/main'
+import { useUsers } from '@/stores/main'
 import { supabase } from '@/lib/supabase'
 
 type ReportType = 'morning' | 'weekly' | 'monthly';
@@ -33,7 +33,7 @@ interface CommInstance {
 }
 
 export default function Communication() {
-    const { activeAgencyId } = useAppStore()
+    const { activeAgencyId } = useUsers()
     const [configs, setConfigs] = useState<Record<string, AutomationConfig>>({})
     const [instances, setInstances] = useState<CommInstance[]>([])
     const [history, setHistory] = useState<any[]>([])
