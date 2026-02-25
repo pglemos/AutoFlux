@@ -33,11 +33,22 @@ interface CommInstance {
     provider: string;
 }
 
+interface HistoryItem {
+    id: string;
+    config_id?: string;
+    report_type: string;
+    ai_insight?: string;
+    created_at: string;
+    automation_configs?: {
+        report_type: ReportType;
+    } | null;
+}
+
 export default function Communication() {
     const { activeAgencyId } = useUsers()
     const [configs, setConfigs] = useState<Record<string, AutomationConfig>>({})
     const [instances, setInstances] = useState<CommInstance[]>([])
-    const [history, setHistory] = useState<any[]>([])
+    const [history, setHistory] = useState<HistoryItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [activeTab, setActiveTab] = useState('automations')
