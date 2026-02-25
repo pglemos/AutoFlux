@@ -8,7 +8,7 @@ export default function Layout() {
   const isMobile = useIsMobile()
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground font-sans">
+    <div className="flex min-h-screen bg-off-white dark:bg-pure-black text-pure-black dark:text-off-white selection:bg-electric-blue selection:text-white font-sans">
       <Navigation />
       <div
         className={cn(
