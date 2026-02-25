@@ -11,8 +11,7 @@
     ],
     "types": [
       "vite/client",
-      "bun",
-      "@testing-library/jest-dom"
+      "bun"
     ],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
