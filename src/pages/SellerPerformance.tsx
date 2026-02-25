@@ -51,8 +51,8 @@ export default function SellerPerformance() {
     const [searchTerm, setSearchTerm] = useState('')
 
     const filteredCommissions = commissions.filter((c) => {
-        const matchesSeller = selectedSeller === 'all' || c.seller === team.find((t) => t.id === selectedSeller)?.name
-        const matchesSearch = c.car.toLowerCase().includes(searchTerm.toLowerCase()) || c.seller.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesSeller = selectedSeller === 'all' || c.sellerId === team.find((t) => t.id === selectedSeller)?.name
+        const matchesSearch = c.car.toLowerCase().includes(searchTerm.toLowerCase()) || c.sellerId.toLowerCase().includes(searchTerm.toLowerCase())
         return matchesSeller && matchesSearch
     })
 
@@ -226,9 +226,9 @@ export default function SellerPerformance() {
                                     <TableCell className="py-5 pl-8">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-electric-blue/10 flex items-center justify-center text-electric-blue font-extrabold text-[10px]">
-                                                {c.seller.substring(0, 2).toUpperCase()}
+                                                {c.sellerId.substring(0, 2).toUpperCase()}
                                             </div>
-                                            <span className="font-extrabold text-sm">{c.seller}</span>
+                                            <span className="font-extrabold text-sm">{c.sellerId}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="py-5">
