@@ -45,7 +45,9 @@ export default function Settings() {
         if (pollingWhatsApp || !whatsappStatus.connected) {
             interval = setInterval(async () => {
                 try {
-                    const res = await fetch('http://localhost:3001/api/whatsapp/status')
+                    const res = await fetch('http://localhost:3001/api/whatsapp/status', {
+                        headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY }
+                    })
                     if (res.ok) {
                         const data = await res.json()
                         setWhatsappStatus(data)

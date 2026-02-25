@@ -51,15 +51,24 @@ client.on('disconnected', (reason) => {
 
 client.initialize();
 
+// Authentication Middleware
+const authenticate = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+    if (!process.env.VITE_WHATSAPP_API_KEY || apiKey !== process.env.VITE_WHATSAPP_API_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    next();
+};
+
 // API Routes for Frontend Integration
-app.get('/api/whatsapp/status', (req, res) => {
+app.get('/api/whatsapp/status', authenticate, (req, res) => {
     res.json({
         connected: isConnected,
         qr: isConnected ? null : qrImage
     });
 });
 
-app.post('/api/whatsapp/restart', async (req, res) => {
+app.post('/api/whatsapp/restart', authenticate, async (req, res) => {
     console.log('Restarting WhatsApp Client...');
     try {
         if (client) {
@@ -75,7 +84,7 @@ app.post('/api/whatsapp/restart', async (req, res) => {
     }
 });
 
-app.post('/api/whatsapp/send', async (req, res) => {
+app.post('/api/whatsapp/send', authenticate, async (req, res) => {
     if (!isConnected) {
         return res.status(400).json({ error: 'WhatsApp is not connected. Scan the QR code first.' });
     }
