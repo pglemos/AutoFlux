@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import useAppStore, { CommissionRule } from '@/stores/main'
+import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 
 export default function CommissionRules({ standalone = true }: { standalone?: boolean }) {
@@ -48,7 +48,7 @@ export default function CommissionRules({ standalone = true }: { standalone?: bo
         setSellerId('all'); setVehicleType('all'); setMarginMin(''); setMarginMax(''); setPercentage('')
     }
 
-    const handleEdit = (rule: CommissionRule) => {
+    const handleEdit = (rule: any) => {
         setEditingRuleId(rule.id)
         setSellerId(rule.sellerId || 'all')
         setVehicleType(rule.vehicleType || 'all')

@@ -172,14 +172,6 @@ export interface Lead {
     createdAt: string
 }
 
-export interface InventoryItem {
-    id: string
-    model: string
-    year: number
-    price: number
-    agencyId: string
-    agingDays?: number
-}
 
 export interface AppState {
     tasks: Task[]
@@ -200,6 +192,7 @@ export interface AppState {
     updateProposal: (id: string, updates: Partial<Proposal>) => void
 
     inventory: InventoryItem[]
+
     updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => void
 
     attendance: AttendanceRecord[]
@@ -251,7 +244,7 @@ export interface AppState {
     updateLead: (id: string, lead: Partial<Lead>) => void
     deleteLead: (id: string) => void
 
-    inventory: InventoryItem[]
+
 
     permissions: Record<string, string[]>
     togglePermission: (role: string, path: string) => void
@@ -332,9 +325,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         { id: 'L-105', name: 'Fernando Lima', car: 'Volvo XC60', stage: 'Proposta', slaMinutes: 300, source: 'Carteira', value: 390000, score: 88, sellerId: 'T-02', agencyId: 'a1', createdAt: new Date().toISOString() },
     ])
     const [inventory, setInventory] = useState<InventoryItem[]>([
-        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1', agingDays: 45 },
-        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1', agingDays: 12 },
-        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2', agingDays: 5 },
+        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1', agingDays: 45, plate: 'ABC-1234', status: 'Disponível' },
+        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1', agingDays: 12, plate: 'DEF-5678', status: 'Disponível' },
+        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2', agingDays: 5, plate: 'GHI-9012', status: 'Disponível' },
     ])
 
     const [permissions, setPermissions] = useState<Record<string, string[]>>({
@@ -423,6 +416,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             inventory,
             permissions, togglePermission,
             activeAgencyId, setActiveAgencyId,
+            appointments, addAppointment, updateAppointment, visits, recordVisit, verifyVisit, proposals, addProposal, updateProposal, attendance, recordAttendance, auditLogs, addAuditLog, updateInventoryItem,
+            notifications, selectedAiModel, setSelectedAiModel,
         }),
         [
             tasks, addTask, updateTask, deleteTask,
@@ -438,6 +433,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             inventory,
             permissions, togglePermission,
             activeAgencyId, setActiveAgencyId,
+            appointments, addAppointment, updateAppointment, visits, recordVisit, verifyVisit, proposals, addProposal, updateProposal, attendance, recordAttendance, auditLogs, addAuditLog, updateInventoryItem,
+            notifications, selectedAiModel, setSelectedAiModel,
         ],
     )
 
