@@ -95,6 +95,15 @@ export interface Lead {
     agencyId?: string
 }
 
+export interface InventoryItem {
+    id: string
+    model: string
+    year: number
+    price: number
+    agencyId: string
+    agingDays?: number
+}
+
 export interface AppState {
     tasks: Task[]
     addTask: (task: Omit<Task, 'id' | 'status'>) => void
@@ -146,6 +155,8 @@ export interface AppState {
     addLead: (lead: Omit<Lead, 'id'>) => void
     updateLead: (id: string, lead: Partial<Lead>) => void
     deleteLead: (id: string) => void
+
+    inventory: InventoryItem[]
 
     permissions: Record<string, string[]>
     togglePermission: (role: string, path: string) => void
@@ -223,10 +234,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         { id: 'L-104', name: 'Juliana Costa', car: 'Mercedes C300', stage: 'Visita', slaMinutes: 120, source: 'Internet', value: 350000, score: 78, sellerId: 'T-03', agencyId: 'a2' },
         { id: 'L-105', name: 'Fernando Lima', car: 'Volvo XC60', stage: 'Proposta', slaMinutes: 300, source: 'Carteira', value: 390000, score: 88, sellerId: 'T-02', agencyId: 'a1' },
     ])
-    const [inventory, setInventory] = useState([
-        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1' },
-        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1' },
-        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2' },
+    const [inventory, setInventory] = useState<InventoryItem[]>([
+        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1', agingDays: 45 },
+        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1', agingDays: 12 },
+        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2', agingDays: 5 },
     ])
 
     const [permissions, setPermissions] = useState<Record<string, string[]>>({
@@ -348,6 +359,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             agencies, addAgency, updateAgency, deleteAgency,
             team, addTeamMember, updateTeamMember, deleteTeamMember,
             leads, addLead, updateLead, deleteLead,
+            inventory,
             permissions, togglePermission,
             activeAgencyId, setActiveAgencyId,
         }),
@@ -362,6 +374,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             agencies, addAgency, updateAgency, deleteAgency,
             team, addTeamMember, updateTeamMember, deleteTeamMember,
             leads, addLead, updateLead, deleteLead,
+            inventory,
             permissions, togglePermission,
             activeAgencyId, setActiveAgencyId,
         ],
