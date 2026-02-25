@@ -128,7 +128,7 @@ export function Navigation() {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-black/5 dark:bg-white/5" />
                         <DropdownMenuItem
-                            onClick={() => navigate('/settings')}
+                            onClick={() => navigate('/settings?tab=profile')}
                             className="flex items-center gap-2 p-3 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:bg-black/5 dark:focus:bg-white/5"
                         >
                             <UserIcon className="w-4 h-4 text-electric-blue" />

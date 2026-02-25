@@ -7,3 +7,5 @@ coverage/
 .env*
 !.env.example
 .vercel
+.wwebjs_auth/
+.wwebjs_cache/

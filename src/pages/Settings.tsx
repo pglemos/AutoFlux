@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Settings as SettingsIcon, Moon, Sun, Shield, Users, Plug, Link2, Zap, UserPlus, ShieldCheck, Target, FileSignature, Bot, Sparkles, CheckCircle2 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { Settings as SettingsIcon, Moon, Sun, Shield, Users, Plug, Link2, Zap, UserPlus, ShieldCheck, Target, FileSignature, Bot, Sparkles, CheckCircle2, User as UserIcon, Mail, Phone } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -25,11 +26,26 @@ import { FREE_AI_MODELS } from '@/lib/openrouter'
 
 export default function Settings() {
     const { theme, setTheme } = useTheme()
-    const { role, setRole } = useAuth()
+    const { role, setRole, user } = useAuth()
     const {
         chainedFunnel, setChainedFunnel, calendarIntegrations, setCalendarIntegration,
         users, addUser, updateUser, deleteUser, permissions, togglePermission
     } = useAppStore()
+
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'general')
+
+    useEffect(() => {
+        const tabParam = searchParams.get('tab')
+        if (tabParam) {
+            setActiveTab(tabParam)
+        }
+    }, [searchParams])
+
+    const handleTabChange = (value: string) => {
+        setActiveTab(value)
+        setSearchParams({ tab: value }, { replace: true })
+    }
     const [userOpen, setUserOpen] = useState(false)
     const [agencyOpen, setAgencyOpen] = useState(false)
     const [editAgencyOpen, setEditAgencyOpen] = useState(false)
@@ -194,8 +210,11 @@ export default function Settings() {
                 <p className="text-muted-foreground font-medium mt-2 max-w-xl">Gerencie preferências, usuários e permissões do AutoGestão com precisão.</p>
             </div>
 
-            <Tabs defaultValue="general" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="bg-white/50 dark:bg-black/50 p-1.5 rounded-2xl border border-white/30 dark:border-white/5 mb-10 backdrop-blur-2xl shadow-xl flex-wrap h-auto">
+                    <TabsTrigger value="profile" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
+                        <UserIcon className="w-4 h-4 mr-2" />Perfil
+                    </TabsTrigger>
                     <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
                         <SettingsIcon className="w-4 h-4 mr-2" />Geral
                     </TabsTrigger>
@@ -203,9 +222,11 @@ export default function Settings() {
                         {role === 'Admin' ? <Building2 className="w-4 h-4 mr-2" /> : <Users className="w-4 h-4 mr-2" />}
                         {role === 'Admin' ? 'Agência' : 'Usuários'}
                     </TabsTrigger>
-                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
-                        <ShieldCheck className="w-4 h-4 mr-2" />Permissões
-                    </TabsTrigger>
+                    {['Admin', 'Owner'].includes(role) && (
+                        <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
+                            <ShieldCheck className="w-4 h-4 mr-2" />Permissões
+                        </TabsTrigger>
+                    )}
                     <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
                         <Plug className="w-4 h-4 mr-2" />Integrações
                     </TabsTrigger>
@@ -219,6 +240,79 @@ export default function Settings() {
                         <FileSignature className="w-4 h-4 mr-2" />Comissões
                     </TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="profile" className="space-y-6 animate-in fade-in-50 duration-500">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                        <CardHeader className="border-b border-black/5 dark:border-white/5 pb-6">
+                            <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
+                                <UserIcon className="w-5 h-5 text-electric-blue" /> Meu Perfil
+                            </CardTitle>
+                            <CardDescription className="font-medium">Informações da sua conta no sistema.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-8">
+                            <div className="flex flex-col md:flex-row items-start gap-8">
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-electric-blue to-blue-600 flex items-center justify-center text-white text-4xl font-black shadow-xl shadow-electric-blue/20 ring-4 ring-white dark:ring-pure-black">
+                                        {user?.user_metadata?.avatar_url ? (
+                                            <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full rounded-[2rem] object-cover" />
+                                        ) : (
+                                            user?.email?.[0]?.toUpperCase() || 'U'
+                                        )}
+                                    </div>
+                                    <Badge className="bg-electric-blue/10 text-electric-blue border-none font-bold text-xs uppercase px-4 py-1">
+                                        {role || 'Sem perfil'}
+                                    </Badge>
+                                </div>
+                                <div className="flex-1 space-y-5 w-full">
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] transition-colors">
+                                        <div className="p-2.5 bg-electric-blue/10 rounded-xl">
+                                            <UserIcon className="w-5 h-5 text-electric-blue" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome Completo</p>
+                                            <p className="text-sm font-extrabold text-pure-black dark:text-off-white">
+                                                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Não informado'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] transition-colors">
+                                        <div className="p-2.5 bg-electric-blue/10 rounded-xl">
+                                            <Mail className="w-5 h-5 text-electric-blue" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Email</p>
+                                            <p className="text-sm font-extrabold text-pure-black dark:text-off-white">
+                                                {user?.email || 'Não informado'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] transition-colors">
+                                        <div className="p-2.5 bg-electric-blue/10 rounded-xl">
+                                            <Phone className="w-5 h-5 text-electric-blue" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Telefone</p>
+                                            <p className="text-sm font-extrabold text-pure-black dark:text-off-white">
+                                                {user?.user_metadata?.phone || user?.phone || 'Não informado'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] transition-colors">
+                                        <div className="p-2.5 bg-electric-blue/10 rounded-xl">
+                                            <Building2 className="w-5 h-5 text-electric-blue" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Perfil de Acesso</p>
+                                            <p className="text-sm font-extrabold text-pure-black dark:text-off-white">
+                                                {role || 'Não definido'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
                 <TabsContent value="general" className="space-y-6 animate-in fade-in-50 duration-500">
                     <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
@@ -503,6 +597,55 @@ export default function Settings() {
                             </div>
                         </Card>
                     )}
+                </TabsContent>
+
+                <TabsContent value="permissions" className="space-y-6 animate-in fade-in-50 duration-500">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden min-h-[500px]">
+                        <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
+                            <div>
+                                <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
+                                    <ShieldCheck className="w-5 h-5 text-electric-blue" />
+                                    Matriz de Permissões
+                                </CardTitle>
+                                <CardDescription className="font-medium">Defina os acessos para cada perfil do sistema.</CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader className="bg-black/5 dark:bg-white/5">
+                                        <TableRow className="border-none hover:bg-transparent">
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 pl-6">Módulo / Página</TableHead>
+                                            {['Owner', 'Manager', 'Seller', 'RH', 'Admin'].map(r => (
+                                                <TableHead key={r} className="font-bold text-[10px] uppercase tracking-widest py-4 text-center">{r}</TableHead>
+                                            ))}
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {navItems.map((item) => (
+                                            <TableRow key={item.path} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                                <TableCell className="font-bold text-sm py-4 pl-6 flex items-center gap-3">
+                                                    <div className="p-2 bg-black/5 dark:bg-white/5 rounded-lg">
+                                                        <item.icon className="w-4 h-4 text-muted-foreground" />
+                                                    </div>
+                                                    {item.title}
+                                                </TableCell>
+                                                {['Owner', 'Manager', 'Seller', 'RH', 'Admin'].map((r) => (
+                                                    <TableCell key={r} className="py-4 text-center">
+                                                        <Switch
+                                                            checked={(permissions[r] || []).includes(item.path)}
+                                                            onCheckedChange={() => togglePermission(r, item.path)}
+                                                            className="data-[state=checked]:bg-electric-blue"
+                                                        />
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
                 <TabsContent value="integrations" className="space-y-6 animate-in fade-in-50 duration-500">
