@@ -18,7 +18,7 @@ const STAGES: LeadStage[] = ['Lead', 'Contato', 'Agendamento', 'Visita', 'Propos
 
 export default function Funnel() {
   const { role } = useAuth()
-  const { leads, addLead, updateLead, deleteLead, team, commissionRules, addCommission, chainedFunnel, activeAgencyId } = useAppStore()
+  const { leads, addLead, updateLead, deleteLead, team, commissionRules, addCommission, chainedFunnel, activeAgencyId, addAuditLog } = useAppStore()
   const [lossDialogOpen, setLossDialogOpen] = useState(false)
   const [blockDialogOpen, setBlockDialogOpen] = useState(false)
   const [leadDialogOpen, setLeadDialogOpen] = useState(false)
@@ -28,6 +28,8 @@ export default function Funnel() {
   const [sellerFilter, setSellerFilter] = useState('all')
   const [form, setForm] = useState<Partial<Lead>>({ name: '', car: '', source: 'Internet', sellerId: '', value: 0 })
 
+  const { visits, proposals } = useAppStore()
+
   const processMove = useCallback((id: string, newStage: LeadStage) => {
     const lead = leads.find((l) => l.id === id)
     if (!lead) return
@@ -35,18 +37,49 @@ export default function Funnel() {
     if (chainedFunnel) {
       const currentIndex = STAGES.indexOf(lead.stage)
       const targetIndex = STAGES.indexOf(newStage)
+
+      // Prevent skipping stages
       if (targetIndex > currentIndex + 1) {
         setBlockDialogOpen(true)
         return
       }
+
+      // Mandatory Validation for Sale
+      if (newStage === 'Venda') {
+        const leadVisits = visits.filter(v => v.leadId === id && v.verified)
+        const leadProposals = proposals.filter(p => p.leadId === id)
+
+        if (leadVisits.length === 0) {
+          toast({
+            title: 'Movimentação Bloqueada',
+            description: 'Não é possível vender sem uma Visita Presencial verificada.',
+            variant: 'destructive'
+          })
+          return
+        }
+        if (leadProposals.length === 0) {
+          toast({
+            title: 'Movimentação Bloqueada',
+            description: 'Não é possível vender sem uma Proposta formalizada no sistema.',
+            variant: 'destructive'
+          })
+          return
+        }
+      }
     }
 
     updateLead(id, { stage: newStage, stagnantDays: 0 })
+    addAuditLog({
+      userId: team[0]?.id || 'system',
+      action: newStage === 'Perdido' ? `LEAD PERDIDO: ${id} (Motivo: Manual)` : `Movimentação: Lead ${id} para ${newStage}`,
+      resource: 'leads',
+      agencyId: activeAgencyId || ''
+    })
     toast({ title: 'Avanço no Funil', description: `Lead movido para ${newStage}.` })
 
     if (newStage === 'Venda') {
       const marginPerc = 10
-      const marginValue = lead.value * (marginPerc / 100)
+      const marginValue = (lead.value || 0) * (marginPerc / 100)
       let comissionPerc = 15
       const rule = commissionRules.find((r) =>
         (r.marginMin === undefined || marginPerc >= r.marginMin) &&
@@ -55,10 +88,17 @@ export default function Funnel() {
       if (rule) comissionPerc = rule.percentage
       const comission = marginValue * (comissionPerc / 100)
       const sellerName = team.find((t) => t.id === lead.sellerId)?.name || 'Vendedor Desconhecido'
-      addCommission({ seller: sellerName, car: lead.car, date: new Date().toLocaleDateString('pt-BR'), margin: `${marginPerc.toFixed(1)}%`, comission })
+      addCommission({
+        sellerId: lead.sellerId || '',
+        car: lead.car,
+        date: new Date().toLocaleDateString('pt-BR'),
+        margin: marginPerc, // Now correctly a number
+        comission,
+        agencyId: lead.agencyId || activeAgencyId || ''
+      })
       toast({ title: 'Venda Concluída!', description: `Comissão gerada automaticamente.` })
     }
-  }, [leads, chainedFunnel, updateLead, commissionRules, team, addCommission])
+  }, [leads, visits, proposals, chainedFunnel, updateLead, commissionRules, team, addCommission, activeAgencyId])
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result
@@ -70,10 +110,17 @@ export default function Funnel() {
   }
 
   const handleLost = () => {
-    if (selectedLeadId && lossReason) {
+    if (selectedLeadId) {
       updateLead(selectedLeadId, { stage: 'Perdido', lossReason })
+      addAuditLog({
+        userId: team[0]?.id || 'system',
+        action: `Leadid ${selectedLeadId} marcado como Perdido: ${lossReason}`,
+        resource: 'leads',
+        agencyId: activeAgencyId || ''
+      })
       setLossDialogOpen(false)
-      toast({ title: 'Lead Perdido', description: `Motivo: ${lossReason}`, variant: 'destructive' })
+      setLossReason('')
+      toast({ title: 'Lead Perdido', description: 'Motivo registrado para análise de IA.' })
     }
   }
 
