@@ -20,12 +20,31 @@ let qrCodeData = '';
 let qrImage = '';
 let isConnected = false;
 
-console.log('Starting WhatsApp Client...');
+console.log('Starting WhatsApp Client with optimized configuration...');
 const client = new Client({
     authStrategy: new LocalAuth(),
+    webVersion: '2.3000.1014559863', // Forcing a very modern version to bypass "outdated" error
+    webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-js/main/dist/wppconnect-wa.js',
+    },
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
+        headless: true,
+        handleSIGINT: false,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--use-gl=disabled',
+            '--disable-setuid-sandbox',
+            '--no-sandbox'
+        ],
+    },
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 });
 
 client.on('qr', async (qr) => {
@@ -60,15 +79,35 @@ app.get('/api/whatsapp/status', (req, res) => {
 });
 
 app.post('/api/whatsapp/restart', async (req, res) => {
-    console.log('Restarting WhatsApp Client...');
+    console.log('Aggressive Restart: Cleaning session files and restarting client...');
     try {
         if (client) {
-            await client.destroy();
+            try {
+                await client.destroy();
+            } catch (e) {
+                console.log('Error destroying client, continuing anyway:', e.message);
+            }
         }
+
+        // Clean session files
+        const fs = require('fs');
+        const path = require('path');
+        const authPath = path.join(__dirname, '.wwebjs_auth');
+        const cachePath = path.join(__dirname, '.wwebjs_cache');
+
+        if (fs.existsSync(authPath)) fs.rmSync(authPath, { recursive: true, force: true });
+        if (fs.existsSync(cachePath)) fs.rmSync(cachePath, { recursive: true, force: true });
+
         isConnected = false;
         qrImage = '';
-        client.initialize();
-        res.json({ success: true, message: 'Client restart initiated' });
+        qrCodeData = '';
+
+        // Give it a second before re-initializing
+        setTimeout(() => {
+            client.initialize();
+        }, 1000);
+
+        res.json({ success: true, message: 'Client reset and restart initiated' });
     } catch (error) {
         console.error('Failed to restart client:', error);
         res.status(500).json({ error: 'Failed to restart client' });
