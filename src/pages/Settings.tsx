@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Settings as SettingsIcon, Moon, Sun, Shield, Users, Plug, Link2, Zap, UserPlus, ShieldCheck, Target, FileSignature, Bot, Sparkles, CheckCircle2, User as UserIcon, Mail, Phone } from 'lucide-react'
+import { Settings as SettingsIcon, Moon, Sun, Shield, Users, Plug, Link2, Zap, UserPlus, ShieldCheck, Target, FileSignature } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -14,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useAuth, Role } from '@/components/auth-provider'
 import { mockIntegrations } from '@/lib/mock-data'
 import { navItems } from '@/components/Navigation'
-import useAppStore, { Agency, User } from '@/stores/main'
+import useAppStore from '@/stores/main'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -22,51 +21,19 @@ import GoalManagement from './GoalManagement'
 import CommissionRules from './CommissionRules'
 import Communication from './Communication'
 import { Plus, Building2, Pencil, Trash2, ChevronRight, UserPlus2 } from 'lucide-react'
-import { WHATSAPP_API_URL } from '@/lib/config'
 
 export default function Settings() {
     const { theme, setTheme } = useTheme()
-    const { role, setRole, user } = useAuth()
-    const {
-        chainedFunnel, setChainedFunnel, calendarIntegrations, setCalendarIntegration,
-        users, addUser, updateUser, deleteUser, permissions, togglePermission
-    } = useAppStore()
-
-    const [searchParams, setSearchParams] = useSearchParams()
-    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'general')
-
-    useEffect(() => {
-        const tabParam = searchParams.get('tab')
-        if (tabParam) {
-            setActiveTab(tabParam)
-        }
-    }, [searchParams])
-
-    const handleTabChange = (value: string) => {
-        setActiveTab(value)
-        setSearchParams({ tab: value }, { replace: true })
-    }
+    const { role, setRole } = useAuth()
+    const { chainedFunnel, setChainedFunnel, calendarIntegrations, setCalendarIntegration, users, addUser, deleteUser, permissions, togglePermission } = useAppStore()
     const [userOpen, setUserOpen] = useState(false)
     const [agencyOpen, setAgencyOpen] = useState(false)
     const [editAgencyOpen, setEditAgencyOpen] = useState(false)
     const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null)
     const [agencyName, setAgencyName] = useState('')
-    const [agencyCnpj, setAgencyCnpj] = useState('')
-    const [agencyAddress, setAgencyAddress] = useState('')
-    const [agencyPhone, setAgencyPhone] = useState('')
-    const [agencyEmail, setAgencyEmail] = useState('')
-    const [agencyWebsite, setAgencyWebsite] = useState('')
-    const [agencyManager, setAgencyManager] = useState('')
-
-    const [editingAgency, setEditingAgency] = useState<Agency | null>(null)
-    const [editingUser, setEditingUser] = useState<User | null>(null)
-    const [editUserOpen, setEditUserOpen] = useState(false)
-    const [editingPermissions, setEditingPermissions] = useState(false)
-
+    const [editingAgency, setEditingAgency] = useState<{ id: string, name: string } | null>(null)
     const [newName, setNewName] = useState('')
     const [newEmail, setNewEmail] = useState('')
-    const [newPassword, setNewPassword] = useState('')
-    const [newPhone, setNewPhone] = useState('')
     const [newRole, setNewRole] = useState<Role>('Seller')
     const [newAgencyId, setNewAgencyId] = useState<string>('')
 
@@ -100,146 +67,56 @@ export default function Settings() {
 
     const handleAddUser = () => {
         if (!newName || !newEmail) return
-        addUser({
-            name: newName,
-            email: newEmail,
-            password: newPassword,
-            phone: newPhone,
-            role: newRole,
-            agencyId: newAgencyId || undefined
-        })
-        toast({ title: 'Usuário Criado', description: `${newName} foi adicionado ao time.` });
-        setUserOpen(false);
-        setNewName('');
-        setNewEmail('');
-        setNewPassword('');
-        setNewPhone('');
-        setNewAgencyId('')
-    }
-
-    const handleUpdateUser = () => {
-        if (!editingUser || !newName || !newEmail) return
-        updateUser(editingUser.id, {
-            name: newName,
-            email: newEmail,
-            role: newRole,
-            password: newPassword,
-            phone: newPhone,
-            agencyId: newAgencyId || undefined
-        })
-        toast({ title: 'Usuário Atualizado', description: `${newName} foi atualizado.` })
-        setEditUserOpen(false)
-        setEditingUser(null)
-        setNewName(''); setNewEmail(''); setNewPassword(''); setNewPhone(''); setNewAgencyId('')
+        addUser({ name: newName, email: newEmail, role: newRole, agencyId: newAgencyId || undefined })
+        toast({ title: 'Usuário Criado', description: `${newName} foi adicionado ao time.` }); setUserOpen(false); setNewName(''); setNewEmail(''); setNewAgencyId('')
     }
 
     const handleAddAgency = () => {
         if (!agencyName) return
-        addAgency({
-            name: agencyName,
-            slug: agencyName.toLowerCase().replace(/\s+/g, '-'),
-            cnpj: agencyCnpj,
-            address: agencyAddress,
-            phone: agencyPhone,
-            email: agencyEmail,
-            website: agencyWebsite,
-            managerName: agencyManager
-        })
+        addAgency({ name: agencyName })
         toast({ title: 'Agência Criada', description: `Agência ${agencyName} foi adicionada.` })
         setAgencyOpen(false)
-        resetAgencyForm()
+        setAgencyName('')
     }
 
     const handleUpdateAgency = () => {
         if (!editingAgency || !agencyName) return
-        updateAgency(editingAgency.id, {
-            name: agencyName,
-            cnpj: agencyCnpj,
-            address: agencyAddress,
-            phone: agencyPhone,
-            email: agencyEmail,
-            website: agencyWebsite,
-            managerName: agencyManager
-        })
+        updateAgency(editingAgency.id, { name: agencyName })
         toast({ title: 'Agência Atualizada', description: `Agência ${agencyName} foi atualizada.` })
         setEditAgencyOpen(false)
         setEditingAgency(null)
-        resetAgencyForm()
-    }
-
-    const resetAgencyForm = () => {
         setAgencyName('')
-        setAgencyCnpj('')
-        setAgencyAddress('')
-        setAgencyPhone('')
-        setAgencyEmail('')
-        setAgencyWebsite('')
-        setAgencyManager('')
-    }
-
-    const prepareEditAgency = (agency: Agency) => {
-        setEditingAgency(agency)
-        setAgencyName(agency.name)
-        setAgencyCnpj(agency.cnpj || '')
-        setAgencyAddress(agency.address || '')
-        setAgencyPhone(agency.phone || '')
-        setAgencyEmail(agency.email || '')
-        setAgencyWebsite(agency.website || '')
-        setAgencyManager(agency.managerName || '')
-        setEditAgencyOpen(true)
-    }
-
-    const prepareEditUser = (user: User) => {
-        setEditingUser(user)
-        setNewName(user.name)
-        setNewEmail(user.email)
-        setNewRole(user.role)
-        setNewPassword(user.password || '')
-        setNewPhone(user.phone || '')
-        setNewAgencyId(user.agencyId || '')
-        setEditUserOpen(true)
     }
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto pb-12">
-            <div className="mb-0">
+            <div className="mb-8">
                 <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-electric-blue animate-pulse"></div>
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">ADMINISTRATION BOX</span>
+                    <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">SISTEMA</span>
                 </div>
-                <h1 className="text-5xl font-extrabold tracking-tighter text-pure-black dark:text-off-white">
-                    Painel de <span className="text-electric-blue">Configurações</span>
-                </h1>
-                <p className="text-muted-foreground font-medium mt-2 max-w-xl">Gerencie preferências, usuários e permissões do AutoGestão com precisão.</p>
+                <p className="text-muted-foreground font-medium mt-1">Gerencie preferências, usuários e permissões do AutoGestão.</p>
             </div>
 
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <TabsList className="bg-white/50 dark:bg-black/50 p-1.5 rounded-2xl border border-white/30 dark:border-white/5 mb-10 backdrop-blur-2xl shadow-xl flex-wrap h-auto">
-                    <TabsTrigger value="profile" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
-                        <UserIcon className="w-4 h-4 mr-2" />Perfil
-                    </TabsTrigger>
-                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
+            <Tabs defaultValue="general" className="w-full">
+                <TabsList className="bg-black/5 dark:bg-white/5 p-1 rounded-2xl border border-black/5 dark:border-white/5 mb-8 backdrop-blur-xl">
+                    <TabsTrigger value="general" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <SettingsIcon className="w-4 h-4 mr-2" />Geral
                     </TabsTrigger>
-                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
+                    <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         {role === 'Admin' ? <Building2 className="w-4 h-4 mr-2" /> : <Users className="w-4 h-4 mr-2" />}
                         {role === 'Admin' ? 'Agência' : 'Usuários'}
                     </TabsTrigger>
-                    {['Admin', 'Owner'].includes(role) && (
-                        <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
-                            <ShieldCheck className="w-4 h-4 mr-2" />Permissões
-                        </TabsTrigger>
-                    )}
-                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
+                    <TabsTrigger value="permissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
+                        <ShieldCheck className="w-4 h-4 mr-2" />Permissões
+                    </TabsTrigger>
+                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Plug className="w-4 h-4 mr-2" />Integrações
                     </TabsTrigger>
-                    <TabsTrigger value="automations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
-                        <Bot className="w-4 h-4 mr-2" />Automações
-                    </TabsTrigger>
-                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
+                    <TabsTrigger value="goals" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <Target className="w-4 h-4 mr-2" />Metas
                     </TabsTrigger>
-                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg px-6 py-2.5 transition-all">
+                    <TabsTrigger value="commissions" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6">
                         <FileSignature className="w-4 h-4 mr-2" />Comissões
                     </TabsTrigger>
                 </TabsList>
@@ -318,9 +195,9 @@ export default function Settings() {
                 </TabsContent>
 
                 <TabsContent value="general" className="space-y-6 animate-in fade-in-50 duration-500">
-                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
-                            <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
+                            <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Moon className="w-5 h-5 text-electric-blue" /> Aparência
                             </CardTitle>
                         </CardHeader>
@@ -335,9 +212,9 @@ export default function Settings() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
-                            <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
+                            <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Shield className="w-5 h-5 text-slate-500" /> Controle de Acesso (RBAC)
                             </CardTitle>
                         </CardHeader>
@@ -363,9 +240,9 @@ export default function Settings() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-sm rounded-3xl overflow-hidden group hover:shadow-md transition-all">
                         <CardHeader>
-                            <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
+                            <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Zap className="w-5 h-5 text-electric-blue" /> Regras de Negócio
                             </CardTitle>
                         </CardHeader>
@@ -388,7 +265,7 @@ export default function Settings() {
                 <TabsContent value="users" className="space-y-6 animate-in fade-in-50 duration-500">
                     {role === 'Admin' ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card className="md:col-span-1 border-none bg-white dark:bg-pure-black shadow-xl rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/5">
+                            <Card className="md:col-span-1 border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden border border-black/5 dark:border-white/5">
                                 <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
                                     <div>
                                         <CardTitle className="text-lg font-extrabold text-electric-blue">Agências</CardTitle>
@@ -421,7 +298,9 @@ export default function Settings() {
                                                     className={cn("h-8 w-8 rounded-lg", selectedAgencyId === agency.id ? "text-white hover:bg-white/20" : "text-muted-foreground hover:bg-black/10")}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        prepareEditAgency(agency);
+                                                        setEditingAgency(agency);
+                                                        setAgencyName(agency.name);
+                                                        setEditAgencyOpen(true);
                                                     }}
                                                 >
                                                     <Pencil className="w-3.5 h-3.5" />
@@ -451,12 +330,12 @@ export default function Settings() {
                                 </div>
                             </Card>
 
-                            <Card className="md:col-span-2 border-none bg-white dark:bg-pure-black shadow-xl rounded-[2rem] overflow-hidden min-h-[500px]">
+                            <Card className="md:col-span-2 border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden min-h-[500px]">
                                 {selectedAgencyId ? (
                                     <>
                                         <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
                                             <div>
-                                                <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
+                                                <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                                     <Users className="w-5 h-5 text-electric-blue" />
                                                     Usuários: {agencies.find(a => a.id === selectedAgencyId)?.name}
                                                 </CardTitle>
@@ -468,11 +347,10 @@ export default function Settings() {
                                         </CardHeader>
                                         <div className="overflow-x-auto">
                                             <Table>
-                                                <TableHeader className="bg-black/[0.03] dark:bg-white/[0.03] backdrop-blur-md">
+                                                <TableHeader className="bg-black/5 dark:bg-white/5">
                                                     <TableRow className="border-none hover:bg-transparent">
                                                         <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 pl-6">Nome</TableHead>
                                                         <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4">Email</TableHead>
-                                                        <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4">Telefone</TableHead>
                                                         <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 text-center">Perfil</TableHead>
                                                         <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 text-right pr-6">Ações</TableHead>
                                                     </TableRow>
@@ -482,31 +360,20 @@ export default function Settings() {
                                                         <TableRow key={u.id} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                                                             <TableCell className="font-extrabold text-sm py-5 pl-6">{u.name}</TableCell>
                                                             <TableCell className="text-sm py-5 text-muted-foreground font-bold">{u.email}</TableCell>
-                                                            <TableCell className="text-sm py-5 text-muted-foreground font-bold">{u.phone || '-'}</TableCell>
                                                             <TableCell className="py-5 text-center">
                                                                 <Badge variant="secondary" className="font-bold uppercase text-[10px] bg-electric-blue/10 text-electric-blue border-none">
                                                                     {u.role}
                                                                 </Badge>
                                                             </TableCell>
                                                             <TableCell className="py-5 text-right pr-6">
-                                                                <div className="flex items-center justify-end gap-2">
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        onClick={() => prepareEditUser(u)}
-                                                                        className="rounded-xl text-electric-blue font-bold text-xs hover:bg-electric-blue/10"
-                                                                    >
-                                                                        Editar
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        onClick={() => { deleteUser(u.id); toast({ title: 'Usuário removido' }) }}
-                                                                        className="rounded-xl text-mars-orange font-bold text-xs hover:bg-mars-orange/10"
-                                                                    >
-                                                                        Remover
-                                                                    </Button>
-                                                                </div>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => { deleteUser(u.id); toast({ title: 'Usuário removido' }) }}
+                                                                    className="rounded-xl text-mars-orange font-bold text-xs hover:bg-mars-orange/10"
+                                                                >
+                                                                    Remover
+                                                                </Button>
                                                             </TableCell>
                                                         </TableRow>
                                                     ))}
@@ -537,7 +404,7 @@ export default function Settings() {
                         <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
                             <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
                                 <div>
-                                    <CardTitle className="text-lg font-extrabold text-pure-black dark:text-off-white">Gerenciamento de Time</CardTitle>
+                                    <CardTitle className="text-lg font-extrabold">Gerenciamento de Time</CardTitle>
                                     <CardDescription className="font-medium">Lista de usuários com acesso à plataforma.</CardDescription>
                                 </div>
                                 <Button onClick={() => setUserOpen(true)} className="rounded-xl font-bold bg-electric-blue text-white shadow-lg hover:bg-electric-blue/90">
@@ -550,7 +417,6 @@ export default function Settings() {
                                         <TableRow className="border-none hover:bg-transparent">
                                             <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 pl-6">Nome</TableHead>
                                             <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4">Email</TableHead>
-                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4">Telefone</TableHead>
                                             <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 text-center">Agência</TableHead>
                                             <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 text-center">Perfil</TableHead>
                                             <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 text-right pr-6">Ações</TableHead>
@@ -561,7 +427,6 @@ export default function Settings() {
                                             <TableRow key={u.id} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                                                 <TableCell className="font-extrabold text-sm py-5 pl-6">{u.name}</TableCell>
                                                 <TableCell className="text-sm py-5 text-muted-foreground font-bold">{u.email}</TableCell>
-                                                <TableCell className="text-sm py-5 text-muted-foreground font-bold">{u.phone || '-'}</TableCell>
                                                 <TableCell className="py-5 text-center">
                                                     <Badge variant="outline" className="font-bold text-[10px] border-black/10 dark:border-white/10">
                                                         {agencies.find(a => a.id === u.agencyId)?.name || '-'}
@@ -573,25 +438,15 @@ export default function Settings() {
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="py-5 text-right pr-6">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => prepareEditUser(u)}
-                                                            className="rounded-xl text-electric-blue font-bold text-xs hover:bg-electric-blue/10"
-                                                        >
-                                                            Editar
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            disabled={u.role === 'Admin'}
-                                                            onClick={() => { deleteUser(u.id); toast({ title: 'Usuário removido' }) }}
-                                                            className="rounded-xl text-mars-orange font-bold text-xs hover:bg-mars-orange/10"
-                                                        >
-                                                            Remover
-                                                        </Button>
-                                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        disabled={u.role === 'Admin'}
+                                                        onClick={() => { deleteUser(u.id); toast({ title: 'Usuário removido' }) }}
+                                                        className="rounded-xl text-mars-orange font-bold text-xs hover:bg-mars-orange/10"
+                                                    >
+                                                        Remover
+                                                    </Button>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -602,73 +457,85 @@ export default function Settings() {
                     )}
                 </TabsContent>
 
-                <TabsContent value="permissions" className="space-y-6 animate-in fade-in-50 duration-500">
-                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden min-h-[500px]">
+                <TabsContent value="agencies" className="space-y-6 animate-in fade-in-50 duration-500">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
                         <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 dark:border-white/5 pb-6">
                             <div>
-                                <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
-                                    <ShieldCheck className="w-5 h-5 text-electric-blue" />
-                                    Matriz de Permissões
-                                </CardTitle>
-                                <CardDescription className="font-medium">Defina os acessos para cada perfil do sistema.</CardDescription>
+                                <CardTitle className="text-lg font-extrabold">Unidades / Agências</CardTitle>
+                                <CardDescription className="font-medium">Gerencie as filiais e centros de distribuição.</CardDescription>
                             </div>
-                            <div>
-                                {!editingPermissions ? (
-                                    <Button
-                                        onClick={() => setEditingPermissions(true)}
-                                        className="rounded-xl font-bold bg-white text-pure-black border border-black/10 dark:bg-pure-black dark:text-white dark:border-white/10 shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
-                                    >
-                                        <Pencil className="w-4 h-4 mr-2" /> Editar
-                                    </Button>
-                                ) : (
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            onClick={() => setEditingPermissions(false)}
-                                            className="rounded-xl font-bold px-6 border-none hover:bg-black/5"
-                                        >
-                                            Cancelar
-                                        </Button>
-                                        <Button
-                                            onClick={() => {
-                                                setEditingPermissions(false)
-                                                toast({ title: 'Permissões Salvas', description: 'A matriz de acessos foi atualizada com sucesso.' })
-                                            }}
-                                            className="rounded-xl font-bold bg-electric-blue text-white px-8 shadow-lg hover:bg-electric-blue/90"
-                                        >
-                                            <CheckCircle2 className="w-4 h-4 mr-2" /> Salvar
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
+                            <Button onClick={() => setAgencyOpen(true)} className="rounded-xl font-bold bg-electric-blue text-white shadow-lg hover:bg-electric-blue/90">
+                                <Building2 className="w-4 h-4 mr-2" /> Nova Unidade
+                            </Button>
                         </CardHeader>
-                        <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader className="bg-black/5 dark:bg-white/5">
+                                    <TableRow className="border-none hover:bg-transparent">
+                                        <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 pl-6">ID</TableHead>
+                                        <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4">Nome da Unidade</TableHead>
+                                        <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 text-center">Membros</TableHead>
+                                        <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 text-right pr-6">Ações</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {agencies.map((agency) => (
+                                        <TableRow key={agency.id} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                            <TableCell className="text-[10px] font-bold text-muted-foreground py-5 pl-6 font-mono">{agency.id}</TableCell>
+                                            <TableCell className="font-extrabold text-sm py-5">{agency.name}</TableCell>
+                                            <TableCell className="py-5 text-center">
+                                                <Badge variant="secondary" className="font-bold text-[10px] bg-electric-blue/5 text-electric-blue border-none">
+                                                    {users.filter(u => u.agencyId === agency.id).length} usuários
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="py-5 text-right pr-6">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    disabled={users.some(u => u.agencyId === agency.id)}
+                                                    onClick={() => { deleteAgency(agency.id); toast({ title: 'Unidade removida' }) }}
+                                                    className="rounded-xl text-mars-orange font-bold text-xs hover:bg-mars-orange/10"
+                                                >
+                                                    Remover
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="permissions" className="space-y-6 animate-in fade-in-50 duration-500">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
+                        <CardHeader className="border-b border-black/5 dark:border-white/5 pb-6">
+                            <CardTitle className="text-lg font-extrabold flex items-center gap-2">
+                                <ShieldCheck className="w-5 h-5 text-mars-orange" /> Matriz de Permissões
+                            </CardTitle>
+                            <CardDescription className="font-medium">Defina o nível de acesso para cada função do sistema.</CardDescription>
+                        </CardHeader>
+                        {role === 'Admin' ? (
                             <div className="overflow-x-auto">
                                 <Table>
                                     <TableHeader className="bg-black/5 dark:bg-white/5">
                                         <TableRow className="border-none hover:bg-transparent">
-                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-4 pl-6">Módulo / Página</TableHead>
-                                            {['Owner', 'Manager', 'Seller', 'RH', 'Admin'].map(r => (
-                                                <TableHead key={r} className="font-bold text-[10px] uppercase tracking-widest py-4 text-center">{r}</TableHead>
-                                            ))}
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5 pl-6">Funcionalidade</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5 text-center">Dono</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5 text-center">Gestor</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5 text-center">Vendedor</TableHead>
+                                            <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5 text-center">RH</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {navItems.map((item) => (
                                             <TableRow key={item.path} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                                <TableCell className="font-bold text-sm py-4 pl-6 flex items-center gap-3">
-                                                    <div className="p-2 bg-black/5 dark:bg-white/5 rounded-lg">
-                                                        <item.icon className="w-4 h-4 text-muted-foreground" />
-                                                    </div>
-                                                    {item.title}
-                                                </TableCell>
-                                                {['Owner', 'Manager', 'Seller', 'RH', 'Admin'].map((r) => (
-                                                    <TableCell key={r} className="py-4 text-center">
+                                                <TableCell className="font-bold text-sm py-5 pl-6">{item.title}</TableCell>
+                                                {['Owner', 'Manager', 'Seller', 'RH'].map((rl) => (
+                                                    <TableCell key={rl} className="py-5 text-center">
                                                         <Switch
-                                                            disabled={!editingPermissions || r === 'Owner'}
-                                                            checked={(permissions[r] || []).includes(item.path) || r === 'Owner'}
-                                                            onCheckedChange={() => togglePermission(r, item.path)}
-                                                            className="data-[state=checked]:bg-electric-blue"
+                                                            checked={permissions[rl]?.includes(item.path)}
+                                                            onCheckedChange={() => togglePermission(rl, item.path)}
                                                         />
                                                     </TableCell>
                                                 ))}
@@ -677,14 +544,20 @@ export default function Settings() {
                                     </TableBody>
                                 </Table>
                             </div>
-                        </CardContent>
+                        ) : (
+                            <div className="p-12 text-center bg-black/5 dark:bg-white/5 mx-6 my-8 rounded-3xl border-2 border-dashed border-black/5 dark:border-white/5">
+                                <Shield className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
+                                <h3 className="text-xl font-bold mb-2">Acesso Restrito ao Admin</h3>
+                                <p className="text-sm text-muted-foreground max-w-xs mx-auto">Apenas o perfil Admin tem privilégios para gerenciar permissões de acesso.</p>
+                            </div>
+                        )}
                     </Card>
                 </TabsContent>
 
                 <TabsContent value="integrations" className="space-y-6 animate-in fade-in-50 duration-500">
                     <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
                         <CardHeader>
-                            <CardTitle className="text-lg font-extrabold flex items-center gap-2 text-pure-black dark:text-off-white">
+                            <CardTitle className="text-lg font-extrabold flex items-center gap-2">
                                 <Link2 className="w-5 h-5 text-electric-blue" /> Ecossistema Conectado
                             </CardTitle>
                             <CardDescription className="font-medium">Integrações ativas e serviços de terceiros.</CardDescription>
@@ -760,9 +633,6 @@ export default function Settings() {
                             </div>
                         </CardContent>
                     </Card>
-
-                    {/* AI Agents Configuration */}
-                    <AIAgentsPanel />
                 </TabsContent>
 
                 <TabsContent value="goals" className="animate-in fade-in-50 duration-500">
@@ -781,54 +651,40 @@ export default function Settings() {
                         <p className="text-white/70 text-sm font-medium">Convide um novo membro para o time.</p>
                     </div>
                     <div className="p-8 space-y-5">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Nome Completo</Label>
-                                <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex: Ricardo Silva" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Endereço de Email</Label>
-                                <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="ricardo@loja.com.br" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
+                        <div className="space-y-2">
+                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Nome Completo</Label>
+                            <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex: Ricardo Silva" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Senha</Label>
-                                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Telefone</Label>
-                                <Input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="(11) 99999-9999" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
+                        <div className="space-y-2">
+                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Endereço de Email</Label>
+                            <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="ricardo@loja.com.br" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Perfil de Acesso</Label>
-                                <Select value={newRole} onValueChange={(v) => setNewRole(v as Role)}>
-                                    <SelectTrigger className="rounded-xl h-11 border-black/10 dark:border-white/10 font-bold">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-none shadow-2xl">
-                                        <SelectItem value="Owner" className="font-bold">Dono (Full Admin)</SelectItem>
-                                        <SelectItem value="Manager" className="font-bold">Gestor (Controle de Time)</SelectItem>
-                                        <SelectItem value="Seller" className="font-bold">Vendedor (Foco em Vendas)</SelectItem>
-                                        <SelectItem value="RH" className="font-bold">RH (Monitoramento)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Unidade / Agência</Label>
-                                <Select value={newAgencyId} onValueChange={setNewAgencyId}>
-                                    <SelectTrigger className="rounded-xl h-11 border-black/10 dark:border-white/10 font-bold">
-                                        <SelectValue placeholder="Selecione uma unidade" />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-none shadow-2xl">
-                                        {agencies.map((a) => (
-                                            <SelectItem key={a.id} value={a.id} className="font-bold">{a.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                        <div className="space-y-2">
+                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Perfil de Acesso</Label>
+                            <Select value={newRole} onValueChange={(v) => setNewRole(v as Role)}>
+                                <SelectTrigger className="rounded-xl h-11 border-black/10 dark:border-white/10 font-bold">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-none shadow-2xl">
+                                    <SelectItem value="Owner" className="font-bold">Dono (Full Admin)</SelectItem>
+                                    <SelectItem value="Manager" className="font-bold">Gestor (Controle de Time)</SelectItem>
+                                    <SelectItem value="Seller" className="font-bold">Vendedor (Foco em Vendas)</SelectItem>
+                                    <SelectItem value="RH" className="font-bold">RH (Monitoramento)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Unidade / Agência</Label>
+                            <Select value={newAgencyId} onValueChange={setNewAgencyId}>
+                                <SelectTrigger className="rounded-xl h-11 border-black/10 dark:border-white/10 font-bold">
+                                    <SelectValue placeholder="Selecione uma unidade" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-none shadow-2xl">
+                                    {agencies.map((a) => (
+                                        <SelectItem key={a.id} value={a.id} className="font-bold">{a.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <DialogFooter className="p-8 bg-black/5 dark:bg-white/5 flex gap-3">
@@ -845,39 +701,9 @@ export default function Settings() {
                         <p className="text-white/70 text-sm font-medium">Cadastre uma nova agência no sistema.</p>
                     </div>
                     <div className="p-8 space-y-5">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Nome da Agência</Label>
-                                <Input value={agencyName} onChange={(e) => setAgencyName(e.target.value)} placeholder="Ex: Agência Central" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">CNPJ</Label>
-                                <Input value={agencyCnpj} onChange={(e) => setAgencyCnpj(e.target.value)} placeholder="00.000.000/0000-00" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                        </div>
                         <div className="space-y-2">
-                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Endereço Completo</Label>
-                            <Input value={agencyAddress} onChange={(e) => setAgencyAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - UF" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Telefone</Label>
-                                <Input value={agencyPhone} onChange={(e) => setAgencyPhone(e.target.value)} placeholder="(11) 99999-9999" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Email de Contato</Label>
-                                <Input value={agencyEmail} onChange={(e) => setAgencyEmail(e.target.value)} placeholder="contato@agencia.com.br" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Website</Label>
-                                <Input value={agencyWebsite} onChange={(e) => setAgencyWebsite(e.target.value)} placeholder="www.agencia.com.br" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Responsável / Gerente</Label>
-                                <Input value={agencyManager} onChange={(e) => setAgencyManager(e.target.value)} placeholder="Nome do Responsável" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
+                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Nome da Agência</Label>
+                            <Input value={agencyName} onChange={(e) => setAgencyName(e.target.value)} placeholder="Ex: Agência Central" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
                         </div>
                     </div>
                     <DialogFooter className="p-8 bg-black/5 dark:bg-white/5 flex gap-3">
@@ -894,39 +720,9 @@ export default function Settings() {
                         <p className="text-white/70 text-sm font-medium">Atualize os dados da agência.</p>
                     </div>
                     <div className="p-8 space-y-5">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Nome da Agência</Label>
-                                <Input value={agencyName} onChange={(e) => setAgencyName(e.target.value)} placeholder="Ex: Agência Central" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">CNPJ</Label>
-                                <Input value={agencyCnpj} onChange={(e) => setAgencyCnpj(e.target.value)} placeholder="00.000.000/0000-00" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                        </div>
                         <div className="space-y-2">
-                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Endereço Completo</Label>
-                            <Input value={agencyAddress} onChange={(e) => setAgencyAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - UF" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Telefone</Label>
-                                <Input value={agencyPhone} onChange={(e) => setAgencyPhone(e.target.value)} placeholder="(11) 99999-9999" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Email de Contato</Label>
-                                <Input value={agencyEmail} onChange={(e) => setAgencyEmail(e.target.value)} placeholder="contato@agencia.com.br" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Website</Label>
-                                <Input value={agencyWebsite} onChange={(e) => setAgencyWebsite(e.target.value)} placeholder="www.agencia.com.br" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Responsável / Gerente</Label>
-                                <Input value={agencyManager} onChange={(e) => setAgencyManager(e.target.value)} placeholder="Nome do Responsável" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
+                            <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Nome da Agência</Label>
+                            <Input value={agencyName} onChange={(e) => setAgencyName(e.target.value)} placeholder="Ex: Agência Central" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
                         </div>
                     </div>
                     <DialogFooter className="p-8 bg-black/5 dark:bg-white/5 flex gap-3">
@@ -935,144 +731,6 @@ export default function Settings() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
-            <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
-                <DialogContent className="sm:max-w-[420px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
-                    <div className="p-6 bg-electric-blue text-white">
-                        <DialogTitle className="font-extrabold text-2xl">Editar Usuário</DialogTitle>
-                        <p className="text-white/70 text-sm font-medium">Atualize os dados do membro do time.</p>
-                    </div>
-                    <div className="p-8 space-y-5">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Nome Completo</Label>
-                                <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex: Ricardo Silva" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Endereço de Email</Label>
-                                <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="ricardo@loja.com.br" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Senha (Opcional)</Label>
-                                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Telefone</Label>
-                                <Input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="(11) 99999-9999" className="rounded-xl h-11 border-black/10 dark:border-white/10" />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Perfil de Acesso</Label>
-                                <Select value={newRole} onValueChange={(v) => setNewRole(v as Role)}>
-                                    <SelectTrigger className="rounded-xl h-11 border-black/10 dark:border-white/10 font-bold">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-none shadow-2xl">
-                                        <SelectItem value="Owner" className="font-bold">Dono (Full Admin)</SelectItem>
-                                        <SelectItem value="Manager" className="font-bold">Gestor (Controle de Time)</SelectItem>
-                                        <SelectItem value="Seller" className="font-bold">Vendedor (Foco em Vendas)</SelectItem>
-                                        <SelectItem value="RH" className="font-bold">RH (Monitoramento)</SelectItem>
-                                        <SelectItem value="Admin" className="font-bold">Admin</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Unidade / Agência</Label>
-                                <Select value={newAgencyId} onValueChange={setNewAgencyId}>
-                                    <SelectTrigger className="rounded-xl h-11 border-black/10 dark:border-white/10 font-bold">
-                                        <SelectValue placeholder="Selecione uma unidade" />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl border-none shadow-2xl">
-                                        {agencies.map((a) => (
-                                            <SelectItem key={a.id} value={a.id} className="font-bold">{a.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                    <DialogFooter className="p-8 bg-black/5 dark:bg-white/5 flex gap-3">
-                        <Button variant="ghost" onClick={() => { setEditUserOpen(false); setEditingUser(null); }} className="rounded-xl font-bold px-6 border-none hover:bg-black/5">Cancelar</Button>
-                        <Button onClick={handleUpdateUser} disabled={!newName || !newEmail} className="rounded-xl font-bold bg-electric-blue text-white px-8 shadow-lg hover:bg-electric-blue/90">Salvar Alterações</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
-    )
-}
-
-function AIAgentsPanel() {
-    const { selectedAiModel, setSelectedAiModel } = useAppStore()
-
-    return (
-        <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-3xl overflow-hidden">
-            <CardHeader className="border-b border-black/5 dark:border-white/5">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-electric-blue/10 rounded-xl">
-                            <Bot className="h-5 w-5 text-electric-blue" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-lg font-extrabold text-pure-black dark:text-off-white">Agentes de IA</CardTitle>
-                            <CardDescription className="font-medium">Selecione o modelo gratuito do OpenRouter para diagnósticos e relatórios.</CardDescription>
-                        </div>
-                    </div>
-                    <Badge className="bg-green-500/10 text-green-600 border-none font-bold text-[10px] uppercase px-3">Free Tier</Badge>
-                </div>
-            </CardHeader>
-            <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {FREE_AI_MODELS.map((model) => {
-                        const isActive = selectedAiModel === model.id
-                        return (
-                            <button
-                                key={model.id}
-                                onClick={() => {
-                                    setSelectedAiModel(model.id)
-                                    toast({ title: '🤖 Modelo Atualizado', description: `Agente de IA alterado para ${model.name} (${model.provider}).` })
-                                }}
-                                className={cn(
-                                    'relative text-left p-5 rounded-2xl border-2 transition-all duration-300 group cursor-pointer',
-                                    isActive
-                                        ? 'border-electric-blue bg-electric-blue/5 dark:bg-electric-blue/10 shadow-lg shadow-electric-blue/10'
-                                        : 'border-transparent bg-black/[0.03] dark:bg-white/[0.03] hover:bg-black/[0.06] dark:hover:bg-white/[0.06] hover:border-black/10 dark:hover:border-white/10'
-                                )}
-                            >
-                                {isActive && (
-                                    <div className="absolute top-3 right-3">
-                                        <CheckCircle2 className="w-5 h-5 text-electric-blue" />
-                                    </div>
-                                )}
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Sparkles className={cn('w-4 h-4', isActive ? 'text-electric-blue' : 'text-muted-foreground/50')} />
-                                    <span className="font-extrabold text-sm text-pure-black dark:text-off-white">{model.name}</span>
-                                </div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Badge variant="outline" className="text-[9px] font-bold px-2 py-0.5 border-black/10 dark:border-white/10 rounded-lg">
-                                        {model.provider}
-                                    </Badge>
-                                    <Badge variant="secondary" className="text-[9px] font-mono-numbers px-2 py-0.5 bg-black/5 dark:bg-white/5 border-none rounded-lg">
-                                        {model.context}
-                                    </Badge>
-                                </div>
-                                <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">{model.desc}</p>
-                            </button>
-                        )
-                    })}
-                </div>
-                <div className="mt-6 p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] flex items-center gap-3">
-                    <Bot className="w-5 h-5 text-electric-blue shrink-0" />
-                    <div>
-                        <p className="text-xs font-bold text-pure-black dark:text-off-white">
-                            Modelo ativo: <span className="text-electric-blue">{FREE_AI_MODELS.find(m => m.id === selectedAiModel)?.name || selectedAiModel}</span>
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-medium">Todos os modelos são 100% gratuitos via OpenRouter. Sem custos adicionais.</p>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
     )
 }

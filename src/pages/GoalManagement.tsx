@@ -59,10 +59,10 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-2 h-2 rounded-full bg-electric-blue animate-pulse"></div>
-                            <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">PERFORMANCE TRACKING</span>
+                            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">PERFORMANCE TRACKING</span>
                         </div>
-                        <h1 className="text-5xl font-extrabold tracking-tighter text-pure-black dark:text-off-white">Gestão de <span className="text-electric-blue">Metas</span></h1>
-                        <p className="text-muted-foreground font-medium mt-2 max-w-xl">Defina objetivos claros e acompanhe a evolução em tempo real.</p>
+                        <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">Gestão de <span className="text-electric-blue">Metas</span></h1>
+                        <p className="text-muted-foreground font-medium mt-1">Defina objetivos claros e acompanhe a evolução em tempo real.</p>
                     </div>
                     <div className="flex gap-3">
                         <Button variant="outline" className="rounded-xl font-bold h-11 border-black/10 dark:border-white/10 bg-white dark:bg-pure-black">
@@ -103,18 +103,18 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                         <CardContent className="p-8 pt-4 space-y-6">
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground dark:text-off-white/60">Tipo de Meta</Label>
-                                <div className="flex p-1.5 bg-white/50 dark:bg-black/50 rounded-2xl border border-white/30 dark:border-white/5 backdrop-blur-xl shadow-inner">
+                                <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-xl">
                                     <Button
                                         variant={type === 'Equipe' ? 'default' : 'ghost'}
                                         onClick={() => setType('Equipe')}
-                                        className={cn("flex-1 rounded-xl font-bold text-xs h-10", type === 'Equipe' ? "bg-white dark:bg-pure-black text-pure-black dark:text-off-white shadow-md" : "text-muted-foreground")}
+                                        className={cn("flex-1 rounded-lg font-bold text-xs h-9", type === 'Equipe' ? "bg-white dark:bg-pure-black text-pure-black dark:text-off-white shadow-sm" : "text-muted-foreground")}
                                     >
                                         <Users className="w-3.5 h-3.5 mr-2" /> Equipe
                                     </Button>
                                     <Button
                                         variant={type === 'Individual' ? 'default' : 'ghost'}
                                         onClick={() => setType('Individual')}
-                                        className={cn("flex-1 rounded-xl font-bold text-xs h-10", type === 'Individual' ? "bg-white dark:bg-pure-black text-pure-black dark:text-off-white shadow-md" : "text-muted-foreground")}
+                                        className={cn("flex-1 rounded-lg font-bold text-xs h-9", type === 'Individual' ? "bg-white dark:bg-pure-black text-pure-black dark:text-off-white shadow-sm" : "text-muted-foreground")}
                                     >
                                         <User className="w-3.5 h-3.5 mr-2" /> Individual
                                     </Button>
