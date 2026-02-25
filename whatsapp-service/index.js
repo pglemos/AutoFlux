@@ -140,10 +140,43 @@ app.post('/api/whatsapp/send', async (req, res) => {
 const startServer = () => {
     client.initialize();
 
-    // Start Server
-    app.listen(PORT, () => {
-        console.log(`WhatsApp Service listening on port ${PORT}`);
-    });
+// CRON JOB: Daily closing report at 18:00
+cron.schedule('0 18 * * *', async () => {
+    if (!isConnected) return;
+    console.log('Running daily report cron...');
+
+    try {
+        // Fetch active daily report configurations
+        const { data: configs, error } = await supabase
+            .from('communication_configs')
+            .select('*')
+            .eq('type', 'daily_report')
+            .eq('is_active', true);
+
+        if (error || !configs || configs.length === 0) return;
+
+        // Optimization: Fetch all unique target roles first
+        const uniqueRoles = new Set();
+        for (const config of configs) {
+            const roles = config.target_roles || ['Manager', 'Owner'];
+            roles.forEach(role => uniqueRoles.add(role));
+        }
+
+        // Fetch all users with these roles in one query
+        const { data: allUsers } = await supabase
+            .from('team')
+            .select('*')
+            // Note: Normally joined with agency, simplifying here
+            .in('role', Array.from(uniqueRoles));
+
+        if (!allUsers) return;
+
+        for (const config of configs) {
+            // Filter users in memory
+            const targetRoles = config.target_roles || ['Manager', 'Owner'];
+            const users = allUsers.filter(user => targetRoles.includes(user.role));
+
+            if (!users || users.length === 0) continue;
 
     // CRON JOB: Daily closing report at 18:00
     cron.schedule('0 18 * * *', async () => {
