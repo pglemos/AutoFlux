@@ -20,16 +20,7 @@ export default function MorningReport() {
     const [loadingAi, setLoadingAi] = useState(false);
     const navigate = useNavigate();
 
-    // Assuming fetchData is an existing function or a placeholder for initial data loading
-    // If fetchData is not defined, this will cause an error.
-    // For the purpose of this edit, I'll assume it's defined elsewhere or meant to be added.
-    const fetchData = () => {
-        // Placeholder for actual data fetching logic if it exists
-        // e.g., useAppStore.getState().fetchInitialData();
-    };
-
     useEffect(() => {
-        fetchData();
         fetchLatestAiInsight();
     }, []);
 
