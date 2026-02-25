@@ -15,6 +15,23 @@ app.use(express.json());
 const PORT = process.env.PORT || 3001;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+const WHATSAPP_API_KEY = process.env.VITE_WHATSAPP_API_KEY;
+
+// Security Middleware
+const authenticateAPI = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+
+    if (!WHATSAPP_API_KEY) {
+        console.error('CRITICAL: VITE_WHATSAPP_API_KEY is not set in environment variables.');
+        return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    if (!apiKey || apiKey !== WHATSAPP_API_KEY) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key' });
+    }
+
+    next();
+};
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -71,15 +88,15 @@ client.on('disconnected', (reason) => {
 });
 
 // API Routes for Frontend Integration
-app.get('/api/whatsapp/status', (req, res) => {
+app.get('/api/whatsapp/status', authenticateAPI, (req, res) => {
     res.json({
         connected: isConnected,
         qr: isConnected ? null : qrImage
     });
 });
 
-app.post('/api/whatsapp/restart', async (req, res) => {
-    console.log('Aggressive Restart: Cleaning session files and restarting client...');
+app.post('/api/whatsapp/restart', authenticateAPI, async (req, res) => {
+    console.log('Restarting WhatsApp Client...');
     try {
         if (client) {
             try {
@@ -114,7 +131,7 @@ app.post('/api/whatsapp/restart', async (req, res) => {
     }
 });
 
-app.post('/api/whatsapp/send', async (req, res) => {
+app.post('/api/whatsapp/send', authenticateAPI, async (req, res) => {
     if (!isConnected) {
         return res.status(400).json({ error: 'WhatsApp is not connected. Scan the QR code first.' });
     }

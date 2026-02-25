@@ -59,7 +59,9 @@ export default function Communication() {
     useEffect(() => {
         const checkStatus = async () => {
             try {
-                const res = await fetch(`${WHATSAPP_API_URL}/api/whatsapp/status`)
+                const res = await fetch('http://localhost:3001/api/whatsapp/status', {
+                    headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY || '' }
+                })
                 const data = await res.json()
                 setWaStatus(data)
             } catch (err) {
@@ -560,7 +562,10 @@ export default function Communication() {
                                         <Button
                                             variant="outline"
                                             onClick={async () => {
-                                                await fetch(`${WHATSAPP_API_URL}/api/whatsapp/restart`, { method: 'POST' })
+                                                await fetch('http://localhost:3001/api/whatsapp/restart', {
+                                                    method: 'POST',
+                                                    headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY || '' }
+                                                })
                                                 toast({ title: 'Reiniciando', description: 'O serviço de WhatsApp está sendo reiniciado.' })
                                             }}
                                             className="w-full rounded-2xl h-14 border-black/10 dark:border-white/10 font-bold"
@@ -591,7 +596,10 @@ export default function Communication() {
                                                     onClick={async () => {
                                                         setIsConnecting(true)
                                                         try {
-                                                            await fetch(`${WHATSAPP_API_URL}/api/whatsapp/restart`, { method: 'POST' })
+                                                            await fetch('http://localhost:3001/api/whatsapp/restart', {
+                                                                method: 'POST',
+                                                                headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY || '' }
+                                                            })
                                                             toast({ title: 'Iniciando', description: 'Aguarde o QR Code ser gerado.' })
                                                         } finally {
                                                             setIsConnecting(false)
