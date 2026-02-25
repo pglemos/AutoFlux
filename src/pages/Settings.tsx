@@ -61,6 +61,7 @@ export default function Settings() {
     const [editingAgency, setEditingAgency] = useState<Agency | null>(null)
     const [editingUser, setEditingUser] = useState<User | null>(null)
     const [editUserOpen, setEditUserOpen] = useState(false)
+    const [editingPermissions, setEditingPermissions] = useState(false)
 
     const [newName, setNewName] = useState('')
     const [newEmail, setNewEmail] = useState('')
@@ -609,6 +610,35 @@ export default function Settings() {
                                 </CardTitle>
                                 <CardDescription className="font-medium">Defina os acessos para cada perfil do sistema.</CardDescription>
                             </div>
+                            <div>
+                                {!editingPermissions ? (
+                                    <Button
+                                        onClick={() => setEditingPermissions(true)}
+                                        className="rounded-xl font-bold bg-white text-pure-black border border-black/10 dark:bg-pure-black dark:text-white dark:border-white/10 shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
+                                    >
+                                        <Pencil className="w-4 h-4 mr-2" /> Editar
+                                    </Button>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setEditingPermissions(false)}
+                                            className="rounded-xl font-bold px-6 border-none hover:bg-black/5"
+                                        >
+                                            Cancelar
+                                        </Button>
+                                        <Button
+                                            onClick={() => {
+                                                setEditingPermissions(false)
+                                                toast({ title: 'Permissões Salvas', description: 'A matriz de acessos foi atualizada com sucesso.' })
+                                            }}
+                                            className="rounded-xl font-bold bg-electric-blue text-white px-8 shadow-lg hover:bg-electric-blue/90"
+                                        >
+                                            <CheckCircle2 className="w-4 h-4 mr-2" /> Salvar
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
@@ -633,7 +663,8 @@ export default function Settings() {
                                                 {['Owner', 'Manager', 'Seller', 'RH', 'Admin'].map((r) => (
                                                     <TableCell key={r} className="py-4 text-center">
                                                         <Switch
-                                                            checked={(permissions[r] || []).includes(item.path)}
+                                                            disabled={!editingPermissions || r === 'Owner'}
+                                                            checked={(permissions[r] || []).includes(item.path) || r === 'Owner'}
                                                             onCheckedChange={() => togglePermission(r, item.path)}
                                                             className="data-[state=checked]:bg-electric-blue"
                                                         />
