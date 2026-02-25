@@ -60,7 +60,7 @@ export default function Communication() {
         const checkStatus = async () => {
             try {
                 const res = await fetch('http://localhost:3001/api/whatsapp/status', {
-                    headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY || '' }
+                    headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY }
                 })
                 const data = await res.json()
                 setWaStatus(data)
@@ -564,7 +564,7 @@ export default function Communication() {
                                             onClick={async () => {
                                                 await fetch('http://localhost:3001/api/whatsapp/restart', {
                                                     method: 'POST',
-                                                    headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY || '' }
+                                                    headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY }
                                                 })
                                                 toast({ title: 'Reiniciando', description: 'O serviço de WhatsApp está sendo reiniciado.' })
                                             }}
@@ -598,7 +598,7 @@ export default function Communication() {
                                                         try {
                                                             await fetch('http://localhost:3001/api/whatsapp/restart', {
                                                                 method: 'POST',
-                                                                headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY || '' }
+                                                                headers: { 'x-api-key': import.meta.env.VITE_WHATSAPP_API_KEY }
                                                             })
                                                             toast({ title: 'Iniciando', description: 'Aguarde o QR Code ser gerado.' })
                                                         } finally {
