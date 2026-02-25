@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, ReactNode } from 'react'
 import {
     UserPlus,
     Trophy,
@@ -203,7 +203,7 @@ export default function Team() {
     )
 }
 
-function SummaryCard({ title, value, trend, icon }: { title: string, value: string, trend: string, icon: any }) {
+function SummaryCard({ title, value, trend, icon }: { title: string, value: string, trend: string, icon: ReactNode }) {
     return (
         <Card className="border-none shadow-sm bg-white dark:bg-black rounded-[2rem] overflow-hidden group">
             <CardContent className="p-7">
