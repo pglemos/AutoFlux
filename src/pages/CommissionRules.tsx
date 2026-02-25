@@ -71,11 +71,12 @@ export default function CommissionRules({ standalone = true }: { standalone?: bo
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
-                            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">CONFIGURAÇÃO</span>
+                            <span className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">FINANCIAL CONFIGURATION</span>
                         </div>
-                        <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
+                        <h1 className="text-5xl font-extrabold tracking-tighter text-pure-black dark:text-off-white">
                             Regras de <span className="text-electric-blue">Comissão</span>
                         </h1>
+                        <p className="text-muted-foreground font-medium mt-2 max-w-xl">Configure as métricas financeiras e automatize os recebíveis do seu time.</p>
                     </div>
                     <Button onClick={handleNew} className="rounded-full px-6 h-11 font-bold bg-pure-black text-white dark:bg-white dark:text-pure-black shadow-elevation hover:scale-105 transition-transform">
                         <Plus className="w-4 h-4 mr-2" /> Nova Regra
