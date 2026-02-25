@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
 import { supabase } from '@/lib/supabase'
-import { generateAIMessage, FREE_AI_MODELS } from '@/lib/openrouter'
 
 type ReportType = 'morning' | 'weekly' | 'monthly';
 
@@ -34,7 +33,7 @@ interface CommInstance {
 }
 
 export default function Communication() {
-    const { activeAgencyId, selectedAiModel } = useAppStore()
+    const { activeAgencyId } = useAppStore()
     const [configs, setConfigs] = useState<Record<string, AutomationConfig>>({})
     const [instances, setInstances] = useState<CommInstance[]>([])
     const [history, setHistory] = useState<any[]>([])
@@ -43,8 +42,6 @@ export default function Communication() {
     const [activeTab, setActiveTab] = useState('automations')
     const [waStatus, setWaStatus] = useState<{ connected: boolean; qr: string | null }>({ connected: false, qr: null })
     const [isConnecting, setIsConnecting] = useState(false)
-    const [aiPreview, setAiPreview] = useState<string | null>(null)
-    const [isGeneratingAI, setIsGeneratingAI] = useState(false)
 
 
     useEffect(() => {
@@ -227,30 +224,6 @@ export default function Communication() {
         }
     }
 
-    const generateAIPreview = async (type: ReportType) => {
-        setIsGeneratingAI(true)
-        try {
-            const message = await generateAIMessage({
-                type,
-                salesCount: 15,
-                leadsCount: 32,
-                conversionRate: 18.5,
-                topSeller: 'Alex',
-                stockValue: 3200000
-            }, selectedAiModel)
-            setAiPreview(message)
-            // Auto-fill the custom_message field
-            handleConfigChange(type, 'custom_message', message)
-            const modelName = FREE_AI_MODELS.find(m => m.id === selectedAiModel)?.name || selectedAiModel
-            toast({ title: '🤖 Mensagem gerada por IA', description: `Texto criado pelo modelo ${modelName}.` })
-        } catch (error) {
-            console.error(error)
-            toast({ title: 'Erro na IA', description: 'Não foi possível gerar. Tente novamente.', variant: 'destructive' })
-        } finally {
-            setIsGeneratingAI(false)
-        }
-    }
-
     const automationCards: Array<{ type: ReportType; title: string; desc: string }> = [
         { type: 'morning', title: 'Start Matinal de Performance', desc: 'Resumo focado nos leads acumulados e diretriz AI para os vendedores.' },
         { type: 'weekly', title: 'Performance Semanal AI', desc: 'Análise estratégica da semana, hotspots de conversão e metas batidas.' },
@@ -289,11 +262,11 @@ export default function Communication() {
                 </div>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
-                    <TabsList className="bg-white/50 dark:bg-black/50 p-1.5 rounded-2xl border border-white/30 dark:border-white/5 backdrop-blur-2xl shadow-xl flex-wrap h-auto">
-                        <TabsTrigger value="automations" className="rounded-xl font-bold px-6 py-2.5 data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg transition-all">
+                    <TabsList className="bg-black/5 dark:bg-white/5 p-1 rounded-2xl border border-black/5 dark:border-white/5">
+                        <TabsTrigger value="automations" className="rounded-xl font-bold px-6 data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:shadow-lg">
                             <Bot className="w-4 h-4 mr-2" /> Automações
                         </TabsTrigger>
-                        <TabsTrigger value="instances" className="rounded-xl font-bold px-6 py-2.5 data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-lg transition-all">
+                        <TabsTrigger value="instances" className="rounded-xl font-bold px-6 data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:shadow-lg">
                             <Smartphone className="w-4 h-4 mr-2" /> Instâncias
                         </TabsTrigger>
                     </TabsList>
@@ -405,23 +378,13 @@ export default function Communication() {
                                                     </div>
 
                                                     <div className="flex items-center justify-between gap-4 pt-4">
-                                                        <div className="flex gap-2">
-                                                            <Button
-                                                                variant="outline"
-                                                                onClick={() => generateAIPreview(card.type)}
-                                                                disabled={isGeneratingAI}
-                                                                className="rounded-2xl font-bold h-14 px-6 border-electric-blue/20 text-electric-blue hover:bg-electric-blue/5"
-                                                            >
-                                                                <Bot className="w-4 h-4 mr-2" /> {isGeneratingAI ? 'Gerando...' : 'Gerar com IA'}
-                                                            </Button>
-                                                            <Button
-                                                                variant="outline"
-                                                                onClick={() => triggerReportNow(card.type)}
-                                                                className="rounded-2xl font-bold h-14 px-8 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground"
-                                                            >
-                                                                <MessageSquare className="w-4 h-4 mr-2" /> Testar Agora
-                                                            </Button>
-                                                        </div>
+                                                        <Button
+                                                            variant="outline"
+                                                            onClick={() => triggerReportNow(card.type)}
+                                                            className="rounded-2xl font-bold h-14 px-8 border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground"
+                                                        >
+                                                            <MessageSquare className="w-4 h-4 mr-2" /> Testar Agora
+                                                        </Button>
 
                                                         <Button
                                                             onClick={() => saveConfig(card.type)}
@@ -527,13 +490,13 @@ export default function Communication() {
                 </TabsContent>
 
                 <TabsContent value="instances" className="mt-0 border-none p-0 outline-none">
-                    <Card className="border-none bg-white dark:bg-pure-black shadow-xl rounded-[2.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-500 ring-1 ring-black/5 dark:ring-white/10">
+                    <Card className="border-none bg-white dark:bg-pure-black rounded-[3rem] shadow-2xl p-12 overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
                         <div className="max-w-2xl mx-auto text-center space-y-8">
                             <div className="w-24 h-24 bg-green-500 rounded-[2rem] flex items-center justify-center text-white mx-auto shadow-2xl shadow-green-500/30">
                                 <Smartphone className="w-12 h-12" />
                             </div>
-                            <div className="space-y-4">
-                                <h2 className="text-4xl font-black tracking-tighter text-pure-black dark:text-off-white">Conexão Estratégica</h2>
+                            <div className="space-y-2">
+                                <h2 className="text-4xl font-black text-pure-black dark:text-off-white">Conexão Estratégica</h2>
                                 <p className="text-muted-foreground font-semibold text-lg">Use o WhatsApp para entregar resultados em tempo real para gestores e vendedores.</p>
                             </div>
 

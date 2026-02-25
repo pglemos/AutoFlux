@@ -1,55 +1,25 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search, Filter, AlertCircle, Clock, CheckCircle2, MoreVertical, Phone, MessageSquare, Sparkles, TrendingUp } from 'lucide-react';
 import clsx from 'clsx';
-import useAppStore from '@/stores/main';
-import { differenceInMinutes, parseISO } from 'date-fns';
+
+const leads = [
+  { id: 1, name: 'Carlos Silva', phone: '(11) 98765-4321', vehicle: 'Jeep Compass 2022', source: 'Meta Ads', status: 'Novo', sla: 'estourado', time: '15m', owner: 'João', score: 92, aiSuggestion: 'Alta intenção de compra (clicou em financiamento). Ligue imediatamente e ofereça test-drive.' },
+  { id: 2, name: 'Ana Oliveira', phone: '(11) 91234-5678', vehicle: 'Honda Civic 2021', source: 'RD Station', status: 'Em Contato', sla: 'ok', time: '2h', owner: 'Maria', score: 75, aiSuggestion: 'Perfil analítico. Envie comparativo com concorrentes via WhatsApp.' },
+  { id: 3, name: 'Roberto Santos', phone: '(11) 99876-5432', vehicle: 'VW Nivus 2023', source: 'WhatsApp', status: 'Agendado', sla: 'ok', time: '1d', owner: 'João', score: 88, aiSuggestion: 'Agendamento para sábado. Envie vídeo do carro 1 dia antes para aquecer.' },
+  { id: 4, name: 'Fernanda Lima', phone: '(11) 98765-1234', vehicle: 'Toyota Corolla 2020', source: 'Meta Ads', status: 'Novo', sla: 'alerta', time: '4m', owner: 'Pedro', score: 45, aiSuggestion: 'Lead frio (horário atípico, dados genéricos). Tente contato via WhatsApp primeiro.' },
+  { id: 5, name: 'Lucas Souza', phone: '(11) 91234-8765', vehicle: 'Hyundai Creta 2022', source: 'Site', status: 'Proposta', sla: 'ok', time: '3d', owner: 'Maria', score: 95, aiSuggestion: 'Negociação avançada. Ofereça bônus na avaliação do usado para fechar hoje.' },
+];
 
 export default function LeadOps() {
-  const { leads, team } = useAppStore();
-  const [expandedLead, setExpandedLead] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [now, setNow] = useState(new Date());
+  const [expandedLead, setExpandedLead] = useState<number | null>(null);
 
-  // Update "now" every minute to refresh SLA
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const toggleLead = (id: string) => {
-    setExpandedLead(expandedLead === id ? null : id);
+  const toggleLead = (id: number) => {
+    if (expandedLead === id) {
+      setExpandedLead(null);
+    } else {
+      setExpandedLead(id);
+    }
   };
-
-  const leadsWithSLA = useMemo(() => {
-    return leads.map(lead => {
-      const minutesSinceCreation = differenceInMinutes(now, parseISO(lead.createdAt));
-      const slaStatus = minutesSinceCreation >= lead.slaMinutes ? 'estourado' :
-        minutesSinceCreation >= lead.slaMinutes * 0.6 ? 'alerta' : 'ok';
-
-      const owner = team.find(t => t.id === lead.sellerId);
-
-      return {
-        ...lead,
-        slaStatus,
-        timeLabel: minutesSinceCreation < 60 ? `${minutesSinceCreation}m` :
-          minutesSinceCreation < 1440 ? `${Math.floor(minutesSinceCreation / 60)}h` :
-            `${Math.floor(minutesSinceCreation / 1440)}d`,
-        owner: owner?.name || 'Não atribuído'
-      };
-    }).filter(lead =>
-      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.car.toLowerCase().includes(searchTerm.toLowerCase())
-    ).sort((a, b) => b.score - a.score);
-  }, [leads, team, now, searchTerm]);
-
-  const stats = useMemo(() => {
-    return {
-      ok: leadsWithSLA.filter(l => l.slaStatus === 'ok').length,
-      alerta: leadsWithSLA.filter(l => l.slaStatus === 'alerta').length,
-      estourado: leadsWithSLA.filter(l => l.slaStatus === 'estourado').length,
-      quentes: leadsWithSLA.filter(l => l.score >= 80).length
-    };
-  }, [leadsWithSLA]);
 
   return (
     <div className="space-y-12">
@@ -70,8 +40,8 @@ export default function LeadOps() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="hyper-glass p-6 rounded-3xl flex items-center justify-between">
           <div>
-            <p className="micro-label mb-2">SLA Ok</p>
-            <p className="text-4xl font-black text-[#050505]">{stats.ok}</p>
+            <p className="micro-label mb-2">SLA Ok ({'<'} 3m)</p>
+            <p className="text-4xl font-black text-[#050505]">12</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/50 flex items-center justify-center">
             <CheckCircle2 className="h-6 w-6 text-[#050505]" strokeWidth={2.5} />
@@ -79,8 +49,8 @@ export default function LeadOps() {
         </div>
         <div className="hyper-glass p-6 rounded-3xl flex items-center justify-between">
           <div>
-            <p className="micro-label mb-2">Alerta</p>
-            <p className="text-4xl font-black text-[#050505]">{stats.alerta}</p>
+            <p className="micro-label mb-2">Alerta (3m - 5m)</p>
+            <p className="text-4xl font-black text-[#050505]">3</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/50 flex items-center justify-center">
             <Clock className="h-6 w-6 text-[#FF4500]" strokeWidth={2.5} />
@@ -88,8 +58,8 @@ export default function LeadOps() {
         </div>
         <div className="hyper-glass p-6 rounded-3xl flex items-center justify-between border-l-4 border-l-[#FF4500]">
           <div>
-            <p className="micro-label mb-2">Estourado</p>
-            <p className="text-4xl font-black text-[#050505]">{stats.estourado}</p>
+            <p className="micro-label mb-2">Estourado ({'>'} 5m)</p>
+            <p className="text-4xl font-black text-[#050505]">1</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-[#FF4500]/10 flex items-center justify-center">
             <AlertCircle className="h-6 w-6 text-[#FF4500]" strokeWidth={2.5} />
@@ -99,7 +69,7 @@ export default function LeadOps() {
           <div className="absolute inset-0 bg-gradient-to-br from-[#2563EB]/20 to-[#FF4500]/20"></div>
           <div className="relative z-10">
             <p className="micro-label !text-white/70 mb-2">Leads Quentes (IA)</p>
-            <p className="text-4xl font-black">{stats.quentes}</p>
+            <p className="text-4xl font-black">5</p>
           </div>
           <div className="relative z-10 h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
             <Sparkles className="h-6 w-6 text-white" strokeWidth={2.5} />
@@ -116,8 +86,6 @@ export default function LeadOps() {
             </div>
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-12 pr-4 py-3 border-none rounded-full leading-5 bg-white/50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB] sm:text-sm font-medium"
               placeholder="Buscar leads..."
             />
@@ -152,7 +120,7 @@ export default function LeadOps() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200/50">
-              {leadsWithSLA.map((lead) => (
+              {leads.sort((a, b) => b.score - a.score).map((lead) => (
                 <React.Fragment key={lead.id}>
                   <tr
                     className={clsx("hover:bg-white/50 transition-colors cursor-pointer", expandedLead === lead.id && "bg-white/80")}
@@ -165,21 +133,21 @@ export default function LeadOps() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-bold text-[#050505]">{lead.name}</div>
-                          <div className="text-sm font-medium text-gray-500">{lead.source}</div>
+                          <div className="text-sm font-medium text-gray-500">{lead.phone}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">
-                      <div className="text-sm font-bold text-[#050505]">{lead.car}</div>
-                      <div className="micro-label mt-1">ID: {lead.id}</div>
+                      <div className="text-sm font-bold text-[#050505]">{lead.vehicle}</div>
+                      <div className="micro-label mt-1">{lead.source}</div>
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className={clsx(
                           "flex items-center justify-center h-8 w-8 rounded-lg font-black text-sm",
                           lead.score >= 80 ? "bg-[#050505] text-white" :
-                            lead.score >= 60 ? "bg-gray-200 text-[#050505]" :
-                              "bg-[#FF4500]/10 text-[#FF4500]"
+                          lead.score >= 60 ? "bg-gray-200 text-[#050505]" :
+                          "bg-[#FF4500]/10 text-[#FF4500]"
                         )}>
                           {lead.score}
                         </div>
@@ -189,18 +157,18 @@ export default function LeadOps() {
                     <td className="px-6 py-5 whitespace-nowrap">
                       <div className="flex flex-col gap-2">
                         <span className="px-3 py-1 inline-flex text-xs font-bold uppercase tracking-wider rounded-full bg-white border border-gray-200 text-[#050505] w-fit">
-                          {lead.stage}
+                          {lead.status}
                         </span>
                         <div className="flex items-center gap-1.5 text-xs font-bold">
-                          {lead.slaStatus === 'estourado' && <AlertCircle className="h-4 w-4 text-[#FF4500]" strokeWidth={2.5} />}
-                          {lead.slaStatus === 'alerta' && <Clock className="h-4 w-4 text-[#FF4500]" strokeWidth={2.5} />}
-                          {lead.slaStatus === 'ok' && <CheckCircle2 className="h-4 w-4 text-[#050505]" strokeWidth={2.5} />}
+                          {lead.sla === 'estourado' && <AlertCircle className="h-4 w-4 text-[#FF4500]" strokeWidth={2.5} />}
+                          {lead.sla === 'alerta' && <Clock className="h-4 w-4 text-[#FF4500]" strokeWidth={2.5} />}
+                          {lead.sla === 'ok' && <CheckCircle2 className="h-4 w-4 text-[#050505]" strokeWidth={2.5} />}
                           <span className={clsx(
-                            lead.slaStatus === 'estourado' && 'text-[#FF4500]',
-                            lead.slaStatus === 'alerta' && 'text-[#FF4500]',
-                            lead.slaStatus === 'ok' && 'text-[#050505]'
+                            lead.sla === 'estourado' && 'text-[#FF4500]',
+                            lead.sla === 'alerta' && 'text-[#FF4500]',
+                            lead.sla === 'ok' && 'text-[#050505]'
                           )}>
-                            {lead.timeLabel}
+                            {lead.time}
                           </span>
                         </div>
                       </div>
@@ -236,11 +204,7 @@ export default function LeadOps() {
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-[#050505] mb-2 uppercase tracking-wider">Análise e Sugestão da IA</h4>
-                            <p className="text-base font-medium text-gray-600">
-                              {lead.score >= 80 ? 'Alta intenção de compra. O cliente interagiu com múltiplos veículos. Ligue em menos de 5 minutos.' :
-                                lead.score >= 60 ? 'Interesse moderado. Cliente buscando comparativos. Envie dados técnicos via WhatsApp.' :
-                                  'Lead em estágio inicial. Realize qualificação SDR antes de encaminhar para o Closer.'}
-                            </p>
+                            <p className="text-base font-medium text-gray-600">{lead.aiSuggestion}</p>
                             <div className="mt-4 flex gap-3">
                               <button className="px-5 py-2.5 bg-[#2563EB] text-white text-sm font-bold rounded-full hover:bg-[#2563EB]/90 transition-colors shadow-lg shadow-[#2563EB]/20">
                                 Executar Ação Sugerida
