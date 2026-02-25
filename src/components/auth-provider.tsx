@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
 import { User, Session } from '@supabase/supabase-js'
+import { getUserData } from '@/lib/auth-service'
 
 export type Role = 'Owner' | 'Manager' | 'Seller' | 'RH' | 'Admin'
 
@@ -24,19 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     const fetchUserData = async (userId: string) => {
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('TIMEOUT_LIMIT')), 4000)
-        );
-
         try {
-            const { data, error } = await Promise.race([
-                supabase
-                    .from('team')
-                    .select('role, agency_id')
-                    .eq('id', userId)
-                    .single(),
-                timeoutPromise
-            ]) as any
+            const { data, error } = await getUserData(userId, supabase)
 
             if (!error && data) {
                 setRole(data.role as Role)
