@@ -129,7 +129,7 @@ cron.schedule('0 18 * * *', async () => {
 
             if (!users) continue;
 
-            for (const user of users) {
+            await Promise.all(users.map(async (user) => {
                 // In a real scenario, you would have the user's phone number in the 'team' table
                 // For this MVP automation, we assume we want to log it or if there was a phone field
                 if (user.phone) {
@@ -139,7 +139,7 @@ cron.schedule('0 18 * * *', async () => {
                     const finalPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
                     await client.sendMessage(`${finalPhone}@c.us`, message);
                 }
-            }
+            }));
         }
     } catch (err) {
         console.error('Error in daily report cron:', err);
