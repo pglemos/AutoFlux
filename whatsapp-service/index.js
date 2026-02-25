@@ -1,6 +1,7 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
+const corsOptions = require('./cors-config');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const { createClient } = require('@supabase/supabase-js');
@@ -8,7 +9,7 @@ const cron = require('node-cron');
 const { runDailyReport } = require('./cron-jobs');
 
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
