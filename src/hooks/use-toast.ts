@@ -3,7 +3,7 @@ import * as React from 'react'
 const TOAST_LIMIT = 3
 const TOAST_REMOVE_DELAY = 5000
 
-type ToasterToast = {
+export type ToasterToast = {
     id: string
     title?: string
     description?: string
@@ -16,13 +16,13 @@ function genId() {
     return count.toString()
 }
 
-type Action =
+export type Action =
     | { type: 'ADD_TOAST'; toast: ToasterToast }
     | { type: 'UPDATE_TOAST'; toast: Partial<ToasterToast> & { id: string } }
     | { type: 'DISMISS_TOAST'; toastId?: string }
     | { type: 'REMOVE_TOAST'; toastId?: string }
 
-interface State {
+export interface State {
     toasts: ToasterToast[]
 }
 
