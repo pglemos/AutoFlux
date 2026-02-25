@@ -172,6 +172,15 @@ export interface Lead {
     createdAt: string
 }
 
+export interface InventoryItem {
+    id: string
+    model: string
+    year: number
+    price: number
+    agencyId: string
+    agingDays?: number
+}
+
 export interface AppState {
     tasks: Task[]
     addTask: (task: Omit<Task, 'id' | 'status'>) => void
@@ -241,6 +250,8 @@ export interface AppState {
     addLead: (lead: Omit<Lead, 'id'>) => void
     updateLead: (id: string, lead: Partial<Lead>) => void
     deleteLead: (id: string) => void
+
+    inventory: InventoryItem[]
 
     permissions: Record<string, string[]>
     togglePermission: (role: string, path: string) => void
@@ -321,9 +332,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         { id: 'L-105', name: 'Fernando Lima', car: 'Volvo XC60', stage: 'Proposta', slaMinutes: 300, source: 'Carteira', value: 390000, score: 88, sellerId: 'T-02', agencyId: 'a1', createdAt: new Date().toISOString() },
     ])
     const [inventory, setInventory] = useState<InventoryItem[]>([
-        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1', plate: 'ABC1D23', agingDays: 12, status: 'Disponível' },
-        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1', plate: 'XYZ9K87', agingDays: 45, status: 'Disponível' },
-        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2', plate: 'QWE4R56', agingDays: 5, status: 'Disponível' },
+        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1', agingDays: 45 },
+        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1', agingDays: 12 },
+        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2', agingDays: 5 },
     ])
 
     const [permissions, setPermissions] = useState<Record<string, string[]>>({
@@ -393,50 +404,42 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         })
     }, [])
 
-    const value = useMemo(() => ({
-        tasks, addTask, updateTask, deleteTask,
-        appointments, addAppointment, updateAppointment,
-        visits, recordVisit, verifyVisit,
-        proposals, addProposal, updateProposal,
-        inventory, updateInventoryItem,
-        attendance, recordAttendance,
-        commissions, addCommission,
-        dashboardWidgets, setDashboardWidgets,
-        reportWidgets, setReportWidgets,
-        commissionRules, addCommissionRule, deleteCommissionRule,
-        goals, setGoal, deleteGoal,
-        calendarIntegrations,
-        setCalendarIntegration: (p: 'google' | 'outlook', c: boolean) => setCalendarIntegrations((prev) => ({ ...prev, [p]: c })),
-        chainedFunnel, setChainedFunnel,
-        users, addUser, updateUser, deleteUser,
-        agencies, addAgency, updateAgency, deleteAgency,
-        team, addTeamMember, updateTeamMember, deleteTeamMember,
-        leads, addLead, updateLead, deleteLead,
-        permissions, togglePermission,
-        notifications, auditLogs, addAuditLog,
-        activeAgencyId, setActiveAgencyId,
-        selectedAiModel, setSelectedAiModel,
-    }), [
-        tasks, addTask, updateTask, deleteTask,
-        appointments, addAppointment, updateAppointment,
-        visits, recordVisit, verifyVisit,
-        proposals, addProposal, updateProposal,
-        inventory, updateInventoryItem,
-        attendance, recordAttendance,
-        commissions, addCommission,
-        dashboardWidgets, reportWidgets,
-        commissionRules, addCommissionRule, deleteCommissionRule,
-        goals, setGoal, deleteGoal,
-        calendarIntegrations, chainedFunnel,
-        users, addUser, updateUser, deleteUser,
-        agencies, addAgency, updateAgency, deleteAgency,
-        team, addTeamMember, updateTeamMember, deleteTeamMember,
-        leads, addLead, updateLead, deleteLead,
-        permissions, togglePermission,
-        notifications, auditLogs, addAuditLog,
-        activeAgencyId, setActiveAgencyId,
-        selectedAiModel, setSelectedAiModel,
-    ])
+    const value = useMemo(
+        () => ({
+            tasks, addTask, updateTask, deleteTask,
+            commissions, addCommission,
+            dashboardWidgets, setDashboardWidgets,
+            reportWidgets, setReportWidgets,
+            commissionRules, addCommissionRule, deleteCommissionRule,
+            goals, setGoal, deleteGoal,
+            calendarIntegrations,
+            setCalendarIntegration: (provider: 'google' | 'outlook', connected: boolean) =>
+                setCalendarIntegrations((prev) => ({ ...prev, [provider]: connected })),
+            chainedFunnel, setChainedFunnel,
+            users, addUser, updateUser, deleteUser,
+            agencies, addAgency, updateAgency, deleteAgency,
+            team, addTeamMember, updateTeamMember, deleteTeamMember,
+            leads, addLead, updateLead, deleteLead,
+            inventory,
+            permissions, togglePermission,
+            activeAgencyId, setActiveAgencyId,
+        }),
+        [
+            tasks, addTask, updateTask, deleteTask,
+            commissions, addCommission,
+            dashboardWidgets, reportWidgets,
+            commissionRules, addCommissionRule, deleteCommissionRule,
+            goals, setGoal, deleteGoal,
+            calendarIntegrations, chainedFunnel,
+            users, addUser, updateUser, deleteUser,
+            agencies, addAgency, updateAgency, deleteAgency,
+            team, addTeamMember, updateTeamMember, deleteTeamMember,
+            leads, addLead, updateLead, deleteLead,
+            inventory,
+            permissions, togglePermission,
+            activeAgencyId, setActiveAgencyId,
+        ],
+    )
 
     return React.createElement(AppContext.Provider, { value }, children)
 }

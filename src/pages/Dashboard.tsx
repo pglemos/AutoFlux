@@ -21,8 +21,23 @@ import { Progress } from '@/components/ui/progress'
 import useAppStore from '@/stores/main'
 
 export default function Dashboard() {
-    // System Data
-    const { leads = [], team = [], inventory = [], goals = [] } = useAppStore()
+    const { role } = useAuth()
+    const { leads = [], team = [], inventory = [], goals = [], activeAgencyId } = useAppStore()
+    const [isEditing, setIsEditing] = useState(false)
+    const [dashboardWidgets, setDashboardWidgets] = useState<string[]>([
+        'kpi-metas',
+        'kpi-leads',
+        'kpi-vendas',
+        'kpi-projecao',
+        'kpi-estoque',
+        'chart-vendas',
+        'ranking-vendedores'
+    ])
+
+    // Conditionally render the premium Admin Dashboard
+    if (role === 'Admin') {
+        return <AdminDashboard />
+    }
 
     const stats = useMemo(() => {
         if (!team || !inventory) return { totalSales: 0, avgAging: 0, stockValue: 0, projection: 0 }
