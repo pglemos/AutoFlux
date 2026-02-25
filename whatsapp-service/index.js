@@ -137,10 +137,10 @@ app.post('/api/whatsapp/send', async (req, res) => {
     }
 });
 
-// Start Server and Client logic wrapped for testing
-if (require.main === module) {
+const startServer = () => {
     client.initialize();
 
+    // Start Server
     app.listen(PORT, () => {
         console.log(`WhatsApp Service listening on port ${PORT}`);
     });
@@ -186,6 +186,10 @@ if (require.main === module) {
             console.error('Error in daily report cron:', err);
         }
     });
+};
+
+if (require.main === module) {
+    startServer();
 }
 
-module.exports = { app, client };
+module.exports = { app, client, startServer };
