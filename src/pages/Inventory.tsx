@@ -34,13 +34,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Inventory() {
     const { role } = useAuth()
-    const { activeAgencyId } = useAppStore()
+    const { inventory, activeAgencyId } = useAppStore()
     const [searchTerm, setSearchTerm] = useState('')
     const [view, setView] = useState<'grid' | 'list'>('grid')
 
-    const filteredInventory = mockInventory.filter((item) => {
-        const matchesSearch = item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.plate.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredInventory = inventory.filter((item) => {
+        const matchesSearch = item.model.toLowerCase().includes(searchTerm.toLowerCase())
 
         if (!matchesSearch) return false
 
@@ -52,12 +51,19 @@ export default function Inventory() {
         return true
     })
 
-    const stats = [
-        { title: 'Total em Estoque', value: 'R$ 4.3M', trend: '+5.2%', icon: CircleDollarSign, color: 'text-emerald-500' },
-        { title: 'Aging Médio', value: '42 dias', trend: '-2.4%', icon: Box, color: 'text-mars-orange' },
-        { title: 'Margem Média', value: '9.4%', trend: '+0.8%', icon: ArrowUpRight, color: 'text-electric-blue' },
-        { title: 'Units', value: '38', trend: '+4', icon: Car, color: 'text-pure-black dark:text-off-white' },
-    ]
+    const stats = useMemo(() => {
+        const totalValue = inventory.reduce((acc, item) => acc + (item.price || 0), 0)
+        const avgAging = inventory.length > 0
+            ? Math.round(inventory.reduce((acc, item) => acc + (item.agingDays || 0), 0) / inventory.length)
+            : 0
+
+        return [
+            { title: 'Total em Estoque', value: `R$ ${(totalValue / 1000000).toFixed(1)}M`, trend: '+5.2%', icon: CircleDollarSign, color: 'text-emerald-500' },
+            { title: 'Aging Médio', value: `${avgAging} dias`, trend: '-2.4%', icon: Box, color: 'text-mars-orange' },
+            { title: 'Margem Média', value: '9.4%', trend: '+0.8%', icon: ArrowUpRight, color: 'text-electric-blue' },
+            { title: 'Units', value: inventory.length.toString(), trend: '+4', icon: Car, color: 'text-pure-black dark:text-off-white' },
+        ]
+    }, [inventory])
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-12 px-4 md:px-0">
@@ -159,14 +165,14 @@ export default function Inventory() {
                                     <div className="aspect-[16/10] bg-black/5 dark:bg-white/5 relative flex items-center justify-center overflow-hidden">
                                         <div className="absolute top-4 left-4 z-10">
                                             <Badge className={cn("font-bold text-[9px] uppercase border-none px-2.5",
-                                                item.status === 'Normal' ? "bg-emerald-500 text-white" : "bg-mars-orange text-white"
+                                                item.agingDays > 45 ? "bg-mars-orange text-white" : "bg-emerald-500 text-white"
                                             )}>
-                                                {item.status}
+                                                {item.agingDays > 45 ? 'Estoque Crítico' : 'Normal'}
                                             </Badge>
                                         </div>
                                         <Car className="w-16 h-16 text-muted-foreground/20 group-hover:scale-110 transition-transform duration-500" />
                                         <div className="absolute bottom-4 right-4 text-xs font-black bg-white/50 dark:bg-black/50 backdrop-blur-md px-3 py-1 rounded-xl text-pure-black dark:text-off-white">
-                                            {item.plate}
+                                            V-{item.id.slice(-4).toUpperCase()}
                                         </div>
                                     </div>
                                     <CardContent className="p-6 space-y-4">
@@ -191,7 +197,7 @@ export default function Inventory() {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Aging</p>
-                                                <p className={cn("text-lg font-black font-mono-numbers", item.aging > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.aging}d</p>
+                                                <p className={cn("text-lg font-black font-mono-numbers", item.agingDays > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.agingDays}d</p>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -232,9 +238,9 @@ export default function Inventory() {
                                                 </td>
                                                 <td className="p-6">
                                                     <div className="flex items-center gap-2">
-                                                        <span className={cn("text-sm font-black font-mono-numbers", item.aging > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.aging}d</span>
+                                                        <span className={cn("text-sm font-black font-mono-numbers", item.agingDays > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.agingDays}d</span>
                                                         <div className="w-16 h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
-                                                            <div className={cn("h-full rounded-full", item.aging > 45 ? "bg-mars-orange" : "bg-emerald-500")} style={{ width: `${Math.min(item.aging * 2, 100)}%` }}></div>
+                                                            <div className={cn("h-full rounded-full", item.agingDays > 45 ? "bg-mars-orange" : "bg-emerald-500")} style={{ width: `${Math.min(item.agingDays * 2, 100)}%` }}></div>
                                                         </div>
                                                     </div>
                                                 </td>
