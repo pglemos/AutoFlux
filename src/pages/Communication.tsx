@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
+import { useWhatsAppPolling } from '@/hooks/use-whatsapp-polling'
 import useAppStore from '@/stores/main'
 import { supabase } from '@/lib/supabase'
 
@@ -40,26 +41,8 @@ export default function Communication() {
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [activeTab, setActiveTab] = useState('automations')
-    const [waStatus, setWaStatus] = useState<{ connected: boolean; qr: string | null }>({ connected: false, qr: null })
+    const waStatus = useWhatsAppPolling()
     const [isConnecting, setIsConnecting] = useState(false)
-
-
-    useEffect(() => {
-        const checkStatus = async () => {
-            try {
-                const res = await fetch('http://localhost:3001/api/whatsapp/status')
-                const data = await res.json()
-                setWaStatus(data)
-            } catch (err) {
-                // Silently fail if service is down
-                setWaStatus({ connected: false, qr: null })
-            }
-        }
-
-        checkStatus()
-        const interval = setInterval(checkStatus, 5000)
-        return () => clearInterval(interval)
-    }, [])
 
     useEffect(() => {
         if (!activeAgencyId) {
