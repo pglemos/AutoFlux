@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useUsers } from '@/stores/main'
+import useAppStore from '@/stores/main'
+import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -21,8 +23,9 @@ function useWhatsAppPolling() {
 }
 
 export default function Communication() {
-    const { activeAgencyId } = useUsers()
-    const { connected, qr } = useWhatsAppPolling()
+    const { activeAgencyId } = useAppStore()
+    const [waStatus, setWaStatus] = useState({ connected: false, qr: null })
+    const { connected, qr } = waStatus
 
     const [messages, setMessages] = useState<any[]>([])
     const [newMessage, setNewMessage] = useState('')
