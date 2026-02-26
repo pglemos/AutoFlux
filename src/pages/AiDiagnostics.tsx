@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
 import { mockAuditLogs } from '@/lib/mock-data'
+import { generateAiDiagnostic } from '@/lib/ai-service'
 import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 
@@ -19,13 +20,30 @@ export default function AiDiagnostics() {
     const [activeTab, setActiveTab] = useState('engine')
     const [diagnosticHistory, setDiagnosticHistory] = useState<any[]>([])
 
-    const generateDiagnostic = () => {
+    const generateDiagnostic = async () => {
         setIsGenerating(true)
-        setTimeout(() => {
+        const targetName = selectedSeller === 'team' ? 'Toda Equipe' : team.find(t => t.id === selectedSeller)?.name || selectedSeller
+
+        try {
+            const result = await generateAiDiagnostic({ target: targetName })
             const newDiagnostic = {
                 id: Math.random().toString(),
                 date: new Date().toLocaleString('pt-BR'),
-                target: selectedSeller === 'team' ? 'Toda Equipe' : team.find(t => t.id === selectedSeller)?.name || selectedSeller,
+                target: targetName,
+                text: result.text,
+                actions: result.actions,
+                message: result.message,
+            }
+            setDiagnostic(newDiagnostic)
+            setDiagnosticHistory(prev => [newDiagnostic, ...prev])
+            toast({ title: 'Inteligência AutoPerf', description: 'Diagnóstico gerado pela IA com sucesso.' })
+        } catch (error: any) {
+            console.error('AI Error:', error)
+            // Fallback to mock behavior if no API key or on error
+            const newDiagnostic = {
+                id: Math.random().toString(),
+                date: new Date().toLocaleString('pt-BR'),
+                target: targetName,
                 text: 'A equipe apresenta uma taxa de conversão saudável em visitas, mas há um acúmulo de leads "Sem Contato" no início do funil (gargalo de D0). A margem média está 2% abaixo da meta estipulada.',
                 actions: [
                     'Redistribuir leads estagnados há mais de 48h para a equipe de SDR.',
@@ -35,9 +53,16 @@ export default function AiDiagnostics() {
             }
             setDiagnostic(newDiagnostic)
             setDiagnosticHistory(prev => [newDiagnostic, ...prev])
+            toast({
+                title: 'Modo Simulação',
+                description: error.message.includes('API Key')
+                    ? 'Chave de IA não configurada. Exibindo dados de simulação.'
+                    : 'Erro na API de IA. Exibindo dados de simulação.',
+                variant: 'destructive'
+            })
+        } finally {
             setIsGenerating(false)
-            toast({ title: 'Diagnóstico Gerado', description: 'O AI Sales Analyst concluiu a análise.' })
-        }, 1500)
+        }
     }
 
     const copyMessage = () => {
