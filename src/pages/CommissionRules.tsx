@@ -9,11 +9,14 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import useAppStore from '@/stores/main'
+import { useFinance } from '@/stores/FinanceContext'
+import { useUsers } from '@/stores/UsersContext'
+import type { CommissionRule } from '@/types'
 import { cn } from '@/lib/utils'
 
 export default function CommissionRules({ standalone = true }: { standalone?: boolean }) {
-    const { commissionRules, addCommissionRule, deleteCommissionRule, team } = useAppStore()
+    const { commissionRules, addCommissionRule, deleteCommissionRule } = useFinance()
+    const { team = [] } = useUsers()
     const [open, setOpen] = useState(false)
     const [editingRuleId, setEditingRuleId] = useState<string | null>(null)
     const [sellerId, setSellerId] = useState('all')
@@ -33,13 +36,11 @@ export default function CommissionRules({ standalone = true }: { standalone?: bo
         }
 
         if (editingRuleId) {
-            // Since the store only has add and delete, we'll simulate update by delete + add
-            // or just notify that update isn't fully in store but we'll reflect in UI
             deleteCommissionRule(editingRuleId)
-            addCommissionRule(ruleData)
+            addCommissionRule(ruleData as any)
             toast({ title: 'Regra Atualizada', description: 'A regra de comissão foi modificada com sucesso.' })
         } else {
-            addCommissionRule(ruleData)
+            addCommissionRule(ruleData as any)
             toast({ title: 'Regra Criada', description: 'Nova regra de comissão adicionada.' })
         }
 

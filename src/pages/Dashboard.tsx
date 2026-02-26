@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useAuth } from '@/components/auth-provider'
 import AdminDashboard from './AdminDashboard'
 import {
@@ -28,8 +28,7 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
-import { useAuth } from '@/components/auth-provider'
-import { chartData } from '@/lib/mock-data'
+import { chartData, mockAuditLogs as auditLogs } from '@/lib/mock-data'
 
 export default function Dashboard() {
     const { role } = useAuth()

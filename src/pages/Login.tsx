@@ -126,7 +126,7 @@ export default function Login() {
                         <div className="size-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
                             <Sparkles className="size-4 text-[#94785C]" />
                         </div>
-                        <span className="tracking-tight text-xl font-bold leading-none">AutoGestão</span>
+                        <span className="tracking-tight text-xl font-bold leading-none">AutoPerf</span>
                     </div>
                 </div>
 
@@ -148,10 +148,10 @@ export default function Login() {
                     <div className="flex flex-col items-center gap-6">
                         <div className="flex items-center gap-4 text-white/90">
                             <div className="h-[1px] w-12 bg-white/20"></div>
-                            <h1 className="text-5xl font-black tracking-tight leading-none uppercase">AutoGestão</h1>
+                            <h1 className="text-5xl font-black tracking-tight leading-none uppercase">AutoPerf</h1>
                             <div className="h-[1px] w-12 bg-white/20"></div>
                         </div>
-                        <span className="text-[10px] uppercase tracking-[0.6em] font-black text-[#94785C]">CONTROLE TOTAL DE FLUXO</span>
+                        <span className="text-[10px] uppercase tracking-[0.6em] font-black text-[#94785C]">PERFORMANCE INTELLIGENCE</span>
                     </div>
                 </div>
                 <div className="relative z-20 flex items-center gap-6">
@@ -175,7 +175,7 @@ export default function Login() {
                         <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <Sparkles className="size-4 text-primary" />
                         </div>
-                        <span>AUTOGESTÃO</span>
+                        <span>AutoPerf</span>
                     </div>
 
                     {/* Header */}

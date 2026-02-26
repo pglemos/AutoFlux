@@ -127,26 +127,10 @@ app.post('/api/whatsapp/send', authenticate, async (req, res) => {
 });
 
 const startServer = () => {
-    client.initialize();
-
     // Start Server
     app.listen(PORT, () => {
         console.log(`WhatsApp Service listening on port ${PORT}`);
     });
+};
 
-            for (const user of users) {
-                // In a real scenario, you would have the user's phone number in the 'team' table
-                // For this MVP automation, we assume we want to log it or if there was a phone field
-                if (user.phone) {
-                    const message = config.custom_message || `Olá ${user.name},\nAqui está o seu relatório diário de fechamento da agência. Tivemos um ótimo dia de vendas!`;
-
-                    const cleanPhone = user.phone.replace(/\D/g, '');
-                    const finalPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
-                    await client.sendMessage(`${finalPhone}@c.us`, message);
-                }
-            }
-        }
-    } catch (err) {
-        console.error('Error in daily report cron:', err);
-    }
-});
+startServer();
