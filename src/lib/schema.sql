@@ -1,4 +1,4 @@
--- AutoGestão CRM & Management System Schema
+-- AutoPerf CRM & Management System Schema
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

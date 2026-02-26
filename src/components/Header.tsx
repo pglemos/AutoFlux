@@ -47,7 +47,7 @@ export function Header() {
             <div className="flex items-center flex-1 gap-4">
                 {isMobile && (
                     <div className="flex flex-col">
-                        <span className="text-lg font-black leading-none">AutoGestão</span>
+                        <span className="text-lg font-black leading-none">AutoPerf</span>
                         <span className="text-[8px] font-bold text-electric-blue tracking-widest uppercase">Flux</span>
                     </div>
                 )}

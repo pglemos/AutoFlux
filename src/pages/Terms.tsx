@@ -11,7 +11,7 @@ export default function Terms() {
         {
             icon: Gavel,
             title: "1. Aceite e Objeto Contratual",
-            content: "O presente documento constitui um acordo legalmente vinculativo entre a AutoGestão e a Pessoa Jurídica cadastrada ('Contratante'). O acesso, navegação ou utilização de qualquer módulo do ecossistema de software implica na anuência explícita, irrevogável e irrestrita com os Termos de Serviço (TOS) aqui definidos, bem como nossa Política de Privacidade associada. Em caso de não consonância com as presentes condições, o uso do sistema deve ser instantaneamente cessado."
+            content: "O presente documento constitui um acordo legalmente vinculativo entre a AutoPerf e a Pessoa Jurídica cadastrada ('Contratante'). O acesso, navegação ou utilização de qualquer módulo do ecossistema de software implica na anuência explícita, irrevogável e irrestrita com os Termos de Serviço (TOS) aqui definidos, bem como nossa Política de Privacidade associada. Em caso de não consonância com as presentes condições, o uso do sistema deve ser instantaneamente cessado."
         },
         {
             icon: Copyright,
