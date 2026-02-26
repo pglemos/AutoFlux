@@ -26,7 +26,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { mockInventory } from '@/lib/mock-data'
 import { useAuth } from '@/components/auth-provider'
 import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
@@ -34,13 +33,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Inventory() {
     const { role } = useAuth()
-    const { activeAgencyId } = useAppStore()
+    const { activeAgencyId, inventory = [] } = useAppStore()
     const [searchTerm, setSearchTerm] = useState('')
     const [view, setView] = useState<'grid' | 'list'>('grid')
 
-    const filteredInventory = mockInventory.filter((item) => {
-        const matchesSearch = item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.plate.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredInventory = inventory.filter((item) => {
+        const matchesSearch = item.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.plate?.toLowerCase().includes(searchTerm.toLowerCase())
 
         if (!matchesSearch) return false
 
@@ -159,7 +158,7 @@ export default function Inventory() {
                                     <div className="aspect-[16/10] bg-black/5 dark:bg-white/5 relative flex items-center justify-center overflow-hidden">
                                         <div className="absolute top-4 left-4 z-10">
                                             <Badge className={cn("font-bold text-[9px] uppercase border-none px-2.5",
-                                                item.status === 'Normal' ? "bg-emerald-500 text-white" : "bg-mars-orange text-white"
+                                                item.status === 'Disponível' ? "bg-emerald-500 text-white" : "bg-mars-orange text-white"
                                             )}>
                                                 {item.status}
                                             </Badge>
@@ -191,7 +190,7 @@ export default function Inventory() {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Aging</p>
-                                                <p className={cn("text-lg font-black font-mono-numbers", item.aging > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.aging}d</p>
+                                                <p className={cn("text-lg font-black font-mono-numbers", item.agingDays > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.agingDays}d</p>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -232,9 +231,9 @@ export default function Inventory() {
                                                 </td>
                                                 <td className="p-6">
                                                     <div className="flex items-center gap-2">
-                                                        <span className={cn("text-sm font-black font-mono-numbers", item.aging > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.aging}d</span>
+                                                        <span className={cn("text-sm font-black font-mono-numbers", item.agingDays > 45 ? "text-mars-orange" : "text-emerald-500")}>{item.agingDays}d</span>
                                                         <div className="w-16 h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
-                                                            <div className={cn("h-full rounded-full", item.aging > 45 ? "bg-mars-orange" : "bg-emerald-500")} style={{ width: `${Math.min(item.aging * 2, 100)}%` }}></div>
+                                                            <div className={cn("h-full rounded-full", item.agingDays > 45 ? "bg-mars-orange" : "bg-emerald-500")} style={{ width: `${Math.min(item.agingDays * 2, 100)}%` }}></div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -243,7 +242,7 @@ export default function Inventory() {
                                                 </td>
                                                 <td className="p-6">
                                                     <Badge className={cn("border-none font-bold uppercase text-[9px]",
-                                                        item.status === 'Normal' ? "bg-emerald-500/10 text-emerald-500" : "bg-mars-orange/10 text-mars-orange"
+                                                        item.status === 'Disponível' ? "bg-emerald-500/10 text-emerald-500" : "bg-mars-orange/10 text-mars-orange"
                                                     )}>
                                                         {item.status}
                                                     </Badge>
