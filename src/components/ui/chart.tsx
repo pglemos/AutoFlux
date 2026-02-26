@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Tooltip as ChartTooltip, TooltipContentProps, TooltipPayloadEntry } from 'recharts'
 import { cn } from '@/lib/utils'
 
 // Simplified chart components for recharts integration
@@ -27,24 +28,31 @@ function ChartContainer({ config, className, children, ...props }: ChartContaine
     )
 }
 
-function ChartTooltipContent({ active, payload, label }: any) {
+// Helper types for Recharts Tooltip
+type ValueType = number | string | Array<number | string>;
+type NameType = number | string;
+
+// Use Partial to allow usage like <ChartTooltipContent /> where props are injected by Recharts
+interface ChartTooltipContentProps extends Partial<Omit<TooltipContentProps<ValueType, NameType>, 'payload'>> {
+    payload?: TooltipPayloadEntry<ValueType, NameType>[];
+}
+
+function ChartTooltipContent({ active, payload, label }: ChartTooltipContentProps) {
     if (!active || !payload?.length) return null
 
     return (
         <div className="rounded-xl border bg-background p-3 shadow-lg">
             {label && <p className="text-xs font-bold text-muted-foreground mb-2">{label}</p>}
-            {payload.map((entry: any, index: number) => (
+            {payload.map((entry, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
-                    <span className="font-semibold text-foreground">{entry.name || entry.dataKey}:</span>
+                    <span className="font-semibold text-foreground">{entry.name || (entry.dataKey as string | number)}:</span>
                     <span className="font-bold text-foreground">{entry.value}</span>
                 </div>
             ))}
         </div>
     )
 }
-
-import { Tooltip as ChartTooltip } from 'recharts'
 
 export { ChartContainer, ChartTooltip, ChartTooltipContent }
 export type { ChartConfig }

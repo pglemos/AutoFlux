@@ -28,13 +28,11 @@ import {
 import { toast } from '@/hooks/use-toast'
 import { mockNotifications } from '@/lib/mock-data'
 import { useState } from 'react'
-import useAppStore from '@/stores/main'
 
 export function Header() {
     const isMobile = useIsMobile()
     const [open, setOpen] = useState(false)
     const [activity, setActivity] = useState('')
-    const { addTask } = useAppStore()
 
     const handleQuickLog = () => {
         toast({

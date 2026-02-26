@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, ReactNode } from 'react'
 import {
     UserPlus,
     Trophy,
@@ -36,21 +36,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function Team() {
     const { role } = useAuth()
-    const { team, leads, goals, addTeamMember, updateTeamMember, deleteTeamMember, activeAgencyId, attendance, recordAttendance } = useAppStore()
+    const { team, leads, goals, addTeamMember, updateTeamMember, deleteTeamMember, activeAgencyId } = useAppStore()
     const [open, setOpen] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [search, setSearch] = useState('')
     const [form, setForm] = useState({ name: '', role: '', email: '', phone: '' })
-
-    const handleCheckIn = (memberId: string) => {
-        recordAttendance({
-            teamMemberId: memberId,
-            date: new Date().toISOString().split('T')[0],
-            status: 'Presente',
-            agencyId: activeAgencyId || ''
-        })
-        toast({ title: 'Ponto Registrado', description: 'Entrada confirmada no sistema.' })
-    }
 
     const filteredTeam = useMemo(() => {
         return team.filter(m => {
@@ -207,7 +197,7 @@ export default function Team() {
     )
 }
 
-function SummaryCard({ title, value, trend, icon }: { title: string, value: string, trend: string, icon: any }) {
+function SummaryCard({ title, value, trend, icon }: { title: string, value: string, trend: string, icon: ReactNode }) {
     return (
         <Card className="border-none shadow-sm bg-white dark:bg-black rounded-[2rem] overflow-hidden group">
             <CardContent className="p-7">
@@ -271,19 +261,9 @@ function MemberCard({ member, rank, isLead, leadsCount, onEdit, onDelete }: {
                     </div>
 
                     <h3 className="text-xl font-extrabold tracking-tight text-pure-black dark:text-off-white">{member.name}</h3>
-                    <div className="flex flex-col items-center gap-1 mt-2">
-                        <div className="flex items-center gap-2">
-                            <Briefcase className="w-3.5 h-3.5 text-muted-foreground" />
-                            <span className="text-xs font-bold text-muted-foreground">{member.role}</span>
-                        </div>
-                        <Badge variant="outline" className={cn(
-                            "text-[9px] font-black uppercase border-none px-2 mt-1",
-                            attendance.some(a => a.teamMemberId === member.id && a.status === 'Presente')
-                                ? "bg-emerald-500/10 text-emerald-500"
-                                : "bg-black/5 text-muted-foreground"
-                        )}>
-                            {attendance.some(a => a.teamMemberId === member.id && a.status === 'Presente') ? '• Online agora' : 'Offline'}
-                        </Badge>
+                    <div className="flex items-center gap-2 mt-2">
+                        <Briefcase className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-xs font-bold text-muted-foreground">{member.role}</span>
                     </div>
                 </div>
 
@@ -309,12 +289,12 @@ function MemberCard({ member, rank, isLead, leadsCount, onEdit, onDelete }: {
                         <Progress value={member.execution} className="h-2 bg-black/5 dark:bg-white/5" />
                     </div>
 
-                    <div className="flex gap-2">
-                        <Button variant="default" className="flex-1 rounded-2xl font-extrabold text-[10px] h-11 uppercase bg-electric-blue text-white shadow-lg shadow-electric-blue/20" onClick={() => handleCheckIn(member.id)}>
-                            Check-in
+                    <div className="flex gap-3">
+                        <Button variant="outline" size="sm" className="flex-1 rounded-2xl font-extrabold text-[10px] h-11 uppercase tracking-widest border-black/10 transition-colors hover:bg-black hover:text-white">
+                            <Mail className="w-3.5 h-3.5 mr-2" /> E-mail
                         </Button>
-                        <Button variant="outline" size="icon" className="rounded-2xl h-11 w-11 border-black/10">
-                            <Phone className="w-4 h-4" />
+                        <Button variant="outline" size="sm" className="flex-1 rounded-2xl font-extrabold text-[10px] h-11 uppercase tracking-widest border-black/10 transition-colors hover:bg-emerald-500 hover:border-emerald-500 hover:text-white">
+                            <Phone className="w-3.5 h-3.5 mr-2" /> Call
                         </Button>
                     </div>
                 </div>

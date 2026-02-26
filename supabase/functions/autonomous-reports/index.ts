@@ -12,6 +12,30 @@ serve(async (req) => {
     }
 
     try {
+        const authHeader = req.headers.get('Authorization')
+        if (!authHeader) {
+            return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 401,
+            })
+        }
+
+        // Validate user token
+        const authClient = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+            { global: { headers: { Authorization: authHeader } } }
+        )
+
+        const { data: { user }, error: authError } = await authClient.auth.getUser()
+
+        if (authError || !user) {
+             return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 401,
+            })
+        }
+
         const supabase = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -91,8 +115,12 @@ ${config.ai_context.includes('motivacional') ? 'Vamos pra cima! 🚀' : 'Sucesso
             }).select().single()
 
             // Log delivery attempt
-            console.log(`Delivering to ${config.recipients?.length ?? 0} recipients for ${agency.name}`)
-            results.push({ agency: agency.name, historyId: history?.id })
+            console.log(JSON.stringify({
+                event: 'delivery_attempt',
+                agencyId: agency.id,
+                recipientCount: config.recipients?.length ?? 0
+            }))
+            results.push({ agencyId: agency.id, historyId: history?.id })
         }
 
         return new Response(JSON.stringify({ success: true, processed: results.length, details: results }), {

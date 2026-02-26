@@ -3,7 +3,7 @@ import * as React from 'react'
 const TOAST_LIMIT = 3
 const TOAST_REMOVE_DELAY = 5000
 
-type ToasterToast = {
+export type ToasterToast = {
     id: string
     title?: string
     description?: string
@@ -17,13 +17,13 @@ function genId() {
     return count.toString()
 }
 
-type Action =
+export type Action =
     | { type: 'ADD_TOAST'; toast: ToasterToast }
     | { type: 'UPDATE_TOAST'; toast: Partial<ToasterToast> & { id: string } }
     | { type: 'DISMISS_TOAST'; toastId?: string }
     | { type: 'REMOVE_TOAST'; toastId?: string }
 
-interface State {
+export interface State {
     toasts: ToasterToast[]
 }
 
@@ -47,8 +47,12 @@ export const reducer = (state: State, action: Action): State => {
             return { ...state, toasts: state.toasts.map((t) => (t.id === action.toast.id ? { ...t, ...action.toast } : t)) }
         case 'DISMISS_TOAST': {
             const { toastId } = action
-            if (toastId) addToRemoveQueue(toastId)
-            else state.toasts.forEach((t) => addToRemoveQueue(t.id))
+            if (toastId) {
+                if (!state.toasts.find((t) => t.id === toastId)) return state
+                addToRemoveQueue(toastId)
+            } else {
+                state.toasts.forEach((t) => addToRemoveQueue(t.id))
+            }
             return state
         }
         case 'REMOVE_TOAST':
