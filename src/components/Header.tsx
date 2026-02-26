@@ -28,19 +28,51 @@ import {
 import { toast } from '@/hooks/use-toast'
 import { useNotifications } from '@/hooks/use-notifications'
 import { useState } from 'react'
+import useAppStore from '@/stores/main'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/components/auth-provider'
 
 export function Header() {
     const isMobile = useIsMobile()
     const [open, setOpen] = useState(false)
     const [activity, setActivity] = useState('')
+    const { leads = [] } = useAppStore()
+    const { user } = useAuth()
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+    const [selectedLeadId, setSelectedLeadId] = useState('')
 
-    const handleQuickLog = () => {
-        toast({
-            title: 'Atividade Registrada',
-            description: 'O log da atividade foi salvo com sucesso (SLA < 10s).',
+    const handleQuickLog = async () => {
+        if (!activity || !user) return
+
+        const leadName = leads.find(l => l.id === selectedLeadId)?.name || 'Lead Desconhecido'
+        const actions: Record<string, string> = {
+            call: 'Tentativa de Contato',
+            schedule: 'Retorno Agendado',
+            visit_done: 'Visita Realizada',
+            proposal: 'Proposta Enviada'
+        }
+
+        const { error } = await supabase.from('audit_logs').insert({
+            user_id: user.id,
+            action: actions[activity],
+            detail: `Ação registrada para o lead ${leadName} via Quick Log.`
         })
-        setOpen(false)
+
+        if (!error) {
+            toast({
+                title: 'Atividade Registrada',
+                description: 'O log da atividade foi salvo com sucesso (SLA < 10s).',
+            })
+            setOpen(false)
+            setActivity('')
+            setSelectedLeadId('')
+        } else {
+            toast({
+                title: 'Erro ao registrar',
+                description: 'Não foi possível salvar a atividade.',
+                variant: 'destructive'
+            })
+        }
     }
 
     return (
@@ -132,15 +164,16 @@ export function Header() {
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
                                 <Label>Lead / Cliente</Label>
-                                <Select>
+                                <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
                                     <SelectTrigger className="rounded-xl">
                                         <SelectValue placeholder="Selecione o lead" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-xl">
-                                        <SelectItem value="l1">
-                                            Carlos Silva - Porsche 911
-                                        </SelectItem>
-                                        <SelectItem value="l2">Ana Oliveira - BMW X5</SelectItem>
+                                        {leads.map(lead => (
+                                            <SelectItem key={lead.id} value={lead.id}>
+                                                {lead.name} - {lead.car}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

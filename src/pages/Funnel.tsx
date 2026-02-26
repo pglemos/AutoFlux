@@ -55,7 +55,14 @@ export default function Funnel() {
       if (rule) comissionPerc = rule.percentage
       const comission = marginValue * (comissionPerc / 100)
       const sellerName = team.find((t) => t.id === lead.sellerId)?.name || 'Vendedor Desconhecido'
-      addCommission({ seller: sellerName, car: lead.car, date: new Date().toLocaleDateString('pt-BR'), margin: `${marginPerc.toFixed(1)}%`, comission })
+      addCommission({
+        seller: sellerName,
+        sellerId: lead.sellerId,
+        car: lead.car,
+        date: new Date().toLocaleDateString('pt-BR'),
+        margin: `${marginPerc.toFixed(1)}%`,
+        comission
+      })
       toast({ title: 'Venda Concluída!', description: `Comissão gerada automaticamente.` })
     }
   }, [leads, chainedFunnel, updateLead, commissionRules, team, addCommission])

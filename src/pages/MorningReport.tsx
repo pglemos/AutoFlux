@@ -60,7 +60,7 @@ export default function MorningReport() {
             const dateStr = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
             const topSellers = [...team].sort((a, b) => b.sales - a.sales).slice(0, 3)
 
-            const reportText = `📊 *AUTOFLUX — RELATÓRIO MATINAL (${dateStr})*
+            const reportText = `📊 *AUTOPERF — RELATÓRIO MATINAL (${dateStr})*
 
 🎯 *PERFORMANCE DO TIME*
 • Vendas Acumuladas: ${totalSales}/${teamGoal} (${goalProgress.toFixed(1)}%)

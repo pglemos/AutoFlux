@@ -14,6 +14,7 @@ export interface Task {
 export interface Commission {
     id: string
     seller: string
+    sellerId?: string
     car: string
     date: string
     margin: string

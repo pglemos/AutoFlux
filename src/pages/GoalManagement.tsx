@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
     Target,
     Plus,
@@ -28,7 +28,7 @@ import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 
 export default function GoalManagement({ standalone = true }: { standalone?: boolean }) {
-    const { goals, setGoal, deleteGoal, team } = useAppStore()
+    const { goals, setGoal, deleteGoal, team, commissions = [] } = useAppStore()
     const [type, setType] = useState<'Equipe' | 'Individual'>('Equipe')
     const [targetId, setTargetId] = useState('')
     const [amount, setAmount] = useState('')
@@ -40,17 +40,35 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
         setAmount('')
     }
 
-    // Mock progress calculation for visual demonstration
-    const getProgress = (goalId: string) => {
-        const hash = goalId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-        return (hash % 60) + 30 // Returns a value between 30% and 90%
+    const getProgress = (goal: any) => {
+        if (!goal.amount) return 0
+        const relevantCommissions = goal.type === 'Equipe'
+            ? commissions
+            : commissions.filter(c => c.sellerId === goal.targetId)
+
+        const count = relevantCommissions.length
+        return Math.min(Math.round((count / goal.amount) * 100), 100)
     }
 
-    const currentStats = [
-        { title: 'Meta Global', value: '85%', label: 'Concluído', icon: Target, color: 'text-electric-blue' },
-        { title: 'Performance Equipe', value: '+12%', label: 'vs mês anterior', icon: TrendingUp, color: 'text-emerald-500' },
-        { title: 'Top Vendedor', value: 'JV', label: '102% da meta', icon: CheckCircle2, color: 'text-amber-500' },
-    ]
+    const currentStats = useMemo(() => {
+        const teamGoal = goals.find(g => g.type === 'Equipe')?.amount || 1
+        const teamSales = commissions.length
+        const globalProgress = Math.round((teamSales / teamGoal) * 100)
+
+        // Find top seller
+        const salesBySeller: Record<string, number> = {}
+        commissions.forEach(c => {
+            if (c.sellerId) salesBySeller[c.sellerId] = (salesBySeller[c.sellerId] || 0) + 1
+        })
+        const topSellerId = Object.entries(salesBySeller).sort((a, b) => b[1] - a[1])[0]?.[0]
+        const topSellerName = team.find(t => t.id === topSellerId)?.name || '---'
+
+        return [
+            { title: 'Meta Global', value: `${globalProgress}%`, label: 'Concluído', icon: Target, color: 'text-electric-blue' },
+            { title: 'Performance Equipe', value: `${teamSales} un`, label: 'vendas no mês', icon: TrendingUp, color: 'text-emerald-500' },
+            { title: 'Top Vendedor', value: topSellerName.split(' ')[0], label: 'vendas no mês', icon: CheckCircle2, color: 'text-amber-500' },
+        ]
+    }, [goals, commissions, team])
 
     return (
         <div className={cn("space-y-8 max-w-7xl mx-auto pb-12", !standalone && "max-w-none pb-0")}>
@@ -177,7 +195,7 @@ export default function GoalManagement({ standalone = true }: { standalone?: boo
                         <CardContent className="p-0 flex-1">
                             <div className="divide-y divide-black/5 dark:divide-white/5">
                                 {goals.map((g) => {
-                                    const progress = getProgress(g.id)
+                                    const progress = getProgress(g)
                                     const current = Math.round((progress / 100) * g.amount)
                                     return (
                                         <div key={g.id} className="p-8 hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors group">
