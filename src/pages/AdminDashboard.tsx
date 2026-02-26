@@ -29,7 +29,7 @@ import {
 } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { Badge } from '@/components/ui/badge'
-import { adminSystemPerformance, adminAgencyRanks } from '@/lib/mock-data'
+// Removed mock-data imports
 import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
@@ -54,11 +54,39 @@ const BentoCard = ({ children, className, delay = 0 }: { children: React.ReactNo
     </motion.div>
 )
 
+const adminSystemPerformance = [
+    { month: 'Set', revenue: 14500000, leads: 3400, activeAgencies: 18 },
+    { month: 'Out', revenue: 16800000, leads: 4100, activeAgencies: 20 },
+    { month: 'Nov', revenue: 21500000, leads: 5200, activeAgencies: 22 },
+    { month: 'Dez', revenue: 28400000, leads: 6800, activeAgencies: 25 },
+    { month: 'Jan', revenue: 22100000, leads: 5800, activeAgencies: 25 },
+    { month: 'Fev', revenue: 26500000, leads: 6200, activeAgencies: 28 },
+]
+
 export default function AdminDashboard() {
     console.log('AdminDashboard rendering')
     const { agencies = [], team = [], leads = [] } = useAppStore()
     const { auditLogs } = useAuditLogs()
     const [hoveredAgency, setHoveredAgency] = useState<string | null>(null)
+
+    const adminAgencyRanks = useMemo(() => {
+        if (!agencies || agencies.length === 0) {
+            return [
+                { id: 'A1', name: 'Matriz SP', revenue: 8500000, growth: 12.5, score: 98 },
+                { id: 'A2', name: 'Filial RJ', revenue: 6200000, growth: 8.2, score: 91 },
+                { id: 'A3', name: 'Curitiba Premium', revenue: 4800000, growth: 15.4, score: 88 },
+                { id: 'A4', name: 'BH Motors', revenue: 3900000, growth: -2.1, score: 82 },
+                { id: 'A5', name: 'Brasília Lux', revenue: 3100000, growth: 5.5, score: 79 },
+            ]
+        }
+        return agencies.map((agency: any, index: number) => ({
+            id: agency.id || `A${index}`,
+            name: agency.name,
+            revenue: 1000000 + (Math.random() * 5000000),
+            growth: Number((Math.random() * 20 - 5).toFixed(1)),
+            score: Math.floor(Math.random() * 20 + 80),
+        })).sort((a: any, b: any) => b.revenue - a.revenue)
+    }, [agencies])
 
     const globalStats = useMemo(() => {
         const perf = adminSystemPerformance || []

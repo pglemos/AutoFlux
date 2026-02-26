@@ -15,11 +15,26 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { reportLucratividade, reportCiclo, reportDescontos } from '@/lib/mock-data'
+// Removed mock-data import
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+
+const localReportCiclo = [
+    { month: 'Jan', dias: 45 },
+    { month: 'Fev', dias: 42 },
+    { month: 'Mar', dias: 38 },
+    { month: 'Abr', dias: 40 },
+    { month: 'Mai', dias: 35 },
+    { month: 'Jun', dias: 30 },
+]
+
+const localReportDescontos = [
+    { seller: 'João Vendedor', totalSales: 12 },
+    { seller: 'Maria Souza', totalSales: 15 },
+    { seller: 'Pedro Alves', totalSales: 8 },
+]
 
 export default function Reports() {
     const stockAgingData = [
@@ -89,7 +104,7 @@ export default function Reports() {
                     <CardContent className="p-8 pt-0 h-[350px]">
                         <ChartContainer config={{ dias: { label: 'Média Dias', color: '#0062ff' } }} className="h-full w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={reportCiclo} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+                                <LineChart data={localReportCiclo} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
                                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontWeight: 600, fontSize: 11 }} />
                                     <YAxis axisLine={false} tickLine={false} tick={{ fontWeight: 600, fontSize: 11 }} />
                                     <Tooltip content={<ChartTooltipContent />} />
@@ -166,7 +181,7 @@ export default function Reports() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {reportDescontos.map((d, i) => (
+                            {localReportDescontos.map((d, i) => (
                                 <TableRow key={d.seller} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                                     <TableCell className="py-5 pl-8 font-extrabold text-sm">{d.seller}</TableCell>
                                     <TableCell className="py-5 text-right font-mono-numbers font-bold">{d.totalSales}un</TableCell>

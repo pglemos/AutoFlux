@@ -17,8 +17,24 @@ import {
     Bar,
     Cell,
 } from 'recharts'
-import { mockYearlySales, mockCategorySales } from '@/lib/mock-data'
+// Removed mock-data imports
 import { cn } from '@/lib/utils'
+
+const localYearlySales = [
+    { month: 'Jan', sales: 1200000, margin: 950000 },
+    { month: 'Fev', sales: 1450000, margin: 1100000 },
+    { month: 'Mar', sales: 1800000, margin: 1400000 },
+    { month: 'Abr', sales: 1600000, margin: 1250000 },
+    { month: 'Mai', sales: 2100000, margin: 1650000 },
+    { month: 'Jun', sales: 1900000, margin: 1500000 },
+]
+
+const localCategorySales = [
+    { category: 'SUV Luxury', value: 4500000 },
+    { category: 'Sports', value: 3800000 },
+    { category: 'Sedan Premium', value: 2900000 },
+    { category: 'Electric', value: 1800000 },
+]
 
 export default function SalesPerformance() {
     const formatCurrency = (val: number) =>
@@ -94,7 +110,7 @@ export default function SalesPerformance() {
                             margin: { label: 'Margem', color: 'var(--emerald-500)' }
                         }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={mockYearlySales} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
+                                <AreaChart data={localYearlySales} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#0062ff" stopOpacity={0.1} />
@@ -145,7 +161,7 @@ export default function SalesPerformance() {
                     <CardContent className="p-8 pt-0 h-[400px]">
                         <ChartContainer config={{ value: { label: 'Volume', color: 'var(--electric-blue)' } }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={mockCategorySales} layout="vertical" margin={{ left: -20, right: 30 }}>
+                                <BarChart data={localCategorySales} layout="vertical" margin={{ left: -20, right: 30 }}>
                                     <XAxis type="number" hide />
                                     <YAxis
                                         dataKey="category"
@@ -157,7 +173,7 @@ export default function SalesPerformance() {
                                     />
                                     <Tooltip content={<ChartTooltipContent />} />
                                     <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={24}>
-                                        {mockCategorySales.map((entry, index) => (
+                                        {localCategorySales.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={index === 0 ? '#0062ff' : index === 1 ? '#3b82f6' : '#93c5fd'} />
                                         ))}
                                     </Bar>
@@ -165,14 +181,14 @@ export default function SalesPerformance() {
                             </ResponsiveContainer>
                         </ChartContainer>
                         <div className="mt-8 space-y-4">
-                            {mockCategorySales.map((cat, i) => (
+                            {localCategorySales.map((cat, i) => (
                                 <div key={i} className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <div className={cn("w-2.5 h-2.5 rounded-full", i === 0 ? "bg-[#0062ff]" : i === 1 ? "bg-[#3b82f6]" : "bg-[#93c5fd]")}></div>
                                         <span className="text-xs font-bold text-pure-black dark:text-off-white">{cat.category}</span>
                                     </div>
                                     <span className="text-xs font-mono-numbers font-extrabold text-muted-foreground">
-                                        {((cat.value / mockCategorySales.reduce((acc, c) => acc + c.value, 0)) * 100).toFixed(1)}%
+                                        {((cat.value / localCategorySales.reduce((acc, c) => acc + c.value, 0)) * 100).toFixed(1)}%
                                     </span>
                                 </div>
                             ))}

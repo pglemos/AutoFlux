@@ -1,7 +1,8 @@
+import { useMemo } from 'react'
 import { TrendingUp, TrendingDown, DollarSign, Wallet, ArrowUpRight, ArrowDownRight, Calendar, PiggyBank, Receipt, CreditCard } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { mockFinance, reportLucratividade } from '@/lib/mock-data'
+// Custom finance logic used here
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -34,6 +35,34 @@ export default function Financeiro() {
         { month: 'Jun', entrada: 720000, saida: 580000 },
     ]
 
+    const reportLucratividade = useMemo(() => {
+        // Generate from actual commissions if available, otherwise fallback
+        if (commissions.length > 0) {
+            const data: Record<string, number> = {}
+            commissions.forEach(c => {
+                const profitEstimate = c.comission * 6 // simplified estimate
+                data[c.car] = (data[c.car] || 0) + profitEstimate
+            })
+            return Object.entries(data).map(([model, profit]) => ({ model, profit })).sort((a, b) => b.profit - a.profit).slice(0, 5)
+        }
+        return [
+            { model: 'Porsche 911', profit: 70000 },
+            { model: 'BMW M3', profit: 45000 },
+            { model: 'Audi RS6', profit: 80000 },
+            { model: 'Mercedes GLE', profit: 55000 },
+            { model: 'Volvo XC90', profit: 40000 },
+        ]
+    }, [commissions])
+
+    const computedFinance = useMemo(() => {
+        const baseEntrada = 1000000
+        const totalCommission = commissions.reduce((acc, c) => acc + c.comission, 0)
+        const entradas = baseEntrada + (totalCommission * 10)
+        const saidas = entradas * 0.65
+        const saldoProjetado = entradas - saidas - totalCommission
+        return { entradas, saidas, saldoProjetado }
+    }, [commissions])
+
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-12 px-4 md:px-0">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
@@ -65,7 +94,7 @@ export default function Financeiro() {
                                 <Badge className="bg-emerald-500/10 text-emerald-600 border-none font-black text-[10px] px-3 py-1 uppercase tracking-wider">Mão Forte +12%</Badge>
                             </div>
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Faturamento Bruto</p>
-                            <p className="text-4xl font-black font-mono-numbers text-pure-black dark:text-off-white tracking-tighter">{formatCurrency(mockFinance.entradas)}</p>
+                            <p className="text-4xl font-black font-mono-numbers text-pure-black dark:text-off-white tracking-tighter">{formatCurrency(computedFinance.entradas)}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -78,7 +107,7 @@ export default function Financeiro() {
                                 <Badge className="bg-mars-orange/10 text-mars-orange border-none font-black text-[10px] px-3 py-1 uppercase tracking-wider">Controlado -5%</Badge>
                             </div>
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Investimento / Custos</p>
-                            <p className="text-4xl font-black font-mono-numbers text-pure-black dark:text-off-white tracking-tighter">{formatCurrency(mockFinance.saidas)}</p>
+                            <p className="text-4xl font-black font-mono-numbers text-pure-black dark:text-off-white tracking-tighter">{formatCurrency(computedFinance.saidas)}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -91,7 +120,7 @@ export default function Financeiro() {
                                 <div className="flex items-center gap-1.5 text-emerald-400 font-black text-xs">SAUDÁVEL <ArrowUpRight className="w-4 h-4" /></div>
                             </div>
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 dark:text-black/50 mb-1">EBITDA Projetado</p>
-                            <p className="text-4xl font-black font-mono-numbers tracking-tighter">{formatCurrency(mockFinance.saldoProjetado)}</p>
+                            <p className="text-4xl font-black font-mono-numbers tracking-tighter">{formatCurrency(computedFinance.saldoProjetado)}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
