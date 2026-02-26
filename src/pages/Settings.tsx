@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Settings as SettingsIcon, Building2, Users, CreditCard, Sparkles, User as UserIcon, Mail, Phone, Moon, Sun, Shield, Plug, Link2, Zap, UserPlus, ShieldCheck, Target, FileSignature } from 'lucide-react'
+import { Settings as SettingsIcon, Building2, Users, CreditCard, Sparkles, User as UserIcon, Mail, Phone, Moon, Sun, Shield, Plug, Zap, CheckCircle2, Key, Bot } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -31,6 +31,35 @@ export default function Settings() {
     const [newRole, setNewRole] = useState<any>('Seller')
     const [newAgencyId, setNewAgencyId] = useState('')
     const [agencyName, setAgencyName] = useState('')
+
+    // AI Integrations
+    const [openRouterKey, setOpenRouterKey] = useState('')
+    const [aiModel, setAiModel] = useState('google/gemini-2.5-flash-free')
+    const [aiConnected, setAiConnected] = useState(false)
+
+    // Load saved settings on mount
+    useEffect(() => {
+        const savedKey = localStorage.getItem('openRouterKey')
+        const savedModel = localStorage.getItem('aiModel')
+        if (savedKey) {
+            setOpenRouterKey(savedKey)
+            setAiConnected(true)
+        }
+        if (savedModel) setAiModel(savedModel)
+    }, [])
+
+    const handleSaveAI = () => {
+        if (!openRouterKey) {
+            setAiConnected(false)
+            localStorage.removeItem('openRouterKey')
+            toast({ title: 'Integração Removida', description: 'Chave da API OpenRouter foi removida.', variant: 'destructive' })
+            return
+        }
+        localStorage.setItem('openRouterKey', openRouterKey)
+        localStorage.setItem('aiModel', aiModel)
+        setAiConnected(true)
+        toast({ title: 'Integração Salva', description: 'Credenciais de IA conectadas com sucesso.' })
+    }
 
     const handleAddUser = () => {
         if (!newName || !newEmail) return
@@ -84,6 +113,9 @@ export default function Settings() {
                     <TabsTrigger value="users" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6 py-2.5 transition-all">
                         {role === 'Admin' ? <Building2 className="w-4 h-4 mr-2" /> : <Users className="w-4 h-4 mr-2" />}
                         {role === 'Admin' ? 'Agências' : 'Usuários'}
+                    </TabsTrigger>
+                    <TabsTrigger value="integrations" className="rounded-xl font-bold text-sm data-[state=active]:bg-white dark:data-[state=active]:bg-pure-black data-[state=active]:text-pure-black dark:data-[state=active]:text-white data-[state=active]:shadow-sm px-6 py-2.5 transition-all">
+                        <Plug className="w-4 h-4 mr-2" />Integrações
                     </TabsTrigger>
                 </TabsList>
 
@@ -154,6 +186,86 @@ export default function Settings() {
                         <CardContent>
                             {/* Content grid for users/agencies here */}
                             <p className="text-center py-12 text-muted-foreground font-bold">Configure os dados conforme as permissões de {role}.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="integrations">
+                    <Card className="border-none bg-white dark:bg-pure-black shadow-sm rounded-3xl overflow-hidden">
+                        <CardHeader className="border-b border-black/5 dark:border-white/5 pb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl bg-electric-blue/10 flex items-center justify-center">
+                                    <Sparkles className="h-6 w-6 text-electric-blue" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-xl font-extrabold text-pure-black dark:text-off-white">Performance Intelligence (IA)</CardTitle>
+                                    <CardDescription className="font-semibold text-muted-foreground mt-1">Conecte o motor de Inteligência Artificial para habilitar diagnósticos automáticos.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-8 pt-8 lg:px-10">
+                            <div className="flex flex-col md:flex-row gap-8">
+                                <div className="flex-1 space-y-6">
+                                    <div className="space-y-4">
+                                        <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                            <Key className="w-4 h-4" /> Chave de API (OpenRouter)
+                                        </Label>
+                                        <Input
+                                            type="password"
+                                            value={openRouterKey}
+                                            onChange={(e) => setOpenRouterKey(e.target.value)}
+                                            className="h-14 rounded-2xl bg-black/5 dark:bg-white/5 border-none font-medium focus-visible:ring-electric-blue"
+                                            placeholder="sk-or-v1-..."
+                                        />
+                                        <p className="text-xs font-semibold text-muted-foreground">
+                                            A chave é armazenada de forma segura localmente. Obtenha a sua em <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-electric-blue hover:underline">openrouter.ai</a>.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                            <Bot className="w-4 h-4" /> Modelo de IA Principal
+                                        </Label>
+                                        <Select value={aiModel} onValueChange={setAiModel}>
+                                            <SelectTrigger className="h-14 rounded-2xl bg-black/5 dark:bg-white/5 border-none font-bold">
+                                                <SelectValue placeholder="Selecione um modelo..." />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl border-black/5 dark:border-white/5 shadow-2xl">
+                                                <SelectItem value="google/gemini-2.5-flash-free" className="font-bold py-3"><span className="text-xs text-muted-foreground mr-2 font-black uppercase">FREE</span>Google: Gemini 2.5 Flash</SelectItem>
+                                                <SelectItem value="cognitivecomputations/dolphin3.0-r1-mistral-24b:free" className="font-bold py-3"><span className="text-xs text-muted-foreground mr-2 font-black uppercase">FREE</span>Dolphin 3.0 (Mistral)</SelectItem>
+                                                <SelectItem value="anthropic/claude-3.5-sonnet:beta" className="font-bold py-3"><span className="text-xs bg-mars-orange text-white px-2 py-0.5 rounded-full mr-2 font-black uppercase tracking-widest">PRO</span>Claude 3.5 Sonnet</SelectItem>
+                                                <SelectItem value="openai/gpt-4o" className="font-bold py-3"><span className="text-xs bg-mars-orange text-white px-2 py-0.5 rounded-full mr-2 font-black uppercase tracking-widest">PRO</span>OpenAI GPT-4o</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <Button
+                                        onClick={handleSaveAI}
+                                        className="w-full h-14 rounded-2xl font-bold bg-pure-black text-white hover:bg-pure-black/80 dark:bg-white dark:text-pure-black transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                    >
+                                        <Zap className="w-5 h-5 mr-2" /> Salvar Configurações de IA
+                                    </Button>
+                                </div>
+
+                                <div className="w-full md:w-80 p-6 rounded-3xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 flex flex-col justify-center gap-4 text-center shrink-0">
+                                    <div className="w-20 h-20 mx-auto rounded-full bg-white dark:bg-pure-black shadow-sm flex items-center justify-center border-4 border-black/5 dark:border-white/5">
+                                        <Sparkles className="w-10 h-10 text-electric-blue" />
+                                    </div>
+                                    <h3 className="font-extrabold text-xl text-pure-black dark:text-off-white leading-tight">Status do Agente</h3>
+                                    {aiConnected ? (
+                                        <Badge className="mx-auto w-max px-4 py-1.5 rounded-full bg-green-500/10 text-green-600 border-none font-bold flex items-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4" /> Conectado e Ativo
+                                        </Badge>
+                                    ) : (
+                                        <Badge variant="secondary" className="mx-auto w-max px-4 py-1.5 rounded-full bg-black/10 dark:bg-white/10 text-muted-foreground border-none font-bold">
+                                            Desconectado
+                                        </Badge>
+                                    )}
+                                    <p className="text-xs font-semibold text-muted-foreground mt-2 px-4 leading-relaxed">
+                                        Conecte sua API para liberar diagnósticos em tempo real, respostas inteligentes e sugestões de comunicação no funil de vendas.
+                                    </p>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
