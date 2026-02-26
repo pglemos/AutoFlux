@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useMemo, useState } from 'react'
+import { useAuth } from '@/components/auth-provider'
 import AdminDashboard from './AdminDashboard'
 import {
     ArrowUpRight,

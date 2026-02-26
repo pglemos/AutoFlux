@@ -95,14 +95,6 @@ export interface Lead {
     agencyId?: string
 }
 
-export interface InventoryItem {
-    id: string
-    model: string
-    year: number
-    price: number
-    agencyId: string
-    agingDays?: number
-}
 
 // --- Split Interfaces ---
 
@@ -111,7 +103,25 @@ export interface TasksState {
     addTask: (task: Omit<Task, 'id' | 'status'>) => void
     updateTask: (id: string, updates: Partial<Task>) => void
     deleteTask: (id: string) => void
-}
+
+    appointments: Appointment[]
+    addAppointment: (appointment: Omit<Appointment, 'id' | 'status'>) => void
+    updateAppointment: (id: string, updates: Partial<Appointment>) => void
+
+    visits: Visit[]
+    recordVisit: (visit: Omit<Visit, 'id' | 'checkIn' | 'verified'>) => void
+    verifyVisit: (id: string) => void
+
+    proposals: Proposal[]
+    addProposal: (proposal: Omit<Proposal, 'id' | 'status'>) => void
+    updateProposal: (id: string, updates: Partial<Proposal>) => void
+
+    inventory: InventoryItem[]
+
+    updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => void
+
+    attendance: AttendanceRecord[]
+    recordAttendance: (record: Omit<AttendanceRecord, 'id' | 'checkIn'>) => void
 
     commissions: Commission[]
     addCommission: (commission: Omit<Commission, 'id'>) => void
@@ -167,7 +177,7 @@ export interface LeadsState {
     deleteLead: (id: string) => void
 }
 
-export interface AppState extends TasksState, CommissionsState, GoalsState, UIState, UsersState, TeamState, LeadsState {}
+
 
 // --- Contexts ---
 
@@ -292,10 +302,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         { id: 'L-104', name: 'Juliana Costa', car: 'Mercedes C300', stage: 'Visita', slaMinutes: 120, source: 'Internet', value: 350000, score: 78, sellerId: 'T-03', agencyId: 'a2' },
         { id: 'L-105', name: 'Fernando Lima', car: 'Volvo XC60', stage: 'Proposta', slaMinutes: 300, source: 'Carteira', value: 390000, score: 88, sellerId: 'T-02', agencyId: 'a1' },
     ])
-    const [inventory, setInventory] = useState([
-        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1' },
-        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1' },
-        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2' },
+    const [inventory, setInventory] = useState<InventoryItem[]>([
+        { id: 'v1', model: 'Porsche 911 GT3', year: 2023, price: 1250000, agencyId: 'a1', agingDays: 45, plate: 'ABC-1234', status: 'Disponível' },
+        { id: 'v2', model: 'BMW M4 Competition', year: 2024, price: 780000, agencyId: 'a1', agingDays: 12, plate: 'DEF-5678', status: 'Disponível' },
+        { id: 'v3', model: 'Audi RS6 Avant', year: 2023, price: 1150000, agencyId: 'a2', agingDays: 5, plate: 'GHI-9012', status: 'Disponível' },
     ])
 
     const [permissions, setPermissions] = useState<Record<string, string[]>>({
@@ -419,6 +429,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             leads, addLead, updateLead, deleteLead,
             permissions, togglePermission,
             activeAgencyId, setActiveAgencyId,
+            appointments, addAppointment, updateAppointment, visits, recordVisit, verifyVisit, proposals, addProposal, updateProposal, attendance, recordAttendance, auditLogs, addAuditLog, updateInventoryItem,
+            notifications, selectedAiModel, setSelectedAiModel,
         }),
         [
             tasks, addTask, updateTask, deleteTask,
@@ -433,6 +445,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             leads, addLead, updateLead, deleteLead,
             permissions, togglePermission,
             activeAgencyId, setActiveAgencyId,
+            appointments, addAppointment, updateAppointment, visits, recordVisit, verifyVisit, proposals, addProposal, updateProposal, attendance, recordAttendance, auditLogs, addAuditLog, updateInventoryItem,
+            notifications, selectedAiModel, setSelectedAiModel,
         ],
     )
 

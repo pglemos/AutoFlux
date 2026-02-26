@@ -8,6 +8,7 @@ export type ToasterToast = {
     title?: string
     description?: string
     variant?: 'default' | 'destructive'
+    action?: React.ReactNode
 }
 
 let count = 0
@@ -42,7 +43,7 @@ export const reducer = (state: State, action: Action): State => {
         case 'ADD_TOAST':
             return { ...state, toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT) }
         case 'UPDATE_TOAST':
-            if (!state.toasts.find((t) => t.id === action.toast.id)) return state
+            if (!state.toasts.some(t => t.id === action.toast.id)) return state
             return { ...state, toasts: state.toasts.map((t) => (t.id === action.toast.id ? { ...t, ...action.toast } : t)) }
         case 'DISMISS_TOAST': {
             const { toastId } = action
@@ -59,7 +60,7 @@ export const reducer = (state: State, action: Action): State => {
                 if (state.toasts.length === 0) return state
                 return { ...state, toasts: [] }
             }
-            if (!state.toasts.find((t) => t.id === action.toastId)) return state
+            if (!state.toasts.some(t => t.id === action.toastId)) return state
             return { ...state, toasts: state.toasts.filter((t) => t.id !== action.toastId) }
     }
 }
