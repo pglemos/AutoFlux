@@ -184,7 +184,7 @@ export default function Team() {
                         </div>
                         <div className="space-y-2">
                             <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">E-mail Corporativo</Label>
-                            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded-xl h-12 bg-black/5 border-none font-bold" placeholder="colaborador@autogestao.com.br" />
+                            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded-xl h-12 bg-black/5 border-none font-bold" placeholder="colaborador@autoperf.com.br" />
                         </div>
                     </div>
                     <DialogFooter>

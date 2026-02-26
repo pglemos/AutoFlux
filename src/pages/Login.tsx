@@ -192,7 +192,7 @@ export default function Login() {
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="usuario@autogestao.com.br"
+                                    placeholder="usuario@autoperf.com.br"
                                     value={email}
                                     autoComplete="off"
                                     onChange={(e) => setEmail(e.target.value)}
