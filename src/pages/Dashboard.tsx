@@ -28,7 +28,7 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
-import { chartData, mockAuditLogs as auditLogs } from '@/lib/mock-data'
+import { chartData } from '@/lib/mock-data'
 
 export default function Dashboard() {
     const { role } = useAuth()

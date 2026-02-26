@@ -5,6 +5,7 @@ import request from 'supertest';
 process.env.VITE_SUPABASE_URL = 'http://localhost:54321';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRlc3QiLCJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjE2NTg1NDI2LCJleHAiOjE5MzIxNjE0MjZ9.ThisIsADummyKeyThatIsLongEnoughToLookLikeAJWTTokenButItIsNotRealOne';
 process.env.VITE_SUPABASE_ANON_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+process.env.VITE_WHATSAPP_API_KEY = "test-api-key";
 
 // Attempt to mock Supabase just in case
 mock.module('@supabase/supabase-js', () => ({
@@ -30,6 +31,7 @@ describe('POST /api/whatsapp/send', () => {
 
         const res = await request(app)
             .post('/api/whatsapp/send')
+            .set('x-api-key', 'test-api-key')
             .send({ message: 'Hello' });
 
         expect(res.status).toBe(400);
@@ -42,6 +44,7 @@ describe('POST /api/whatsapp/send', () => {
 
         const res = await request(app)
             .post('/api/whatsapp/send')
+            .set('x-api-key', 'test-api-key')
             .send({ phone: '1234567890' });
 
         expect(res.status).toBe(400);
@@ -54,6 +57,7 @@ describe('POST /api/whatsapp/send', () => {
 
         const res = await request(app)
             .post('/api/whatsapp/send')
+            .set('x-api-key', 'test-api-key')
             .send({ phone: '1234567890', message: 'Hello' });
 
         expect(res.status).toBe(400);

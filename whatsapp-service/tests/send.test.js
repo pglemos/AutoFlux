@@ -8,7 +8,7 @@ const mockClient = {
     on: (event, cb) => {
         eventHandlers[event] = cb;
     },
-    initialize: () => {},
+    initialize: () => { },
     sendMessage: mock(() => Promise.resolve()),
     destroy: mock(() => Promise.resolve()),
 };
@@ -21,7 +21,7 @@ mock.module("whatsapp-web.js", () => {
                 return mockClient;
             }
         },
-        LocalAuth: class {}
+        LocalAuth: class { }
     };
 });
 
@@ -50,6 +50,7 @@ mock.module("@supabase/supabase-js", () => {
 process.env.VITE_SUPABASE_URL = "https://example.com";
 process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
 process.env.VITE_SUPABASE_ANON_KEY = "test-key";
+process.env.VITE_WHATSAPP_API_KEY = "test-api-key";
 
 // Force reload of index.js to ensure mock is used
 const indexPath = require.resolve("../index.js");
@@ -63,6 +64,7 @@ describe("POST /api/whatsapp/send", () => {
 
         const response = await request(app)
             .post("/api/whatsapp/send")
+            .set('x-api-key', 'test-api-key')
             .send({ phone: "1234567890", message: "Hello" });
 
         expect(response.status).toBe(400);
@@ -75,6 +77,7 @@ describe("POST /api/whatsapp/send", () => {
 
         const response1 = await request(app)
             .post("/api/whatsapp/send")
+            .set('x-api-key', 'test-api-key')
             .send({ phone: "1234567890" });
 
         expect(response1.status).toBe(400);
@@ -82,6 +85,7 @@ describe("POST /api/whatsapp/send", () => {
 
         const response2 = await request(app)
             .post("/api/whatsapp/send")
+            .set('x-api-key', 'test-api-key')
             .send({ message: "Hello" });
 
         expect(response2.status).toBe(400);
@@ -96,6 +100,7 @@ describe("POST /api/whatsapp/send", () => {
 
         const response = await request(app)
             .post("/api/whatsapp/send")
+            .set('x-api-key', 'test-api-key')
             .send({ phone, message });
 
         expect(response.status).toBe(200);

@@ -7,13 +7,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
-import { mockAuditLogs } from '@/lib/mock-data'
+import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { generateAiDiagnostic } from '@/lib/ai-service'
 import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 
 export default function AiDiagnostics() {
     const { team } = useAppStore()
+    const { auditLogs } = useAuditLogs()
     const [isGenerating, setIsGenerating] = useState(false)
     const [diagnostic, setDiagnostic] = useState<{ text: string; actions: string[]; message: string } | null>(null)
     const [selectedSeller, setSelectedSeller] = useState('team')
@@ -223,16 +224,16 @@ export default function AiDiagnostics() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {mockAuditLogs.map((log, index) => (
+                                    {auditLogs.map((log, index) => (
                                         <TableRow key={log.id} className={cn('hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-none', index % 2 === 0 ? 'bg-transparent' : 'bg-black/[0.02] dark:bg-white/[0.02]')}>
-                                            <TableCell className="font-bold text-xs text-muted-foreground py-4 pl-6 whitespace-nowrap">{log.date}</TableCell>
-                                            <TableCell className="font-extrabold text-sm text-pure-black dark:text-off-white py-4 whitespace-nowrap">{log.user}</TableCell>
+                                            <TableCell className="font-bold text-xs text-muted-foreground py-4 pl-6 whitespace-nowrap">{new Date(log.created_at).toLocaleString('pt-BR')}</TableCell>
+                                            <TableCell className="font-extrabold text-sm text-pure-black dark:text-off-white py-4 whitespace-nowrap">{log.profiles?.name || 'Sistema'}</TableCell>
                                             <TableCell className="py-4 pr-6">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     {log.action.includes('Bloqueado') || log.action.includes('Alerta') ? <ShieldAlert className="w-3.5 h-3.5 text-mars-orange shrink-0" /> : <div className="w-1.5 h-1.5 rounded-full bg-electric-blue shrink-0"></div>}
                                                     <span className={cn('font-bold text-xs', log.action.includes('Bloqueado') || log.action.includes('Alerta') ? 'text-mars-orange' : 'text-pure-black dark:text-off-white')}>{log.action}</span>
                                                 </div>
-                                                <p className="text-xs text-muted-foreground font-medium leading-tight">{log.detail}</p>
+                                                <p className="text-xs text-muted-foreground font-medium leading-tight">{log.details && typeof log.details === 'object' ? JSON.stringify(log.details) : log.details || ''}</p>
                                             </TableCell>
                                         </TableRow>
                                     ))}

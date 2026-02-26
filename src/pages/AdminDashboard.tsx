@@ -29,7 +29,8 @@ import {
 } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { Badge } from '@/components/ui/badge'
-import { adminSystemPerformance, adminAgencyRanks, mockAuditLogs } from '@/lib/mock-data'
+import { adminSystemPerformance, adminAgencyRanks } from '@/lib/mock-data'
+import { useAuditLogs } from '@/hooks/use-audit-logs'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
@@ -56,6 +57,7 @@ const BentoCard = ({ children, className, delay = 0 }: { children: React.ReactNo
 export default function AdminDashboard() {
     console.log('AdminDashboard rendering')
     const { agencies = [], team = [], leads = [] } = useAppStore()
+    const { auditLogs } = useAuditLogs()
     const [hoveredAgency, setHoveredAgency] = useState<string | null>(null)
 
     const globalStats = useMemo(() => {
@@ -349,15 +351,15 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            {mockAuditLogs.map((log, i) => (
+                            {auditLogs.slice(0, 4).map((log, i) => (
                                 <div key={log.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 relative overflow-hidden group">
                                     <div className="absolute inset-x-0 bottom-0 h-0.5 bg-white/5 group-hover:bg-electric-blue/30 transition-colors" />
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-[9px] font-mono text-white/40">{log.user.split(' ')[0]}</span>
-                                        <span className="text-[8px] uppercase font-bold text-white/20">{log.date.split(',')[0]}</span>
+                                        <span className="text-[9px] font-mono text-white/40">{log.profiles?.name?.split(' ')[0] || 'Sistema'}</span>
+                                        <span className="text-[8px] uppercase font-bold text-white/20">{new Date(log.created_at).toLocaleDateString('pt-BR')}</span>
                                     </div>
                                     <p className="text-[11px] font-bold text-white/80 line-clamp-1 mb-0.5">{log.action}</p>
-                                    <p className="text-[9px] text-white/40 line-clamp-1">{log.detail}</p>
+                                    <p className="text-[9px] text-white/40 line-clamp-1">{log.details && typeof log.details === 'object' ? JSON.stringify(log.details) : log.details || ''}</p>
                                 </div>
                             ))}
                         </div>

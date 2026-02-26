@@ -133,4 +133,8 @@ const startServer = () => {
     });
 };
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
+
+module.exports = { app, client };
