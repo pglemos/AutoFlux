@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react'
-import { UIState } from '@/types'
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react'
 
 export interface UIContextProps {
     dashboardWidgets: string[]
@@ -24,23 +23,25 @@ export function UIProvider({ children }: { children: ReactNode }) {
     const [calendarIntegrations, setCalendarIntegrations] = useState({ google: false, outlook: false })
     const [chainedFunnel, setChainedFunnel] = useState(true)
 
-    const setCalendarIntegration = (provider: 'google' | 'outlook', connected: boolean) => {
+    const setCalendarIntegration = useCallback((provider: 'google' | 'outlook', connected: boolean) => {
         setCalendarIntegrations(prev => ({ ...prev, [provider]: connected }))
-    }
+    }, [])
+
+    const value = useMemo<UIContextProps>(() => ({
+        dashboardWidgets, setDashboardWidgets,
+        reportWidgets, setReportWidgets,
+        calendarIntegrations, setCalendarIntegration,
+        chainedFunnel, setChainedFunnel,
+    }), [dashboardWidgets, reportWidgets, calendarIntegrations, setCalendarIntegration, chainedFunnel])
 
     return (
-        <UIContext.Provider value={{
-            dashboardWidgets, setDashboardWidgets,
-            reportWidgets, setReportWidgets,
-            calendarIntegrations, setCalendarIntegration,
-            chainedFunnel, setChainedFunnel
-        }}>
+        <UIContext.Provider value={value}>
             {children}
         </UIContext.Provider>
     )
 }
 
-export const useUI = () => {
+export function useUI() {
     const context = useContext(UIContext)
     if (!context) throw new Error('useUI must be used within UIProvider')
     return context

@@ -48,7 +48,7 @@ export function Header() {
                 {isMobile && (
                     <div className="flex flex-col">
                         <span className="text-lg font-black leading-none">AutoPerf</span>
-                        <span className="text-[8px] font-bold text-electric-blue tracking-widest uppercase">Flux</span>
+                        <span className="text-[8px] font-bold text-electric-blue tracking-widest uppercase">Perf</span>
                     </div>
                 )}
                 <div className="relative max-w-md w-full hidden sm:block">

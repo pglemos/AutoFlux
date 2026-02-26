@@ -32,7 +32,7 @@ import { chartData, mockAuditLogs as auditLogs } from '@/lib/mock-data'
 
 export default function Dashboard() {
     const { role } = useAuth()
-    const { leads = [], team = [], inventory = [], goals = [], activeAgencyId, auditLogs = [] } = useAppStore()
+    const { leads = [], team = [], inventory = [], goals = [], activeAgencyId } = useAppStore()
     const [isEditing, setIsEditing] = useState(false)
     const [dashboardWidgets, setDashboardWidgets] = useState<string[]>([
         'kpi-metas',

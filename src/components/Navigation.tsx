@@ -87,7 +87,7 @@ export function Navigation() {
                     </div>
                     <div className="flex flex-col">
                         <span className="text-xl font-black leading-none">AutoPerf</span>
-                        <span className="text-[10px] font-bold text-electric-blue tracking-widest uppercase mt-0.5">Flux Control</span>
+                        <span className="text-[10px] font-bold text-electric-blue tracking-widest uppercase mt-0.5">Performance Intelligence</span>
                     </div>
                 </div>
             </div>
