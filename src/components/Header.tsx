@@ -55,7 +55,7 @@ export function Header() {
         const { error } = await supabase.from('audit_logs').insert({
             user_id: user.id,
             action: actions[activity],
-            detail: `Ação registrada para o lead ${leadName} via Quick Log.`
+            details: `Ação registrada para o lead ${leadName} via Quick Log.`
         })
 
         if (!error) {

@@ -80,7 +80,7 @@ export default function AiDiagnostics() {
                     <div className="w-2 h-2 rounded-full bg-electric-blue"></div>
                     <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">INTELIGÊNCIA ARTIFICIAL</span>
                 </div>
-                <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">Sales <span className="text-electric-blue">Analyst</span></h1>
+                <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">AutoPerf <span className="text-electric-blue">Intel Analyst</span></h1>
             </div>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="bg-white/50 dark:bg-black/50 p-1 rounded-2xl border border-white/30 dark:border-white/5 mb-8">

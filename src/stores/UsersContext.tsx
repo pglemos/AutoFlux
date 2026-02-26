@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { User, Agency, TeamMember } from '@/types'
+import { toCamelCase, toSnakeCase } from '@/lib/utils'
 
 export interface UsersState {
     users: User[]
@@ -49,21 +50,63 @@ export function UsersProvider({ children }: { children: ReactNode }) {
                 supabase.from('agencies').select('*'),
                 supabase.from('team').select('*'),
             ])
-            if (userData) setUsers(userData)
-            if (agencyData) setAgencies(agencyData)
-            if (teamData) setTeam(teamData)
+            if (userData) setUsers(toCamelCase(userData))
+            if (agencyData) setAgencies(toCamelCase(agencyData))
+            if (teamData) setTeam(toCamelCase(teamData))
         }
         fetchData()
+
+        const profileSub = supabase
+            .channel('public:profiles')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+                if (payload.eventType === 'INSERT') setUsers(prev => [...prev, toCamelCase(payload.new) as User])
+                if (payload.eventType === 'UPDATE') {
+                    const updated = toCamelCase(payload.new) as User
+                    setUsers(prev => prev.map(u => u.id === updated.id ? updated : u))
+                }
+                if (payload.eventType === 'DELETE') setUsers(prev => prev.filter(u => u.id !== payload.old.id))
+            })
+            .subscribe()
+
+        const agencySub = supabase
+            .channel('public:agencies')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'agencies' }, (payload) => {
+                if (payload.eventType === 'INSERT') setAgencies(prev => [...prev, toCamelCase(payload.new) as Agency])
+                if (payload.eventType === 'UPDATE') {
+                    const updated = toCamelCase(payload.new) as Agency
+                    setAgencies(prev => prev.map(a => a.id === updated.id ? updated : a))
+                }
+                if (payload.eventType === 'DELETE') setAgencies(prev => prev.filter(a => a.id !== payload.old.id))
+            })
+            .subscribe()
+
+        const teamSub = supabase
+            .channel('public:team')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'team' }, (payload) => {
+                if (payload.eventType === 'INSERT') setTeam(prev => [...prev, toCamelCase(payload.new) as TeamMember])
+                if (payload.eventType === 'UPDATE') {
+                    const updated = toCamelCase(payload.new) as TeamMember
+                    setTeam(prev => prev.map(t => t.id === updated.id ? updated : t))
+                }
+                if (payload.eventType === 'DELETE') setTeam(prev => prev.filter(t => t.id !== payload.old.id))
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(profileSub)
+            supabase.removeChannel(agencySub)
+            supabase.removeChannel(teamSub)
+        }
     }, [])
 
     // --- Users CRUD ---
     const addUser = useCallback(async (user: Omit<User, 'id'>) => {
-        const { data, error } = await supabase.from('profiles').insert([user]).select()
-        if (!error && data) setUsers(prev => [...prev, data[0]])
+        const { data, error } = await supabase.from('profiles').insert([toSnakeCase(user)]).select()
+        if (!error && data) setUsers(prev => [...prev, toCamelCase(data[0])])
     }, [])
 
     const updateUser = useCallback(async (id: string, updates: Partial<User>) => {
-        const { error } = await supabase.from('profiles').update(updates).eq('id', id)
+        const { error } = await supabase.from('profiles').update(toSnakeCase(updates)).eq('id', id)
         if (!error) setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u))
     }, [])
 
@@ -74,12 +117,12 @@ export function UsersProvider({ children }: { children: ReactNode }) {
 
     // --- Agencies CRUD ---
     const addAgency = useCallback(async (agency: Omit<Agency, 'id'>) => {
-        const { data, error } = await supabase.from('agencies').insert([agency]).select()
-        if (!error && data) setAgencies(prev => [...prev, data[0]])
+        const { data, error } = await supabase.from('agencies').insert([toSnakeCase(agency)]).select()
+        if (!error && data) setAgencies(prev => [...prev, toCamelCase(data[0])])
     }, [])
 
     const updateAgency = useCallback(async (id: string, updates: Partial<Agency>) => {
-        const { error } = await supabase.from('agencies').update(updates).eq('id', id)
+        const { error } = await supabase.from('agencies').update(toSnakeCase(updates)).eq('id', id)
         if (!error) setAgencies(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a))
     }, [])
 
@@ -93,12 +136,12 @@ export function UsersProvider({ children }: { children: ReactNode }) {
 
     // --- Team CRUD ---
     const addTeamMember = useCallback(async (member: Omit<TeamMember, 'id'>) => {
-        const { data, error } = await supabase.from('team').insert([member]).select()
-        if (!error && data) setTeam(prev => [...prev, data[0]])
+        const { data, error } = await supabase.from('team').insert([toSnakeCase(member)]).select()
+        if (!error && data) setTeam(prev => [...prev, toCamelCase(data[0])])
     }, [])
 
     const updateTeamMember = useCallback(async (id: string, updates: Partial<TeamMember>) => {
-        const { error } = await supabase.from('team').update(updates).eq('id', id)
+        const { error } = await supabase.from('team').update(toSnakeCase(updates)).eq('id', id)
         if (!error) setTeam(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
     }, [])
 
@@ -123,11 +166,7 @@ export function UsersProvider({ children }: { children: ReactNode }) {
         permissions, togglePermission,
         activeAgencyId, setActiveAgencyId,
     }), [
-        users, addUser, updateUser, deleteUser,
-        agencies, addAgency, updateAgency, deleteAgency,
-        team, addTeamMember, updateTeamMember, deleteTeamMember,
-        permissions, togglePermission,
-        activeAgencyId,
+        users, agencies, team, permissions, togglePermission, activeAgencyId, addUser, updateUser, deleteUser, addAgency, updateAgency, deleteAgency, addTeamMember, updateTeamMember, deleteTeamMember
     ])
 
     return (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
     BarChart,
     Bar,
@@ -37,26 +37,67 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 
-const monthlyData = [
-    { month: 'Jan', vendas: 18, meta: 20 },
-    { month: 'Fev', vendas: 22, meta: 22 },
-    { month: 'Mar', vendas: 28, meta: 25 },
-    { month: 'Abr', vendas: 19, meta: 25 },
-    { month: 'Mai', vendas: 24, meta: 25 },
-]
-
 export default function SellerPerformance() {
-    const { team, commissions } = useAppStore()
+    const { team = [], commissions = [], leads = [], goals = [] } = useAppStore()
     const [selectedSeller, setSelectedSeller] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
 
-    const filteredCommissions = commissions.filter((c) => {
-        const matchesSeller = selectedSeller === 'all' || c.seller === team.find((t) => t.id === selectedSeller)?.name
-        const matchesSearch = c.car.toLowerCase().includes(searchTerm.toLowerCase()) || c.seller.toLowerCase().includes(searchTerm.toLowerCase())
-        return matchesSeller && matchesSearch
-    })
+    const enrichedTeam = useMemo(() => {
+        return team.map(member => {
+            const sellersComms = commissions.filter(c => c.sellerId === member.id)
+            const sellerLeads = leads.filter(l => l.sellerId === member.id)
+            const salesCount = sellersComms.length
+            const leadsCount = sellerLeads.length
 
-    const leaderboard = [...team].sort((a, b) => b.sales - a.sales).slice(0, 3)
+            // Calculate conversion: sales / total leads (including lost and sold)
+            const conversion = leadsCount > 0 ? Math.round((salesCount / leadsCount) * 100) : 0
+
+            return {
+                ...member,
+                sales: salesCount,
+                conversion
+            }
+        })
+    }, [team, commissions, leads])
+
+    const monthlyData = useMemo(() => {
+        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        const last5Months = []
+        const now = new Date()
+
+        for (let i = 4; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+            const monthLabel = months[d.getMonth()]
+            const mIdx = d.getMonth()
+            const yIdx = d.getFullYear()
+
+            const monthlyComms = commissions.filter(c => {
+                const cDate = new Date(c.date)
+                const matchesSeller = selectedSeller === 'all' || c.sellerId === selectedSeller
+                return cDate.getMonth() === mIdx && cDate.getFullYear() === yIdx && matchesSeller
+            })
+
+            const periodGoal = goals.find(g => g.type === 'Equipe')?.amount || 25
+            const individualGoal = goals.find(g => g.type === 'Individual' && g.targetId === selectedSeller)?.amount || Math.round(periodGoal / Math.max(team.length, 1))
+
+            last5Months.push({
+                month: monthLabel,
+                vendas: monthlyComms.length,
+                meta: selectedSeller === 'all' ? periodGoal : individualGoal
+            })
+        }
+        return last5Months
+    }, [commissions, selectedSeller, goals, team])
+
+    const filteredCommissions = useMemo(() => {
+        return commissions.filter((c) => {
+            const matchesSeller = selectedSeller === 'all' || c.sellerId === selectedSeller
+            const matchesSearch = c.car.toLowerCase().includes(searchTerm.toLowerCase()) || c.seller.toLowerCase().includes(searchTerm.toLowerCase())
+            return matchesSeller && matchesSearch
+        })
+    }, [commissions, selectedSeller, searchTerm])
+
+    const leaderboard = useMemo(() => [...enrichedTeam].sort((a, b) => b.sales - a.sales).slice(0, 3), [enrichedTeam])
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-12">
@@ -176,12 +217,12 @@ export default function SellerPerformance() {
                     <CardContent className="p-8 pt-0 h-[350px]">
                         <ChartContainer config={{ conversion: { label: 'Conversão %', color: '#0062ff' } }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={[...team].sort((a, b) => b.conversion - a.conversion)} layout="vertical" margin={{ left: -30, right: 30 }}>
+                                <BarChart data={[...enrichedTeam].sort((a, b) => b.conversion - a.conversion)} layout="vertical" margin={{ left: -30, right: 30 }}>
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontWeight: 700, fontSize: 11 }} width={100} />
                                     <Tooltip content={<ChartTooltipContent />} />
                                     <Bar dataKey="conversion" radius={[0, 8, 8, 0]} barSize={28}>
-                                        {[...team].sort((a, b) => b.conversion - a.conversion).map((entry, index) => (
+                                        {[...enrichedTeam].sort((a, b) => b.conversion - a.conversion).map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={index === 0 ? '#0062ff' : index === 1 ? '#3b82f6' : '#93c5fd'} />
                                         ))}
                                     </Bar>
@@ -213,7 +254,7 @@ export default function SellerPerformance() {
                     <Table>
                         <TableHeader className="bg-black/5 dark:bg-white/5">
                             <TableRow className="border-none hover:bg-transparent">
-                                <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5 pl-8">Admin</TableHead>
+                                <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5 pl-8">Vendedor</TableHead>
                                 <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5">Veículo</TableHead>
                                 <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5">Data</TableHead>
                                 <TableHead className="font-bold text-[10px] uppercase tracking-widest py-5">Margem</TableHead>

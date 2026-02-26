@@ -26,14 +26,34 @@ export default function Financeiro() {
     const { commissions } = useAppStore()
     const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val)
 
-    const fluxData = [
-        { month: 'Jan', entrada: 420000, saida: 380000 },
-        { month: 'Fev', entrada: 510000, saida: 410000 },
-        { month: 'Mar', entrada: 480000, saida: 430000 },
-        { month: 'Abr', entrada: 610000, saida: 520000 },
-        { month: 'Mai', entrada: 550000, saida: 490000 },
-        { month: 'Jun', entrada: 720000, saida: 580000 },
-    ]
+    const fluxData = useMemo(() => {
+        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        const currentMonthIdx = new Date().getMonth()
+        const last6Months = Array.from({ length: 6 }, (_, i) => {
+            const mIdx = (currentMonthIdx - 5 + i + 12) % 12
+            return months[mIdx]
+        })
+
+        if (commissions.length === 0) {
+            return last6Months.map(m => ({ month: m, entrada: 0, saida: 0 }))
+        }
+
+        const grouped = commissions.reduce((acc: any, c) => {
+            const date = new Date(c.date)
+            const month = months[date.getMonth()]
+            if (!acc[month]) acc[month] = { entrada: 0, saida: 0 }
+            const revenueEstimate = c.comission * 10
+            acc[month].entrada += revenueEstimate
+            acc[month].saida += revenueEstimate * 0.7
+            return acc
+        }, {})
+
+        return last6Months.map(m => ({
+            month: m,
+            entrada: grouped[m]?.entrada || 0,
+            saida: grouped[m]?.saida || 0
+        }))
+    }, [commissions])
 
     const reportLucratividade = useMemo(() => {
         // Generate from actual commissions if available, otherwise fallback

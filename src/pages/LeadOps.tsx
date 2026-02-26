@@ -1,36 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Filter, AlertCircle, Clock, CheckCircle2, MoreVertical, Phone, MessageSquare, Sparkles, TrendingUp } from 'lucide-react';
 import clsx from 'clsx';
-
-const leads = [
-  { id: 1, name: 'Carlos Silva', phone: '(11) 98765-4321', vehicle: 'Jeep Compass 2022', source: 'Meta Ads', status: 'Novo', sla: 'estourado', time: '15m', owner: 'João', score: 92, aiSuggestion: 'Alta intenção de compra (clicou em financiamento). Ligue imediatamente e ofereça test-drive.' },
-  { id: 2, name: 'Ana Oliveira', phone: '(11) 91234-5678', vehicle: 'Honda Civic 2021', source: 'RD Station', status: 'Em Contato', sla: 'ok', time: '2h', owner: 'Maria', score: 75, aiSuggestion: 'Perfil analítico. Envie comparativo com concorrentes via WhatsApp.' },
-  { id: 3, name: 'Roberto Santos', phone: '(11) 99876-5432', vehicle: 'VW Nivus 2023', source: 'WhatsApp', status: 'Agendado', sla: 'ok', time: '1d', owner: 'João', score: 88, aiSuggestion: 'Agendamento para sábado. Envie vídeo do carro 1 dia antes para aquecer.' },
-  { id: 4, name: 'Fernanda Lima', phone: '(11) 98765-1234', vehicle: 'Toyota Corolla 2020', source: 'Meta Ads', status: 'Novo', sla: 'alerta', time: '4m', owner: 'Pedro', score: 45, aiSuggestion: 'Lead frio (horário atípico, dados genéricos). Tente contato via WhatsApp primeiro.' },
-  { id: 5, name: 'Lucas Souza', phone: '(11) 91234-8765', vehicle: 'Hyundai Creta 2022', source: 'Site', status: 'Proposta', sla: 'ok', time: '3d', owner: 'Maria', score: 95, aiSuggestion: 'Negociação avançada. Ofereça bônus na avaliação do usado para fechar hoje.' },
-];
+import useAppStore from '@/stores/main';
 
 export default function LeadOps() {
-  const [expandedLead, setExpandedLead] = useState<number | null>(null);
+  const { leads, team } = useAppStore();
+  const [expandedLead, setExpandedLead] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const toggleLead = (id: number) => {
-    if (expandedLead === id) {
-      setExpandedLead(null);
-    } else {
-      setExpandedLead(id);
-    }
+  const toggleLead = (id: string) => {
+    setExpandedLead(expandedLead === id ? null : id);
   };
+
+  const filteredLeads = useMemo(() => {
+    return leads.filter(l =>
+      l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      l.car.toLowerCase().includes(searchTerm.toLowerCase())
+    ).sort((a, b) => (b.score || 0) - (a.score || 0));
+  }, [leads, searchTerm]);
+
+  const stats = useMemo(() => {
+    const ok = leads.filter(l => l.slaMinutes <= 3).length;
+    const alerta = leads.filter(l => l.slaMinutes > 3 && l.slaMinutes <= 5).length;
+    const estourado = leads.filter(l => l.slaMinutes > 5).length;
+    const quentes = leads.filter(l => (l.score || 0) >= 80).length;
+    return { ok, alerta, estourado, quentes };
+  }, [leads]);
 
   return (
     <div className="space-y-12">
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-black tracking-tighter text-[#050505]">LeadOps</h1>
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-electric-blue animate-pulse"></div>
+            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">SLA MONITORING</span>
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">AutoPerf <span className="text-electric-blue">LeadOps</span></h1>
+        </div>
         <div className="flex gap-3">
-          <button className="hyper-glass px-6 py-2.5 rounded-full text-sm font-bold text-[#050505] hover:bg-white/80 transition-all flex items-center gap-2">
+          <button className="hyper-glass px-6 py-2.5 rounded-full text-sm font-bold text-pure-black dark:text-off-white hover:bg-white/80 transition-all flex items-center gap-2">
             <Filter className="h-4 w-4" strokeWidth={2.5} />
             Filtros
           </button>
-          <button className="bg-[#050505] text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-[#050505]/80 transition-all shadow-lg">
+          <button className="bg-pure-black dark:bg-white dark:text-pure-black text-white px-6 py-2.5 rounded-full text-sm font-bold hover:scale-105 transition-all shadow-lg">
             Distribuir Manualmente
           </button>
         </div>
@@ -40,178 +52,157 @@ export default function LeadOps() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="hyper-glass p-6 rounded-3xl flex items-center justify-between">
           <div>
-            <p className="micro-label mb-2">SLA Ok ({'<'} 3m)</p>
-            <p className="text-4xl font-black text-[#050505]">12</p>
+            <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-2">SLA Ok ({'<'} 3m)</p>
+            <p className="text-4xl font-black text-pure-black dark:text-off-white">{stats.ok}</p>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-white/50 flex items-center justify-center">
-            <CheckCircle2 className="h-6 w-6 text-[#050505]" strokeWidth={2.5} />
+          <div className="h-12 w-12 rounded-2xl bg-black/5 dark:bg-white/10 flex items-center justify-center">
+            <CheckCircle2 className="h-6 w-6 text-emerald-500" strokeWidth={2.5} />
           </div>
         </div>
         <div className="hyper-glass p-6 rounded-3xl flex items-center justify-between">
           <div>
-            <p className="micro-label mb-2">Alerta (3m - 5m)</p>
-            <p className="text-4xl font-black text-[#050505]">3</p>
+            <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-2">Alerta (3m - 5m)</p>
+            <p className="text-4xl font-black text-pure-black dark:text-off-white">{stats.alerta}</p>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-white/50 flex items-center justify-center">
-            <Clock className="h-6 w-6 text-[#FF4500]" strokeWidth={2.5} />
+          <div className="h-12 w-12 rounded-2xl bg-black/5 dark:bg-white/10 flex items-center justify-center">
+            <Clock className="h-6 w-6 text-amber-500" strokeWidth={2.5} />
           </div>
         </div>
-        <div className="hyper-glass p-6 rounded-3xl flex items-center justify-between border-l-4 border-l-[#FF4500]">
+        <div className="hyper-glass p-6 rounded-3xl flex items-center justify-between border-l-4 border-l-mars-orange">
           <div>
-            <p className="micro-label mb-2">Estourado ({'>'} 5m)</p>
-            <p className="text-4xl font-black text-[#050505]">1</p>
+            <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-2">Estourado ({'>'} 5m)</p>
+            <p className="text-4xl font-black text-pure-black dark:text-off-white">{stats.estourado}</p>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-[#FF4500]/10 flex items-center justify-center">
-            <AlertCircle className="h-6 w-6 text-[#FF4500]" strokeWidth={2.5} />
+          <div className="h-12 w-12 rounded-2xl bg-mars-orange/10 flex items-center justify-center">
+            <AlertCircle className="h-6 w-6 text-mars-orange" strokeWidth={2.5} />
           </div>
         </div>
-        <div className="bg-[#050505] p-6 rounded-3xl shadow-2xl flex items-center justify-between text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#2563EB]/20 to-[#FF4500]/20"></div>
+        <div className="bg-pure-black dark:bg-white p-6 rounded-3xl shadow-2xl flex items-center justify-between text-white dark:text-pure-black relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-electric-blue/20 to-transparent"></div>
           <div className="relative z-10">
-            <p className="micro-label !text-white/70 mb-2">Leads Quentes (IA)</p>
-            <p className="text-4xl font-black">5</p>
+            <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2 opacity-70">Leads Quentes (IA)</p>
+            <p className="text-4xl font-black">{stats.quentes}</p>
           </div>
-          <div className="relative z-10 h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
-            <Sparkles className="h-6 w-6 text-white" strokeWidth={2.5} />
+          <div className="relative z-10 h-12 w-12 rounded-2xl bg-white/10 dark:bg-black/10 flex items-center justify-center backdrop-blur-sm">
+            <Sparkles className="h-6 w-6 group-hover:animate-pulse" strokeWidth={2.5} />
           </div>
         </div>
       </div>
 
       {/* Leads Table */}
-      <div className="hyper-glass rounded-3xl overflow-hidden">
-        <div className="p-6 border-b border-gray-200/50 flex justify-between items-center">
+      <div className="hyper-glass rounded-[2.5rem] overflow-hidden border border-black/5 dark:border-white/5">
+        <div className="p-8 border-b border-black/5 dark:border-white/5 flex justify-between items-center bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="relative w-72">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" strokeWidth={2.5} />
-            </div>
+            <Search className="absolute inset-y-0 left-4 flex items-center pointer-events-none h-full w-5 text-muted-foreground" strokeWidth={2.5} />
             <input
               type="text"
-              className="block w-full pl-12 pr-4 py-3 border-none rounded-full leading-5 bg-white/50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB] sm:text-sm font-medium"
+              className="block w-full pl-12 pr-4 py-3 border-none rounded-2xl bg-white/50 dark:bg-black/50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-electric-blue sm:text-sm font-bold shadow-sm"
               placeholder="Buscar leads..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#050505] font-medium">
-            <TrendingUp className="h-5 w-5 text-[#2563EB]" strokeWidth={2.5} />
-            <span>Ordenado por: <strong>Score IA (Maior)</strong></span>
+          <div className="flex items-center gap-2 text-sm text-pure-black dark:text-off-white font-bold">
+            <TrendingUp className="h-5 w-5 text-electric-blue" strokeWidth={2.5} />
+            <span className="opacity-60">Ordenado por:</span> <strong>Score IA</strong>
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200/50">
-            <thead className="bg-white/30">
-              <tr>
-                <th scope="col" className="px-6 py-4 text-left micro-label">
-                  Lead
-                </th>
-                <th scope="col" className="px-6 py-4 text-left micro-label">
-                  Veículo de Interesse
-                </th>
-                <th scope="col" className="px-6 py-4 text-left micro-label">
-                  Score IA
-                </th>
-                <th scope="col" className="px-6 py-4 text-left micro-label">
-                  Status / SLA
-                </th>
-                <th scope="col" className="px-6 py-4 text-left micro-label">
-                  Dono
-                </th>
-                <th scope="col" className="relative px-6 py-4">
-                  <span className="sr-only">Ações</span>
-                </th>
+          <table className="min-w-full divide-y divide-black/5 dark:divide-white/5">
+            <thead>
+              <tr className="bg-black/5 dark:bg-white/5">
+                <th scope="col" className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Lead</th>
+                <th scope="col" className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Veículo</th>
+                <th scope="col" className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Score IA</th>
+                <th scope="col" className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status / SLA</th>
+                <th scope="col" className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Dono</th>
+                <th scope="col" className="relative px-8 py-5"><span className="sr-only">Ações</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200/50">
-              {leads.sort((a, b) => b.score - a.score).map((lead) => (
+            <tbody className="divide-y divide-black/5 dark:divide-white/5">
+              {filteredLeads.map((lead) => (
                 <React.Fragment key={lead.id}>
                   <tr
-                    className={clsx("hover:bg-white/50 transition-colors cursor-pointer", expandedLead === lead.id && "bg-white/80")}
+                    className={clsx("hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer group", expandedLead === lead.id && "bg-black/[0.03] dark:bg-white/[0.03]")}
                     onClick={() => toggleLead(lead.id)}
                   >
-                    <td className="px-6 py-5 whitespace-nowrap">
+                    <td className="px-8 py-6 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-[#050505] flex items-center justify-center text-white font-bold text-sm">
+                        <div className="h-11 w-11 flex-shrink-0 rounded-2xl bg-pure-black dark:bg-white flex items-center justify-center text-white dark:text-pure-black font-black text-sm">
                           {lead.name.charAt(0)}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-bold text-[#050505]">{lead.name}</div>
-                          <div className="text-sm font-medium text-gray-500">{lead.phone}</div>
+                          <div className="text-sm font-extrabold text-pure-black dark:text-off-white">{lead.name}</div>
+                          <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Via {lead.source}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5 whitespace-nowrap">
-                      <div className="text-sm font-bold text-[#050505]">{lead.vehicle}</div>
-                      <div className="micro-label mt-1">{lead.source}</div>
+                    <td className="px-8 py-6 whitespace-nowrap">
+                      <div className="text-sm font-extrabold text-pure-black dark:text-off-white">{lead.car}</div>
+                      <div className="text-[10px] font-bold text-electric-blue uppercase">Interesse Ativo</div>
                     </td>
-                    <td className="px-6 py-5 whitespace-nowrap">
+                    <td className="px-8 py-6 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className={clsx(
-                          "flex items-center justify-center h-8 w-8 rounded-lg font-black text-sm",
-                          lead.score >= 80 ? "bg-[#050505] text-white" :
-                          lead.score >= 60 ? "bg-gray-200 text-[#050505]" :
-                          "bg-[#FF4500]/10 text-[#FF4500]"
+                          "flex items-center justify-center h-9 w-9 rounded-xl font-black text-sm font-mono-numbers shadow-sm",
+                          (lead.score || 0) >= 80 ? "bg-pure-black dark:bg-white text-white dark:text-pure-black" :
+                            (lead.score || 0) >= 60 ? "bg-black/5 dark:bg-white/10 text-pure-black dark:text-off-white" :
+                              "bg-mars-orange/10 text-mars-orange"
                         )}>
-                          {lead.score}
+                          {lead.score || 0}
                         </div>
-                        {lead.score >= 80 && <Sparkles className="h-5 w-5 text-[#2563EB]" strokeWidth={2.5} />}
+                        {(lead.score || 0) >= 80 && <Sparkles className="h-5 w-5 text-electric-blue animate-pulse" strokeWidth={2.5} />}
                       </div>
                     </td>
-                    <td className="px-6 py-5 whitespace-nowrap">
+                    <td className="px-8 py-6 whitespace-nowrap">
                       <div className="flex flex-col gap-2">
-                        <span className="px-3 py-1 inline-flex text-xs font-bold uppercase tracking-wider rounded-full bg-white border border-gray-200 text-[#050505] w-fit">
-                          {lead.status}
+                        <span className="px-3 py-1 inline-flex text-[9px] font-black uppercase tracking-widest rounded-full bg-white dark:bg-black border border-black/5 dark:border-white/10 text-pure-black dark:text-off-white w-fit shadow-sm">
+                          {lead.stage}
                         </span>
-                        <div className="flex items-center gap-1.5 text-xs font-bold">
-                          {lead.sla === 'estourado' && <AlertCircle className="h-4 w-4 text-[#FF4500]" strokeWidth={2.5} />}
-                          {lead.sla === 'alerta' && <Clock className="h-4 w-4 text-[#FF4500]" strokeWidth={2.5} />}
-                          {lead.sla === 'ok' && <CheckCircle2 className="h-4 w-4 text-[#050505]" strokeWidth={2.5} />}
-                          <span className={clsx(
-                            lead.sla === 'estourado' && 'text-[#FF4500]',
-                            lead.sla === 'alerta' && 'text-[#FF4500]',
-                            lead.sla === 'ok' && 'text-[#050505]'
-                          )}>
-                            {lead.time}
+                        <div className="flex items-center gap-2 text-xs font-black font-mono-numbers">
+                          {lead.slaMinutes > 5 ? <AlertCircle className="h-4 w-4 text-mars-orange" strokeWidth={2.5} /> :
+                            lead.slaMinutes > 3 ? <Clock className="h-4 w-4 text-amber-500" strokeWidth={2.5} /> :
+                              <CheckCircle2 className="h-4 w-4 text-emerald-500" strokeWidth={2.5} />}
+                          <span className={clsx(lead.slaMinutes > 5 ? 'text-mars-orange' : lead.slaMinutes > 3 ? 'text-amber-500' : 'text-emerald-500')}>
+                            {lead.slaMinutes}m
                           </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5 whitespace-nowrap">
+                    <td className="px-8 py-6 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-[#050505] text-xs font-bold">
-                          {lead.owner.charAt(0)}
+                        <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-pure-black dark:text-off-white text-[10px] font-black border border-black/5 dark:border-white/5">
+                          {(team.find(t => t.id === lead.sellerId)?.name || 'S').charAt(0)}
                         </div>
-                        <span className="text-sm font-bold text-[#050505]">{lead.owner}</span>
+                        <span className="text-sm font-bold text-pure-black dark:text-off-white">{team.find(t => t.id === lead.sellerId)?.name || 'Sem Dono'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <button className="text-gray-400 hover:text-[#2563EB] p-2 rounded-xl hover:bg-[#2563EB]/10 transition-colors">
-                          <Phone className="h-5 w-5" strokeWidth={2.5} />
-                        </button>
-                        <button className="text-gray-400 hover:text-[#2563EB] p-2 rounded-xl hover:bg-[#2563EB]/10 transition-colors">
-                          <MessageSquare className="h-5 w-5" strokeWidth={2.5} />
-                        </button>
-                        <button className="text-gray-400 hover:text-[#050505] p-2 rounded-xl hover:bg-black/5 transition-colors">
-                          <MoreVertical className="h-5 w-5" strokeWidth={2.5} />
-                        </button>
+                    <td className="px-8 py-6 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button className="text-muted-foreground hover:text-electric-blue p-2.5 rounded-xl hover:bg-electric-blue/10 transition-colors"><Phone className="h-5 w-5" strokeWidth={2.5} /></button>
+                        <button className="text-muted-foreground hover:text-electric-blue p-2.5 rounded-xl hover:bg-electric-blue/10 transition-colors"><MessageSquare className="h-5 w-5" strokeWidth={2.5} /></button>
                       </div>
                     </td>
                   </tr>
                   {expandedLead === lead.id && (
-                    <tr className="bg-white/80">
-                      <td colSpan={6} className="px-6 py-6 border-t border-gray-200/50">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-[#050505] rounded-2xl">
-                            <Sparkles className="h-6 w-6 text-white" strokeWidth={2.5} />
+                    <tr className="bg-black/[0.01] dark:bg-white/[0.01]">
+                      <td colSpan={6} className="px-8 py-8 border-t border-black/5 dark:border-white/5">
+                        <div className="flex items-start gap-6 max-w-4xl">
+                          <div className="p-4 bg-pure-black dark:bg-white rounded-2xl shadow-xl">
+                            <Sparkles className="h-7 w-7 text-white dark:text-pure-black" strokeWidth={2.5} />
                           </div>
-                          <div>
-                            <h4 className="text-sm font-bold text-[#050505] mb-2 uppercase tracking-wider">Análise e Sugestão da IA</h4>
-                            <p className="text-base font-medium text-gray-600">{lead.aiSuggestion}</p>
-                            <div className="mt-4 flex gap-3">
-                              <button className="px-5 py-2.5 bg-[#2563EB] text-white text-sm font-bold rounded-full hover:bg-[#2563EB]/90 transition-colors shadow-lg shadow-[#2563EB]/20">
-                                Executar Ação Sugerida
-                              </button>
-                              <button className="px-5 py-2.5 bg-white border border-gray-200 text-[#050505] text-sm font-bold rounded-full hover:bg-gray-50 transition-colors">
-                                Ver Histórico Completo
-                              </button>
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="text-[10px] font-black text-electric-blue mb-2 uppercase tracking-widest">Análise Preditiva AutoPerf</h4>
+                              <p className="text-lg font-bold text-pure-black dark:text-off-white leading-relaxed">
+                                {lead.score >= 80 ? "Alta intenção de compra identificada. Lead interagiu com simulações de financiamento e vídeos do veículo." :
+                                  lead.score >= 60 ? "Interesse moderado. O lead solicitou informações técnicas, mas ainda não demonstrou urgência." :
+                                    "Lead em fase de descoberta. Prefere contato assíncrono (WhatsApp) inicialmente."}
+                              </p>
+                            </div>
+                            <div className="flex gap-3">
+                              <button className="px-6 py-3 bg-electric-blue text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-electric-blue/90 transition-all shadow-lg shadow-electric-blue/20">Executar Ação</button>
+                              <button className="px-6 py-3 bg-white dark:bg-[#111] border border-black/5 dark:border-white/10 text-pure-black dark:text-off-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all">Ver Histórico</button>
                             </div>
                           </div>
                         </div>
@@ -220,6 +211,9 @@ export default function LeadOps() {
                   )}
                 </React.Fragment>
               ))}
+              {filteredLeads.length === 0 && (
+                <tr><td colSpan={6} className="px-8 py-24 text-center text-muted-foreground font-bold">Nenhum lead encontrado com estes critérios.</td></tr>
+              )}
             </tbody>
           </table>
         </div>

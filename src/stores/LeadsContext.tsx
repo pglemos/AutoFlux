@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Lead, LeadStage } from '@/types'
+import { toCamelCase, toSnakeCase } from '@/lib/utils'
 
 export interface LeadsState {
     leads: Lead[]
@@ -19,19 +20,37 @@ export function LeadsProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const fetchLeads = async () => {
             const { data, error } = await supabase.from('leads').select('*')
-            if (!error && data) setLeads(data)
+            if (!error && data) setLeads(toCamelCase(data))
             setLoading(false)
         }
         fetchLeads()
+
+        const subscription = supabase
+            .channel('public:leads')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, (payload) => {
+                setLeads(prev => [...prev, toCamelCase(payload.new) as Lead])
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'leads' }, (payload) => {
+                const updated = toCamelCase(payload.new) as Lead
+                setLeads(prev => prev.map(l => l.id === updated.id ? updated : l))
+            })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'leads' }, (payload) => {
+                setLeads(prev => prev.filter(l => l.id !== payload.old.id))
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(subscription)
+        }
     }, [])
 
     const addLead = useCallback(async (lead: Omit<Lead, 'id'>) => {
-        const { data, error } = await supabase.from('leads').insert([lead]).select()
-        if (!error && data) setLeads(prev => [...prev, data[0]])
+        const { data, error } = await supabase.from('leads').insert([toSnakeCase(lead)]).select()
+        if (!error && data) setLeads(prev => [...prev, toCamelCase(data[0])])
     }, [])
 
     const updateLead = useCallback(async (id: string, updates: Partial<Lead>) => {
-        const { error } = await supabase.from('leads').update(updates).eq('id', id)
+        const { error } = await supabase.from('leads').update(toSnakeCase(updates)).eq('id', id)
         if (!error) setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l))
     }, [])
 

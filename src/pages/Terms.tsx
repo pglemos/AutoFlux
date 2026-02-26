@@ -16,7 +16,7 @@ export default function Terms() {
         {
             icon: Copyright,
             title: "2. Licenciamento e Propriedade Intelectual",
-            content: "Concedemos ao Contratante uma licença revogável, não-exclusiva, intransferível e limitada ao uso do software-as-a-service (SaaS) restrito às suas operações internas. Todos os direitos de propriedade intelectual aplicáveis (códigos-fonte em React/Node, algoritmos e weights de inteligência artificial, design do front-end, estrutura de relatórios de BI, e a marca LUZ DIREÇÃO) são e permanecerão sendo de titularidade irrenunciável e exclusiva da operadora."
+            content: "Concedemos ao Contratante uma licença revogável, não-exclusiva, intransferível e limitada ao uso do software-as-a-service (SaaS) restrito às suas operações internas. Todos os direitos de propriedade intelectual aplicáveis (códigos-fonte em React/Node, algoritmos e weights de inteligência artificial, design do front-end, estrutura de relatórios de BI, e a marca AutoPerf) são e permanecerão sendo de titularidade irrenunciável e exclusiva da operadora."
         },
         {
             icon: Briefcase,
@@ -26,17 +26,17 @@ export default function Terms() {
         {
             icon: Timer,
             title: "4. Nível de Serviço (SLA) de Plataforma e Contratempos",
-            content: "A LUZ DIREÇÃO planeja um cálculo e meta de disponibilidade real da plataforma de 99.9% contínuos e calculados mensalmente. Computa-se como 'fora do uptime' qualquer ocasião que impossibilite inteiramente chamadas vitais ao backend da plataforma. Paradas sistêmicas visando manutenção e que foram comunicadas ao menos 48h retroativamente, assim como ocorrências globais de força-maior estrutural (falhas massivas em serviços de infraestrutura DNS e Nuvem) ficam isentos de penalizações contratuais associadas do SLA legal."
+            content: "A AutoPerf planeja um cálculo e meta de disponibilidade real da plataforma de 99.9% contínuos e calculados mensalmente. Computa-se como 'fora do uptime' qualquer ocasião que impossibilite inteiramente chamadas vitais ao backend da plataforma. Paradas sistêmicas visando manutenção e que foram comunicadas ao menos 48h retroativamente, assim como ocorrências globais de força-maior estrutural (falhas massivas em serviços de infraestrutura DNS e Nuvem) ficam isentos de penalizações contratuais associadas do SLA legal."
         },
         {
             icon: Server,
             title: "5. Integridade Institucional do Banco de Dados",
-            content: "As operações estruturadoras de backup são procedidas de maneira espelhada em banco de dados isolado com rotinas diárias e rigorosas. Todavia, a plataforma LUZ DIREÇÃO não representa nem preenche as lacunas de um serviço independente de guarda prolongada arquivística do cliente, e em sendo a operadora isenta de multas punitivas oriundas de catástrofes de dados que não advindam de imperícia direta da gestão de engenharia da LUZ DIREÇÃO."
+            content: "As operações estruturadoras de backup são procedidas de maneira espelhada em banco de dados isolado com rotinas diárias e rigorosas. Todavia, a plataforma AutoPerf não representa nem preenche as lacunas de um serviço independente de guarda prolongada arquivística do cliente, e em sendo a operadora isenta de multas punitivas oriundas de catástrofes de dados que não advindam de imperícia direta da gestão de engenharia da AutoPerf."
         },
         {
             icon: AlertTriangle,
             title: "6. Limitação de Responsabilidade Financeira Consolidada",
-            content: "O sistema disponibiliza soluções e cálculos preditivos automatizados com base informada pelo volume. Sob absolutamente nenhuma conjectura jurídica a LUZ DIREÇÃO ou seu quadro societário se perfazerão responsáveis passivos por prejuízos empresariais indiretos, perda mercantil, danos imprevistos, ou lucros que deixaram de se materializar provenientes de ações de negócio assumidas com amparo nas métricas vistas na tela. O montante agregador reparatório da provedora delimitará-se à totalização contratual paga pelo cliente aos seis (6) meses precedendo à contestação documentada."
+            content: "O sistema disponibiliza soluções e cálculos preditivos automatizados com base informada pelo volume. Sob absolutamente nenhuma conjectura jurídica a AutoPerf ou seu quadro societário se perfazerão responsáveis passivos por prejuízos empresariais indiretos, perda mercantil, danos imprevistos, ou lucros que deixaram de se materializar provenientes de ações de negócio assumidas com amparo nas métricas vistas na tela. O montante agregador reparatório da provedora delimitará-se à totalização contratual paga pelo cliente aos seis (6) meses precedendo à contestação documentada."
         },
         {
             icon: Ban,
@@ -46,7 +46,7 @@ export default function Terms() {
         {
             icon: Scale,
             title: "8. Foro Eletivo e Composição de Conflitos",
-            content: "Ficam regidas as avenças do presente Contrato Eletrônico sob a tutela irrestrita das legislações vigentes formalmente elaboradas e estabelecidas no Brasil (Leis Federais vinculantes ao setor virtual). Acorda-se de mútuo agrado a exclusividade soberana do Foro da Comarca da Capital do Estado de São Paulo — por mais fortuito e distinto local de onde se origina o uso do software — na arbitração ou julgamento de pendências de direito que escaparem às mediações diplomáticas primárias extra-judiciais entre a Autuante e a LUZ DIREÇÃO."
+            content: "Ficam regidas as avenças do presente Contrato Eletrônico sob a tutela irrestrita das legislações vigentes formalmente elaboradas e estabelecidas no Brasil (Leis Federais vinculantes ao setor virtual). Acorda-se de mútuo agrado a exclusividade soberana do Foro da Comarca da Capital do Estado de São Paulo — por mais fortuito e distinto local de onde se origina o uso do software — na arbitração ou julgamento de pendências de direito que escaparem às mediações diplomáticas primárias extra-judiciais entre a Autuante e a AutoPerf."
         }
     ];
 
@@ -146,9 +146,9 @@ export default function Terms() {
                     <div className="pt-16 border-t border-slate-200 dark:border-white/10 flex items-center justify-between opacity-50">
                         <div className="flex items-center gap-3">
                             <Sparkles className="size-4 text-[#94785C]" />
-                            <span className="text-[10px] font-black tracking-[0.5em] uppercase">LUZ DIREÇÃO</span>
+                            <span className="text-[10px] font-black tracking-[0.5em] uppercase">AUTOPERF</span>
                         </div>
-                        <span className="text-[9px] font-bold uppercase tracking-widest truncate">© 2026 Contractual Agreement Ref: 0X-LDR</span>
+                        <span className="text-[9px] font-bold uppercase tracking-widest truncate">© 2026 Contractual Agreement Ref: 0X-AP</span>
                     </div>
                 </div>
             </div>

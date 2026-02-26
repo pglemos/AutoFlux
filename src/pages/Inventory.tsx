@@ -51,11 +51,23 @@ export default function Inventory() {
         return true
     })
 
+    const { totalStockValue, averageAging, totalUnits } = useMemo(() => {
+        const totalValue = filteredInventory.reduce((acc, item) => acc + item.price, 0)
+        const avgAging = filteredInventory.length > 0
+            ? Math.round(filteredInventory.reduce((acc, item) => acc + item.agingDays, 0) / filteredInventory.length)
+            : 0
+        return {
+            totalStockValue: totalValue,
+            averageAging: avgAging,
+            totalUnits: filteredInventory.length
+        }
+    }, [filteredInventory])
+
     const stats = [
-        { title: 'Total em Estoque', value: 'R$ 4.3M', trend: '+5.2%', icon: CircleDollarSign, color: 'text-emerald-500' },
-        { title: 'Aging Médio', value: '42 dias', trend: '-2.4%', icon: Box, color: 'text-mars-orange' },
+        { title: 'Total em Estoque', value: `R$ ${(totalStockValue / 1000000).toFixed(1)}M`, trend: '+5.2%', icon: CircleDollarSign, color: 'text-emerald-500' },
+        { title: 'Aging Médio', value: `${averageAging} dias`, trend: '-2.4%', icon: Box, color: 'text-mars-orange' },
         { title: 'Margem Média', value: '9.4%', trend: '+0.8%', icon: ArrowUpRight, color: 'text-electric-blue' },
-        { title: 'Units', value: '38', trend: '+4', icon: Car, color: 'text-pure-black dark:text-off-white' },
+        { title: 'Units', value: totalUnits.toString(), trend: `+${Math.floor(totalUnits * 0.1)}`, icon: Car, color: 'text-pure-black dark:text-off-white' },
     ]
 
     return (

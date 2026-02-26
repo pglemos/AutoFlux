@@ -34,7 +34,7 @@ export default function Communication() {
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 rounded-full bg-electric-blue animate-pulse"></div>
-                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">COMMUNICATION HUB</span>
+                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">AUTOPERF CONNECT</span>
                     </div>
                     <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">
                         Canal <span className="text-electric-blue">Inteligente</span>

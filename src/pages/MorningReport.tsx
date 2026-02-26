@@ -236,15 +236,26 @@ ${topSellers.map((t, i) => `· ${i + 1}º ${t.name}: ${t.sales} vendas (${t.conv
                                     tag="Imediato"
                                     color="emerald"
                                 />
-                                <ActionInsight
-                                    title="Redistribuição de Carga"
-                                    desc="O vendedor Ricardo está com 12 leads estagnados. Considere redistribuir para vendedores com menor carga atual."
-                                    tag="Gestão"
-                                    color="electric-blue"
-                                />
+                                {(() => {
+                                    const sellerStats = team.map(t => ({
+                                        name: t.name,
+                                        stale: leads.filter(l => l.sellerId === t.id && l.stagnantDays && l.stagnantDays >= 2).length
+                                    })).sort((a, b) => b.stale - a.stale);
+
+                                    const topStale = sellerStats[0];
+
+                                    return topStale && topStale.stale > 0 ? (
+                                        <ActionInsight
+                                            title="Redistribuição de Carga"
+                                            desc={`O vendedor ${topStale.name} está com ${topStale.stale} leads estagnados. Considere redistribuir para vendedores com menor carga atual.`}
+                                            tag="Gestão"
+                                            color="electric-blue"
+                                        />
+                                    ) : null;
+                                })()}
                                 <ActionInsight
                                     title="Follow-up de Visitas"
-                                    desc={`Temos ${leads.filter(l => l.stage === 'Visita').length} leads que realizaram visitas ontem. Solicite o feedback dos vendedores.`}
+                                    desc={`Temos ${leads.filter(l => l.stage === 'Visita').length} leads que realizaram visitas recentemente. Solicite o feedback dos vendedores.`}
                                     tag="Processo"
                                     color="mars-orange"
                                 />

@@ -59,7 +59,7 @@ export default function Funnel() {
         seller: sellerName,
         sellerId: lead.sellerId,
         car: lead.car,
-        date: new Date().toLocaleDateString('pt-BR'),
+        date: new Date().toISOString(),
         margin: `${marginPerc.toFixed(1)}%`,
         comission
       })
@@ -125,7 +125,7 @@ export default function Funnel() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-mars-orange animate-pulse"></div>
-            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">KAIZEN CRM</span>
+            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">AUTOPERF CRM</span>
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-pure-black dark:text-off-white">Pipeline de <span className="text-electric-blue">Vendas</span></h1>
         </div>

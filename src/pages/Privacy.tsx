@@ -26,7 +26,7 @@ export default function Privacy() {
         {
             icon: Globe,
             title: "4. Compartilhamento e Transferência Internacional",
-            content: "A LUZ DIREÇÃO mantém contrato estrito com provedores de nuvem tier-1 (como hospedagem Vercel e AWS/GCP para persistência), que cumprem rígidas normas internacionais (ISO/IEC 27001, SOC 2 Type II e ISO/IEC 27018 - Privacidade na Nuvem). Caso os dados sejam armazenados em servidores físicos fora do território brasileiro, garantimos que tais transferências seguem as diretrizes do Art. 33 da LGPD, adotando cláusulas contratuais padrão, normas corporativas globais e assegurando nível de conformidade equivalente ao exigido pela legislação local."
+            content: "A AutoPerf mantém contrato estrito com provedores de nuvem tier-1 (como hospedagem Vercel e AWS/GCP para persistência), que cumprem rígidas normas internacionais (ISO/IEC 27001, SOC 2 Type II e ISO/IEC 27018 - Privacidade na Nuvem). Caso os dados sejam armazenados em servidores físicos fora do território brasileiro, garantimos que tais transferências seguem as diretrizes do Art. 33 da LGPD, adotando cláusulas contratuais padrão, normas corporativas globais e assegurando nível de conformidade equivalente ao exigido pela legislação local."
         },
         {
             icon: UserCheck,
@@ -46,7 +46,7 @@ export default function Privacy() {
         {
             icon: Mail,
             title: "8. Contato do DPO e Notificações de Incidente",
-            content: "Em conformidade com o Art. 41 da LGPD, a LUZ DIREÇÃO nomeou um Encarregado de Dados (Data Protection Officer - DPO), que atua como canal de comunicação entre a operadora, os titulares e a Autoridade Nacional de Proteção de Dados (ANPD). Para tratar de qualquer incidente de segurança, vazamento (real ou suspeito) ou exercício de direitos, entre em contato exclusivamente pelo canal seguro de governança de dados associado a consultoria. Nossa política estipula notificação de contenção rápida para parceiros sobre qualquer incidente que comprometa a base isolada."
+            content: "Em conformidade com o Art. 41 da LGPD, a AutoPerf nomeou um Encarregado de Dados (Data Protection Officer - DPO), que atua como canal de comunicação entre a operadora, os titulares e a Autoridade Nacional de Proteção de Dados (ANPD). Para tratar de qualquer incidente de segurança, vazamento (real ou suspeito) ou exercício de direitos, entre em contato exclusivamente pelo canal seguro de governança de dados associado a consultoria. Nossa política estipula notificação de contenção rápida para parceiros sobre qualquer incidente que comprometa a base isolada."
         }
     ];
 
@@ -150,7 +150,7 @@ export default function Privacy() {
                     <div className="pt-16 border-t border-slate-200 dark:border-white/10 flex items-center justify-between opacity-50">
                         <div className="flex items-center gap-3">
                             <Sparkles className="size-4 text-[#94785C]" />
-                            <span className="text-[10px] font-black tracking-[0.5em] uppercase">LUZ DIREÇÃO</span>
+                            <span className="text-[10px] font-black tracking-[0.5em] uppercase">AUTOPERF</span>
                         </div>
                         <span className="text-[9px] font-bold uppercase tracking-widest truncate">© 2026 Data & Privacy Operations</span>
                     </div>

@@ -1,4 +1,5 @@
 import { Share2, Zap, ArrowRight, ShieldCheck, Heart, Layers, TrendingUp } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,7 +35,11 @@ export default function CrossSalesReports() {
     ]
 
     return (
-        <div className="space-y-8 max-w-7xl mx-auto pb-12">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8 max-w-7xl mx-auto pb-12"
+        >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
                 <div>
                     <div className="flex items-center gap-2 mb-2">
@@ -100,7 +105,13 @@ export default function CrossSalesReports() {
                     </CardHeader>
                     <CardContent className="px-8 space-y-6">
                         {opportunities.map((opt, i) => (
-                            <div key={i} className="bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer group">
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer group"
+                            >
                                 <div className="flex justify-between items-start mb-2">
                                     <h4 className="font-bold text-sm">{opt.client}</h4>
                                     <Badge variant="outline" className={cn("text-[8px] font-extrabold border-none bg-white/5", opt.color)}>
@@ -112,7 +123,7 @@ export default function CrossSalesReports() {
                                     <span className="text-[9px] font-extrabold text-electric-blue uppercase tracking-widest">{opt.potential}</span>
                                     <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                         <Button className="w-full h-11 rounded-xl bg-electric-blue hover:bg-electric-blue/90 text-white font-bold text-xs mt-4">
                             Enviar Insights p/ Time
@@ -128,23 +139,30 @@ export default function CrossSalesReports() {
                     { title: 'Satisfação', value: '4.8/5.0', trend: '+0.2', icon: Heart, sub: 'NPS Pós-Venda' },
                     { title: 'Conversão Seguros', value: '58%', trend: '-2.1%', icon: ShieldCheck, sub: 'Renovações Ativas' },
                 ].map((card, i) => (
-                    <Card key={i} className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl p-6">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex justify-between items-start">
-                                <div className="p-2.5 rounded-xl bg-black/5 dark:bg-white/5 text-electric-blue">
-                                    <card.icon className="w-5 h-5" />
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.05 }}
+                    >
+                        <Card className="border-none bg-white dark:bg-[#111] shadow-sm rounded-3xl p-6 h-full">
+                            <div className="flex flex-col gap-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="p-2.5 rounded-xl bg-black/5 dark:bg-white/5 text-electric-blue">
+                                        <card.icon className="w-5 h-5" />
+                                    </div>
+                                    <Badge variant="secondary" className="text-[8px] font-extrabold bg-emerald-500/10 text-emerald-500 border-none">{card.trend}</Badge>
                                 </div>
-                                <Badge variant="secondary" className="text-[8px] font-extrabold bg-emerald-500/10 text-emerald-500 border-none">{card.trend}</Badge>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{card.title}</p>
+                                    <h3 className="text-xl font-extrabold text-pure-black dark:text-off-white font-mono-numbers">{card.value}</h3>
+                                    <p className="text-[9px] font-medium text-muted-foreground mt-1">{card.sub}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{card.title}</p>
-                                <h3 className="text-xl font-extrabold text-pure-black dark:text-off-white font-mono-numbers">{card.value}</h3>
-                                <p className="text-[9px] font-medium text-muted-foreground mt-1">{card.sub}</p>
-                            </div>
-                        </div>
-                    </Card>
+                        </Card>
+                    </motion.div>
                 ))}
             </div>
-        </div>
+        </motion.div>
     )
 }

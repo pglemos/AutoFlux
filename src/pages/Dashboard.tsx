@@ -54,7 +54,7 @@ export default function Dashboard() {
             const vendasNoDia = commissions.filter(c => {
                 const cd = new Date(c.date || new Date())
                 return cd.getDate().toString().padStart(2, '0') === day
-            }).length || Math.floor(Math.random() * 5 + 1)
+            }).length
             return { day, vendas: vendasNoDia }
         })
     }, [commissions])

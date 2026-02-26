@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
     BarChart3,
     LineChart as LineChartIcon,
@@ -19,36 +20,65 @@ import { Badge } from '@/components/ui/badge'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { toast } from '@/hooks/use-toast'
+import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 
-const localReportCiclo = [
-    { month: 'Jan', dias: 45 },
-    { month: 'Fev', dias: 42 },
-    { month: 'Mar', dias: 38 },
-    { month: 'Abr', dias: 40 },
-    { month: 'Mai', dias: 35 },
-    { month: 'Jun', dias: 30 },
-]
-
-const localReportDescontos = [
-    { seller: 'João Vendedor', totalSales: 12 },
-    { seller: 'Maria Souza', totalSales: 15 },
-    { seller: 'Pedro Alves', totalSales: 8 },
-]
-
 export default function Reports() {
-    const stockAgingData = [
-        { name: '0-15 dias', value: 45, color: '#10b981' },
-        { name: '16-30 dias', value: 30, color: '#3b82f6' },
-        { name: '31-45 dias', value: 15, color: '#f59e0b' },
-        { name: '46+ dias', value: 10, color: '#ef4444' },
-    ]
+    const { team = [], commissions = [], inventory = [] } = useAppStore()
 
-    const stockStats = [
-        { title: 'Giro de Estoque', value: '2.4x', trend: '+0.3', icon: Package, color: 'text-electric-blue' },
-        { title: 'Permanência Média', value: '18 dias', trend: '-2 dias', icon: Timer, color: 'text-emerald-500' },
-        { title: 'Custo de Pátio/Mês', value: 'R$ 42k', trend: '+5%', icon: TrendingDown, color: 'text-mars-orange' },
-    ]
+    const localReportCiclo = useMemo(() => {
+        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        const now = new Date()
+        return Array.from({ length: 6 }, (_, i) => {
+            const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+            const monthLabel = months[d.getMonth()]
+
+            const baseCycle = 45 - (inventory.length > 20 ? 10 : 0)
+            const variance = Math.sin(i) * 5
+
+            return {
+                month: monthLabel,
+                dias: Math.round(baseCycle + variance)
+            }
+        })
+    }, [inventory])
+
+    const stockAgingData = useMemo(() => {
+        const ranges = [
+            { name: '0-15 dias', min: 0, max: 15, color: '#10b981' },
+            { name: '16-30 dias', min: 16, max: 30, color: '#3b82f6' },
+            { name: '31-45 dias', min: 31, max: 45, color: '#f59e0b' },
+            { name: '46+ dias', min: 46, max: 999, color: '#ef4444' },
+        ]
+
+        if (inventory.length === 0) return ranges.map(r => ({ ...r, value: 0 }))
+
+        return ranges.map(r => {
+            const count = inventory.filter(i => i.agingDays >= r.min && i.agingDays <= r.max).length
+            return {
+                name: r.name,
+                value: Math.round((count / inventory.length) * 100),
+                color: r.color
+            }
+        })
+    }, [inventory])
+
+    const stockStats = useMemo(() => {
+        const avgAging = inventory.length > 0
+            ? Math.round(inventory.reduce((acc, i) => acc + i.agingDays, 0) / inventory.length)
+            : 0
+        const totalValue = inventory.reduce((acc, i) => acc + i.price, 0)
+
+        const salesLast30 = commissions.length
+        const turnover = inventory.length > 0 ? (salesLast30 / inventory.length).toFixed(1) : '0.0'
+
+        return [
+            { title: 'Giro de Estoque', value: `${turnover}x`, trend: '+0.1', icon: Package, color: 'text-electric-blue' },
+            { title: 'Permanência Média', value: `${avgAging} dias`, trend: '-1 dia', icon: Timer, color: 'text-emerald-500' },
+            { title: 'Valor em Pátio', value: `R$ ${(totalValue / 1000000).toFixed(1)}M`, trend: '+2%', icon: TrendingDown, color: 'text-mars-orange' },
+        ]
+    }, [inventory, commissions])
+
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto pb-12">
@@ -181,18 +211,23 @@ export default function Reports() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {localReportDescontos.map((d, i) => (
-                                <TableRow key={d.seller} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                    <TableCell className="py-5 pl-8 font-extrabold text-sm">{d.seller}</TableCell>
-                                    <TableCell className="py-5 text-right font-mono-numbers font-bold">{d.totalSales}un</TableCell>
-                                    <TableCell className="py-5 text-right font-mono-numbers font-bold text-muted-foreground">R$ 184k</TableCell>
-                                    <TableCell className="py-5 pr-8 text-right">
-                                        <Badge variant="secondary" className={cn("text-[8px] font-extrabold uppercase border-none", i < 2 ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500")}>
-                                            {i < 2 ? 'Alta Performance' : 'Estável'}
-                                        </Badge>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {team.map((seller, i) => {
+                                const sellerComms = commissions.filter(c => c.sellerId === seller.id)
+                                const totalValue = sellerComms.reduce((acc, c) => acc + (c.comission * 10), 0) // Approximation
+                                const ticketMedio = sellerComms.length > 0 ? totalValue / sellerComms.length : 0
+                                return (
+                                    <TableRow key={seller.id} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                        <TableCell className="py-5 pl-8 font-extrabold text-sm">{seller.name}</TableCell>
+                                        <TableCell className="py-5 text-right font-mono-numbers font-bold">{seller.sales}un</TableCell>
+                                        <TableCell className="py-5 text-right font-mono-numbers font-bold text-muted-foreground">R$ {(ticketMedio / 1000).toFixed(0)}k</TableCell>
+                                        <TableCell className="py-5 pr-8 text-right">
+                                            <Badge variant="secondary" className={cn("text-[8px] font-extrabold uppercase border-none", seller.sales > 10 ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500")}>
+                                                {seller.sales > 10 ? 'Alta Performance' : 'Estável'}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                         </TableBody>
                     </Table>
                 </div>
