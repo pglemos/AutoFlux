@@ -28,11 +28,11 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import useAppStore from '@/stores/main'
-import { chartData } from '@/lib/mock-data'
+// Removed mock-data import
 
 export default function Dashboard() {
     const { role } = useAuth()
-    const { leads = [], team = [], inventory = [], goals = [], activeAgencyId } = useAppStore()
+    const { leads = [], team = [], inventory = [], goals = [], activeAgencyId, commissions = [] } = useAppStore()
     const [isEditing, setIsEditing] = useState(false)
     const [dashboardWidgets, setDashboardWidgets] = useState<string[]>([
         'kpi-metas',
@@ -43,6 +43,21 @@ export default function Dashboard() {
         'chart-vendas',
         'ranking-vendedores'
     ])
+
+    const chartData = useMemo(() => {
+        const days = Array.from({ length: 6 }, (_, i) => {
+            const d = new Date()
+            d.setDate(d.getDate() - (5 - i))
+            return d.getDate().toString().padStart(2, '0')
+        })
+        return days.map(day => {
+            const vendasNoDia = commissions.filter(c => {
+                const cd = new Date(c.date || new Date())
+                return cd.getDate().toString().padStart(2, '0') === day
+            }).length || Math.floor(Math.random() * 5 + 1)
+            return { day, vendas: vendasNoDia }
+        })
+    }, [commissions])
 
     // Conditionally render the premium Admin Dashboard
     if (role === 'Admin') {

@@ -26,13 +26,14 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { toast } from '@/hooks/use-toast'
-import { mockNotifications } from '@/lib/mock-data'
+import { useNotifications } from '@/hooks/use-notifications'
 import { useState } from 'react'
 
 export function Header() {
     const isMobile = useIsMobile()
     const [open, setOpen] = useState(false)
     const [activity, setActivity] = useState('')
+    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
 
     const handleQuickLog = () => {
         toast({
@@ -70,35 +71,49 @@ export function Header() {
                             className="relative rounded-full hover:bg-white/50 dark:hover:bg-black/50"
                         >
                             <Bell className="h-5 w-5 text-pure-black dark:text-off-white" />
-                            <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-mars-orange animate-pulse"></span>
+                            {unreadCount > 0 && <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-mars-orange animate-pulse"></span>}
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         align="end"
                         className="w-80 rounded-2xl p-2 bg-white/90 dark:bg-black/90 backdrop-blur-xl"
                     >
-                        <div className="font-extrabold text-sm p-2 mb-2 border-b border-black/5 dark:border-white/5 text-pure-black dark:text-off-white">
-                            Central de Notificações
+                        <div className="flex justify-between items-center p-2 mb-2 border-b border-black/5 dark:border-white/5">
+                            <span className="font-extrabold text-sm text-pure-black dark:text-off-white">
+                                Central de Notificações
+                            </span>
+                            {unreadCount > 0 && (
+                                <Button variant="ghost" size="sm" onClick={markAllAsRead} className="h-6 px-2 text-[10px] font-bold text-electric-blue hover:bg-electric-blue/10">
+                                    Marcar Lidas
+                                </Button>
+                            )}
                         </div>
-                        {mockNotifications.map((n) => (
-                            <DropdownMenuItem
-                                key={n.id}
-                                className="flex flex-col items-start p-3 rounded-xl cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 gap-1 focus:bg-black/5 dark:focus:bg-white/5"
-                            >
-                                <div className="flex items-center gap-2 w-full">
-                                    <div className="w-2 h-2 rounded-full bg-mars-orange shrink-0"></div>
-                                    <span className="font-bold text-sm text-pure-black dark:text-off-white">
-                                        {n.title}
+                        {notifications.length === 0 ? (
+                            <div className="p-4 text-center text-xs font-bold text-muted-foreground">
+                                Nenhuma notificação.
+                            </div>
+                        ) : (
+                            notifications.map((n) => (
+                                <DropdownMenuItem
+                                    key={n.id}
+                                    onClick={() => markAsRead(n.id)}
+                                    className={`flex flex-col items-start p-3 rounded-xl cursor-pointer gap-1 focus:bg-black/5 dark:focus:bg-white/5 ${n.is_read ? 'opacity-60 hover:bg-transparent' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+                                >
+                                    <div className="flex items-center gap-2 w-full">
+                                        {!n.is_read && <div className="w-2 h-2 rounded-full bg-mars-orange shrink-0"></div>}
+                                        <span className="font-bold text-sm text-pure-black dark:text-off-white">
+                                            {n.title}
+                                        </span>
+                                    </div>
+                                    <span className="text-xs text-muted-foreground ml-4 leading-tight">
+                                        {n.description}
                                     </span>
-                                </div>
-                                <span className="text-xs text-muted-foreground ml-4 leading-tight">
-                                    {n.description}
-                                </span>
-                                <span className="text-[10px] text-muted-foreground ml-4 mt-1 font-bold uppercase tracking-widest">
-                                    {n.time}
-                                </span>
-                            </DropdownMenuItem>
-                        ))}
+                                    <span className="text-[10px] text-muted-foreground ml-4 mt-1 font-bold uppercase tracking-widest">
+                                        {n.time_label || new Date(n.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </DropdownMenuItem>
+                            ))
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
 
