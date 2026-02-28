@@ -64,7 +64,6 @@ export interface TeamMember {
 export type LeadStage =
     | 'Agendamento'
     | 'Visita'
-    | 'Proposta'
     | 'Venda'
     | 'Perdido'
 

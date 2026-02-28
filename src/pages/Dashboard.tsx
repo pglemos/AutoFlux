@@ -109,7 +109,6 @@ export default function Dashboard() {
         return [
             { stage: 'Agendamento', value: leads.filter(l => l.stage === 'Agendamento').length },
             { stage: 'Visita', value: leads.filter(l => l.stage === 'Visita').length },
-            { stage: 'Proposta', value: leads.filter(l => l.stage === 'Proposta').length },
             { stage: 'Venda', value: leads.filter(l => l.stage === 'Venda').length },
         ]
     }, [leads])

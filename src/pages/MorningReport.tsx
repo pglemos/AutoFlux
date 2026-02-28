@@ -75,7 +75,7 @@ ${topSellers.map((t, i) => `· ${i + 1}º ${t.name}: ${t.sales} vendas (${t.conv
 
 💡 *DIAGNÓSTICO IA*
 • Prioridade 1: Atender os ${newLeads} novos leads antes das 10:30h.
-• Prioridade 2: Revisar propostas dos ${leads.filter(l => l.stage === 'Proposta').length} leads em fase de fechamento.`
+• Prioridade 2: Revisar os ${leads.filter(l => l.stage === 'Visita').length} leads em fase de visita para acelerar o fechamento.`
 
             setReport(reportText)
             setIsGenerating(false)

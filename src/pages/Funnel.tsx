@@ -13,7 +13,7 @@ import useAppStore, { LeadStage, Lead } from '@/stores/main'
 import { useAuth } from '@/components/auth-provider'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 
-const STAGES: LeadStage[] = ['Agendamento', 'Visita', 'Proposta', 'Venda']
+const STAGES: LeadStage[] = ['Agendamento', 'Visita', 'Venda']
 
 export default function Funnel() {
   const { role } = useAuth()
@@ -156,7 +156,7 @@ export default function Funnel() {
 
   const filteredLeads = leads.filter((l) => {
     // Exclude legacy stages that no longer exist in the pipeline
-    if (l.stage === 'Lead' as any || l.stage === 'Contato' as any) return false
+    if (l.stage === 'Lead' as any || l.stage === 'Contato' as any || l.stage === 'Proposta' as any) return false
     if (sourceFilter !== 'all' && l.source !== sourceFilter) return false
     if (sellerFilter !== 'all' && l.sellerId !== sellerFilter) return false
     if (role === 'Admin' && activeAgencyId) {

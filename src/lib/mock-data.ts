@@ -16,7 +16,6 @@ export const mockKPIs = {
 export type LeadStage =
     | 'Agendamento'
     | 'Visita'
-    | 'Proposta'
     | 'Venda'
     | 'Perdido'
 
@@ -90,7 +89,7 @@ export const mockLeads: Lead[] = [
         id: 'L-106',
         name: 'Mariana Souza',
         car: 'Land Rover Evoque',
-        stage: 'Proposta',
+        stage: 'Visita',
         slaMinutes: 1440,
         source: 'Meta Ads',
         value: 380000,
@@ -101,7 +100,7 @@ export const mockLeads: Lead[] = [
         id: 'L-107',
         name: 'João Mendes',
         car: 'Tesla Model Y',
-        stage: 'Proposta',
+        stage: 'Venda',
         slaMinutes: 2880,
         source: 'Webmotors',
         value: 450000,
