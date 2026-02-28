@@ -107,10 +107,10 @@ export default function Dashboard() {
     const funnelLeakData = useMemo(() => {
         if (!leads) return []
         return [
-            { stage: 'Sem Contato', value: leads.filter(l => l.stage === 'Lead').length },
             { stage: 'Agendamento', value: leads.filter(l => l.stage === 'Agendamento').length },
             { stage: 'Visita', value: leads.filter(l => l.stage === 'Visita').length },
             { stage: 'Proposta', value: leads.filter(l => l.stage === 'Proposta').length },
+            { stage: 'Venda', value: leads.filter(l => l.stage === 'Venda').length },
         ]
     }, [leads])
 

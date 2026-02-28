@@ -62,8 +62,6 @@ export interface TeamMember {
 }
 
 export type LeadStage =
-    | 'Lead'
-    | 'Contato'
     | 'Agendamento'
     | 'Visita'
     | 'Proposta'
@@ -102,4 +100,12 @@ export interface UIState {
     reportWidgets: string[]
     calendarIntegrations: { google: boolean; outlook: boolean }
     chainedFunnel: boolean
+}
+
+export interface DailyLeadVolume {
+    id: string
+    sellerId: string
+    date: string
+    volume: number
+    agencyId?: string
 }

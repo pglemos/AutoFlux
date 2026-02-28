@@ -51,7 +51,7 @@ export default function MorningReport() {
     const teamGoal = goals.find((g) => g.type === 'Equipe')?.amount || 25
     const goalProgress = (totalSales / teamGoal) * 100
     const staleLeads = leads.filter((l) => l.stagnantDays && l.stagnantDays >= 2).length
-    const newLeads = leads.filter((l) => l.stage === 'Lead').length
+    const newLeads = leads.filter((l) => l.stage === 'Agendamento').length
     const activeLeads = leads.filter((l) => l.stage !== 'Perdido' && l.stage !== 'Venda').length
 
     const generateReport = () => {

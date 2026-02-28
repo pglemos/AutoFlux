@@ -5,6 +5,7 @@ import { UIProvider, useUI } from './UIContext'
 import { UsersProvider, useUsers } from './UsersContext'
 import { LeadsProvider, useLeads } from './LeadsContext'
 import { InventoryProvider, useInventory } from './InventoryContext'
+import { DailyLeadVolumeProvider, useDailyLeadVolume } from './DailyLeadVolumeContext'
 
 export * from './TasksContext'
 export * from './FinanceContext'
@@ -12,6 +13,7 @@ export * from './UIContext'
 export * from './UsersContext'
 export * from './LeadsContext'
 export * from './InventoryContext'
+export * from './DailyLeadVolumeContext'
 export * from '@/types'
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
@@ -22,7 +24,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
                     <InventoryProvider>
                         <TasksProvider>
                             <FinanceProvider>
-                                {children}
+                                <DailyLeadVolumeProvider>
+                                    {children}
+                                </DailyLeadVolumeProvider>
                             </FinanceProvider>
                         </TasksProvider>
                     </InventoryProvider>
@@ -41,6 +45,7 @@ export default function useAppStore() {
     const leads = useLeads()
     const inventory = useInventory()
     const finance = useFinance()
+    const dailyLeadVolume = useDailyLeadVolume()
 
     return useMemo(() => ({
         ...tasks,
@@ -51,5 +56,6 @@ export default function useAppStore() {
         ...leads,
         ...inventory,
         ...finance,
-    }), [tasks, commissions, goals, ui, users, leads, inventory, finance])
+        ...dailyLeadVolume,
+    }), [tasks, commissions, goals, ui, users, leads, inventory, finance, dailyLeadVolume])
 }
