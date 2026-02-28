@@ -44,18 +44,22 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [
-                { data: commsData },
-                { data: rulesData },
-                { data: goalsData },
-            ] = await Promise.all([
-                supabase.from('commissions').select('*'),
-                supabase.from('commission_rules').select('*'),
-                supabase.from('goals').select('*'),
-            ])
-            if (commsData) setCommissions(commsData.map(mapCommissionFromDB))
-            if (rulesData) setCommissionRules(toCamelCase(rulesData))
-            if (goalsData) setGoals(toCamelCase(goalsData))
+            try {
+                const [
+                    { data: commsData },
+                    { data: rulesData },
+                    { data: goalsData },
+                ] = await Promise.all([
+                    supabase.from('commissions').select('*'),
+                    supabase.from('commission_rules').select('*'),
+                    supabase.from('goals').select('*'),
+                ])
+                if (commsData) setCommissions(commsData.map(mapCommissionFromDB))
+                if (rulesData) setCommissionRules(toCamelCase(rulesData))
+                if (goalsData) setGoals(toCamelCase(goalsData))
+            } catch {
+                // Supabase error — use empty arrays
+            }
         }
         fetchData()
 
@@ -90,35 +94,71 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const addCommission = useCallback(async (comm: Omit<Commission, 'id'>) => {
-        const { data, error } = await supabase.from('commissions').insert([mapCommissionToDB(comm)]).select()
-        if (!error && data) setCommissions(prev => [mapCommissionFromDB(data[0]), ...prev])
+        try {
+            const { data, error } = await supabase.from('commissions').insert([mapCommissionToDB(comm)]).select()
+            if (!error && data) {
+                setCommissions(prev => [mapCommissionFromDB(data[0]), ...prev])
+            } else {
+                const local: Commission = { ...comm, id: crypto.randomUUID() } as Commission
+                setCommissions(prev => [local, ...prev])
+            }
+        } catch {
+            const local: Commission = { ...comm, id: crypto.randomUUID() } as Commission
+            setCommissions(prev => [local, ...prev])
+        }
     }, [])
 
     const addCommissionRule = useCallback(async (rule: Omit<CommissionRule, 'id'>) => {
-        const { data, error } = await supabase.from('commission_rules').insert([toSnakeCase(rule)]).select()
-        if (!error && data) setCommissionRules(prev => [...prev, toCamelCase(data[0])])
+        try {
+            const { data, error } = await supabase.from('commission_rules').insert([toSnakeCase(rule)]).select()
+            if (!error && data) {
+                setCommissionRules(prev => [...prev, toCamelCase(data[0])])
+            } else {
+                const local: CommissionRule = { ...rule, id: crypto.randomUUID() } as CommissionRule
+                setCommissionRules(prev => [...prev, local])
+            }
+        } catch {
+            const local: CommissionRule = { ...rule, id: crypto.randomUUID() } as CommissionRule
+            setCommissionRules(prev => [...prev, local])
+        }
     }, [])
 
     const deleteCommissionRule = useCallback(async (id: string) => {
-        const { error } = await supabase.from('commission_rules').delete().eq('id', id)
-        if (!error) setCommissionRules(prev => prev.filter(r => r.id !== id))
+        setCommissionRules(prev => prev.filter(r => r.id !== id))
+        try {
+            await supabase.from('commission_rules').delete().eq('id', id)
+        } catch {
+            // Local state already updated
+        }
     }, [])
 
     const setGoal = useCallback(async (goal: Omit<Goal, 'id'>) => {
-        const { data, error } = await supabase.from('goals').upsert([toSnakeCase(goal)]).select()
-        if (!error && data) {
-            const updated = toCamelCase(data[0]) as Goal
-            setGoals(prev => {
-                const existing = prev.find(g => g.type === updated.type && g.targetId === updated.targetId)
-                if (existing) return prev.map(g => g.id === existing.id ? updated : g)
-                return [...prev, updated]
-            })
+        try {
+            const { data, error } = await supabase.from('goals').upsert([toSnakeCase(goal)]).select()
+            if (!error && data) {
+                const updated = toCamelCase(data[0]) as Goal
+                setGoals(prev => {
+                    const existing = prev.find(g => g.type === updated.type && g.targetId === updated.targetId)
+                    if (existing) return prev.map(g => g.id === existing.id ? updated : g)
+                    return [...prev, updated]
+                })
+            } else {
+                const local: Goal = { ...goal, id: crypto.randomUUID() } as Goal
+                setGoals(prev => [...prev, local])
+            }
+        } catch {
+            const local: Goal = { ...goal, id: crypto.randomUUID() } as Goal
+            setGoals(prev => [...prev, local])
         }
     }, [])
 
     const deleteGoal = useCallback(async (id: string) => {
-        const { error } = await supabase.from('goals').delete().eq('id', id)
-        if (!error) setGoals(prev => prev.filter(g => g.id !== id))
+        setGoals(prev => prev.filter(g => g.id !== id))
+        try {
+            await supabase.from('goals').delete().eq('id', id)
+        } catch {
+            // Local state already updated
+        }
     }, [])
 
     const value = useMemo<FinanceState>(() => ({

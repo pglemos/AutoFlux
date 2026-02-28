@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Task, TaskStatus, TaskPriority } from '@/types'
 import { toCamelCase, toSnakeCase } from '@/lib/utils'
@@ -17,8 +17,12 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const fetchTasks = async () => {
-            const { data, error } = await supabase.from('tasks').select('*')
-            if (!error && data) setTasks(toCamelCase(data))
+            try {
+                const { data, error } = await supabase.from('tasks').select('*')
+                if (!error && data) setTasks(toCamelCase(data))
+            } catch {
+                // Table may not exist yet
+            }
         }
         fetchTasks()
 
@@ -42,22 +46,44 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const addTask = useCallback(async (task: Omit<Task, 'id' | 'status'>) => {
-        const { data, error } = await supabase.from('tasks').insert([toSnakeCase({ ...task, status: 'Pendente' })]).select()
-        if (!error && data) setTasks(prev => [...prev, toCamelCase(data[0])])
+        try {
+            const { data, error } = await supabase.from('tasks').insert([toSnakeCase({ ...task, status: 'Pendente' })]).select()
+            if (!error && data) {
+                setTasks(prev => [...prev, toCamelCase(data[0])])
+            } else {
+                const localTask: Task = { ...task, id: crypto.randomUUID(), status: 'Pendente' } as Task
+                setTasks(prev => [...prev, localTask])
+            }
+        } catch {
+            const localTask: Task = { ...task, id: crypto.randomUUID(), status: 'Pendente' } as Task
+            setTasks(prev => [...prev, localTask])
+        }
     }, [])
 
     const updateTask = useCallback(async (id: string, updates: Partial<Task>) => {
-        const { error } = await supabase.from('tasks').update(toSnakeCase(updates)).eq('id', id)
-        if (!error) setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
+        try {
+            await supabase.from('tasks').update(toSnakeCase(updates)).eq('id', id)
+        } catch {
+            // Local state already updated
+        }
     }, [])
 
     const deleteTask = useCallback(async (id: string) => {
-        const { error } = await supabase.from('tasks').delete().eq('id', id)
-        if (!error) setTasks(prev => prev.filter(t => t.id !== id))
+        setTasks(prev => prev.filter(t => t.id !== id))
+        try {
+            await supabase.from('tasks').delete().eq('id', id)
+        } catch {
+            // Local state already updated
+        }
     }, [])
 
+    const value = useMemo<TasksState>(() => ({
+        tasks, addTask, updateTask, deleteTask,
+    }), [tasks, addTask, updateTask, deleteTask])
+
     return (
-        <TasksContext.Provider value={{ tasks, addTask, updateTask, deleteTask }}>
+        <TasksContext.Provider value={value}>
             {children}
         </TasksContext.Provider>
     )

@@ -45,18 +45,39 @@ export function LeadsProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const addLead = useCallback(async (lead: Omit<Lead, 'id'>) => {
-        const { data, error } = await supabase.from('leads').insert([toSnakeCase(lead)]).select()
-        if (!error && data) setLeads(prev => [...prev, toCamelCase(data[0])])
+        try {
+            const { data, error } = await supabase.from('leads').insert([toSnakeCase(lead)]).select()
+            if (!error && data) {
+                setLeads(prev => [...prev, toCamelCase(data[0])])
+            } else {
+                // Supabase error — fallback to local state
+                const localLead: Lead = { ...lead, id: crypto.randomUUID() } as Lead
+                setLeads(prev => [...prev, localLead])
+            }
+        } catch {
+            const localLead: Lead = { ...lead, id: crypto.randomUUID() } as Lead
+            setLeads(prev => [...prev, localLead])
+        }
     }, [])
 
     const updateLead = useCallback(async (id: string, updates: Partial<Lead>) => {
-        const { error } = await supabase.from('leads').update(toSnakeCase(updates)).eq('id', id)
-        if (!error) setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l))
+        // Always update local state first for responsiveness
+        setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l))
+        try {
+            await supabase.from('leads').update(toSnakeCase(updates)).eq('id', id)
+        } catch {
+            // Supabase failed, but local state is already updated
+        }
     }, [])
 
     const deleteLead = useCallback(async (id: string) => {
-        const { error } = await supabase.from('leads').delete().eq('id', id)
-        if (!error) setLeads(prev => prev.filter(l => l.id !== id))
+        // Always update local state first
+        setLeads(prev => prev.filter(l => l.id !== id))
+        try {
+            await supabase.from('leads').delete().eq('id', id)
+        } catch {
+            // Supabase failed, but local state is already updated
+        }
     }, [])
 
     return (

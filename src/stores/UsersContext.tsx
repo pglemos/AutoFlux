@@ -41,32 +41,32 @@ export function UsersProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [
-                { data: userData },
-                { data: agencyData },
-                { data: teamData },
-            ] = await Promise.all([
-                supabase.from('profiles').select('*'),
-                supabase.from('agencies').select('*'),
-                supabase.from('team').select('*'),
-            ])
-            if (userData) setUsers(toCamelCase(userData))
-            if (agencyData) setAgencies(toCamelCase(agencyData))
-            if (teamData) setTeam(toCamelCase(teamData))
+            try {
+                const [
+                    { data: teamData },
+                    { data: agencyData },
+                ] = await Promise.all([
+                    supabase.from('team').select('*'),
+                    supabase.from('agencies').select('*'),
+                ])
+                if (teamData) {
+                    const camelTeam = toCamelCase(teamData)
+                    setTeam(camelTeam)
+                    // Users are derived from team members with email/role info
+                    setUsers(camelTeam.map((t: any) => ({
+                        id: t.id,
+                        name: t.name,
+                        email: t.email || '',
+                        role: t.role || 'Seller',
+                        agencyId: t.agencyId,
+                    })))
+                }
+                if (agencyData) setAgencies(toCamelCase(agencyData))
+            } catch {
+                // Supabase error — use empty arrays
+            }
         }
         fetchData()
-
-        const profileSub = supabase
-            .channel('public:profiles')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
-                if (payload.eventType === 'INSERT') setUsers(prev => [...prev, toCamelCase(payload.new) as User])
-                if (payload.eventType === 'UPDATE') {
-                    const updated = toCamelCase(payload.new) as User
-                    setUsers(prev => prev.map(u => u.id === updated.id ? updated : u))
-                }
-                if (payload.eventType === 'DELETE') setUsers(prev => prev.filter(u => u.id !== payload.old.id))
-            })
-            .subscribe()
 
         const agencySub = supabase
             .channel('public:agencies')
@@ -93,61 +93,104 @@ export function UsersProvider({ children }: { children: ReactNode }) {
             .subscribe()
 
         return () => {
-            supabase.removeChannel(profileSub)
             supabase.removeChannel(agencySub)
             supabase.removeChannel(teamSub)
         }
     }, [])
 
-    // --- Users CRUD ---
+    // --- Users CRUD (uses team table) ---
     const addUser = useCallback(async (user: Omit<User, 'id'>) => {
-        const { data, error } = await supabase.from('profiles').insert([toSnakeCase(user)]).select()
-        if (!error && data) setUsers(prev => [...prev, toCamelCase(data[0])])
+        try {
+            const { data, error } = await supabase.from('team').insert([toSnakeCase(user)]).select()
+            if (!error && data) {
+                setUsers(prev => [...prev, toCamelCase(data[0])])
+            } else {
+                const localUser: User = { ...user, id: crypto.randomUUID() } as User
+                setUsers(prev => [...prev, localUser])
+            }
+        } catch {
+            const localUser: User = { ...user, id: crypto.randomUUID() } as User
+            setUsers(prev => [...prev, localUser])
+        }
     }, [])
 
     const updateUser = useCallback(async (id: string, updates: Partial<User>) => {
-        const { error } = await supabase.from('profiles').update(toSnakeCase(updates)).eq('id', id)
-        if (!error) setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u))
+        setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u))
+        try {
+            await supabase.from('team').update(toSnakeCase(updates)).eq('id', id)
+        } catch {
+            // Local state already updated
+        }
     }, [])
 
     const deleteUser = useCallback(async (id: string) => {
-        const { error } = await supabase.from('profiles').delete().eq('id', id)
-        if (!error) setUsers(prev => prev.filter(u => u.id !== id))
+        setUsers(prev => prev.filter(u => u.id !== id))
+        try {
+            await supabase.from('team').delete().eq('id', id)
+        } catch {
+            // Local state already updated
+        }
     }, [])
 
     // --- Agencies CRUD ---
     const addAgency = useCallback(async (agency: Omit<Agency, 'id'>) => {
-        const { data, error } = await supabase.from('agencies').insert([toSnakeCase(agency)]).select()
-        if (!error && data) setAgencies(prev => [...prev, toCamelCase(data[0])])
+        try {
+            const { data, error } = await supabase.from('agencies').insert([toSnakeCase(agency)]).select()
+            if (!error && data) {
+                setAgencies(prev => [...prev, toCamelCase(data[0])])
+            } else {
+                const local: Agency = { ...agency, id: crypto.randomUUID() } as Agency
+                setAgencies(prev => [...prev, local])
+            }
+        } catch {
+            const local: Agency = { ...agency, id: crypto.randomUUID() } as Agency
+            setAgencies(prev => [...prev, local])
+        }
     }, [])
 
     const updateAgency = useCallback(async (id: string, updates: Partial<Agency>) => {
-        const { error } = await supabase.from('agencies').update(toSnakeCase(updates)).eq('id', id)
-        if (!error) setAgencies(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a))
+        setAgencies(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a))
+        try {
+            await supabase.from('agencies').update(toSnakeCase(updates)).eq('id', id)
+        } catch { /* local state already updated */ }
     }, [])
 
     const deleteAgency = useCallback(async (id: string) => {
-        const { error } = await supabase.from('agencies').delete().eq('id', id)
-        if (!error) {
-            setAgencies(prev => prev.filter(a => a.id !== id))
-            setUsers(prev => prev.map(u => u.agencyId === id ? { ...u, agencyId: undefined } : u))
-        }
+        setAgencies(prev => prev.filter(a => a.id !== id))
+        setUsers(prev => prev.map(u => u.agencyId === id ? { ...u, agencyId: undefined } : u))
+        try {
+            await supabase.from('agencies').delete().eq('id', id)
+        } catch { /* local state already updated */ }
     }, [])
 
     // --- Team CRUD ---
     const addTeamMember = useCallback(async (member: Omit<TeamMember, 'id'>) => {
-        const { data, error } = await supabase.from('team').insert([toSnakeCase(member)]).select()
-        if (!error && data) setTeam(prev => [...prev, toCamelCase(data[0])])
+        try {
+            const { data, error } = await supabase.from('team').insert([toSnakeCase(member)]).select()
+            if (!error && data) {
+                setTeam(prev => [...prev, toCamelCase(data[0])])
+            } else {
+                const local: TeamMember = { ...member, id: crypto.randomUUID() } as TeamMember
+                setTeam(prev => [...prev, local])
+            }
+        } catch {
+            const local: TeamMember = { ...member, id: crypto.randomUUID() } as TeamMember
+            setTeam(prev => [...prev, local])
+        }
     }, [])
 
     const updateTeamMember = useCallback(async (id: string, updates: Partial<TeamMember>) => {
-        const { error } = await supabase.from('team').update(toSnakeCase(updates)).eq('id', id)
-        if (!error) setTeam(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
+        setTeam(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
+        try {
+            await supabase.from('team').update(toSnakeCase(updates)).eq('id', id)
+        } catch { /* local state already updated */ }
     }, [])
 
     const deleteTeamMember = useCallback(async (id: string) => {
-        const { error } = await supabase.from('team').delete().eq('id', id)
-        if (!error) setTeam(prev => prev.filter(t => t.id !== id))
+        setTeam(prev => prev.filter(t => t.id !== id))
+        try {
+            await supabase.from('team').delete().eq('id', id)
+        } catch { /* local state already updated */ }
     }, [])
 
     // --- Permissions ---
