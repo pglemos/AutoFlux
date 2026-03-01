@@ -38,7 +38,7 @@ import useAppStore from '@/stores/main'
 import { cn } from '@/lib/utils'
 
 export default function SellerPerformance() {
-    const { team = [], commissions = [], leads = [], goals = [] } = useAppStore()
+    const { team = [], commissions = [], leads = [], goals = [], agencies = [] } = useAppStore()
     const [selectedSeller, setSelectedSeller] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
 
@@ -92,10 +92,12 @@ export default function SellerPerformance() {
     const filteredCommissions = useMemo(() => {
         return commissions.filter((c) => {
             const matchesSeller = selectedSeller === 'all' || c.sellerId === selectedSeller
-            const matchesSearch = c.car.toLowerCase().includes(searchTerm.toLowerCase()) || c.seller.toLowerCase().includes(searchTerm.toLowerCase())
+            const sellerInfo = team.find(t => t.id === c.sellerId)
+            const sellerName = sellerInfo?.name || c.seller || ''
+            const matchesSearch = (c.car || '').toLowerCase().includes(searchTerm.toLowerCase()) || sellerName.toLowerCase().includes(searchTerm.toLowerCase())
             return matchesSeller && matchesSearch
         })
-    }, [commissions, selectedSeller, searchTerm])
+    }, [commissions, selectedSeller, searchTerm, team])
 
     const leaderboard = useMemo(() => [...enrichedTeam].sort((a, b) => b.sales - a.sales).slice(0, 3), [enrichedTeam])
 
@@ -145,6 +147,10 @@ export default function SellerPerformance() {
                                     <p className={cn("text-xs font-bold uppercase tracking-widest opacity-60", i === 0 ? "text-white" : "text-muted-foreground")}>
                                         {i === 0 ? 'Top Performer' : member.role}
                                     </p>
+                                    {(() => {
+                                        const agName = agencies?.find(a => a.id === member.agencyId)?.name;
+                                        return agName ? <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 inline-block", i === 0 ? "bg-white/20 text-white" : "bg-electric-blue/10 text-electric-blue")}>{agName}</span> : null;
+                                    })()}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -262,35 +268,43 @@ export default function SellerPerformance() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredCommissions.map((c) => (
-                                <TableRow key={c.id} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
-                                    <TableCell className="py-5 pl-8">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-electric-blue/10 flex items-center justify-center text-electric-blue font-extrabold text-[10px]">
-                                                {c.seller.substring(0, 2).toUpperCase()}
+                            {filteredCommissions.map((c) => {
+                                const sellerInfo = team.find(t => t.id === c.sellerId);
+                                const sellerName = sellerInfo?.name || c.seller || 'N/A';
+                                const agencyName = agencies?.find(a => a.id === sellerInfo?.agencyId)?.name;
+                                return (
+                                    <TableRow key={c.id} className="border-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+                                        <TableCell className="py-5 pl-8">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-electric-blue/10 flex items-center justify-center text-electric-blue font-extrabold text-[10px]">
+                                                    {sellerName.substring(0, 2).toUpperCase()}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-extrabold text-sm">{sellerName}</span>
+                                                    {agencyName && <span className="text-[10px] font-bold text-electric-blue/70 uppercase tracking-widest">{agencyName}</span>}
+                                                </div>
                                             </div>
-                                            <span className="font-extrabold text-sm">{c.seller}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="py-5">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-sm text-pure-black dark:text-off-white">{c.car}</span>
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Venda Direta</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="py-5 font-bold text-xs text-muted-foreground">{c.date}</TableCell>
-                                    <TableCell className="py-5">
-                                        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-none font-mono-numbers text-[10px] font-extrabold">
-                                            {c.margin}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="py-5 pr-8 text-right">
-                                        <span className="font-extrabold text-sm text-electric-blue font-mono-numbers">
-                                            R$ {c.comission.toLocaleString('pt-BR')}
-                                        </span>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                        </TableCell>
+                                        <TableCell className="py-5">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-sm text-pure-black dark:text-off-white">{c.car}</span>
+                                                <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Venda Direta</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="py-5 font-bold text-xs text-muted-foreground">{c.date}</TableCell>
+                                        <TableCell className="py-5">
+                                            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border-none font-mono-numbers text-[10px] font-extrabold">
+                                                {c.margin}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="py-5 pr-8 text-right">
+                                            <span className="font-extrabold text-sm text-electric-blue font-mono-numbers">
+                                                R$ {c.comission.toLocaleString('pt-BR')}
+                                            </span>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                         </TableBody>
                     </Table>
                 </div>

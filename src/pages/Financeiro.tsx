@@ -23,7 +23,7 @@ import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { motion } from 'framer-motion'
 
 export default function Financeiro() {
-    const { commissions } = useAppStore()
+    const { commissions, team, agencies } = useAppStore()
     const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val)
 
     const fluxData = useMemo(() => {
@@ -194,15 +194,25 @@ export default function Financeiro() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-black/5 dark:divide-white/5">
-                                {commissions.slice(0, 5).map((c) => (
-                                    <tr key={c.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-all group">
-                                        <td className="p-6 first:pl-8 font-black text-sm text-pure-black dark:text-off-white">{c.seller}</td>
-                                        <td className="p-6 font-bold text-xs text-muted-foreground">{c.car}</td>
-                                        <td className="p-6 text-right last:pr-8 group-hover:scale-105 transition-transform">
-                                            <span className="font-mono-numbers font-black text-lg text-emerald-500">{formatCurrency(c.comission)}</span>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {commissions.slice(0, 5).map((c) => {
+                                    const sellerInfo = team.find(t => t.id === c.sellerId);
+                                    const sellerName = sellerInfo?.name || c.seller || 'N/A';
+                                    const agencyName = agencies?.find(a => a.id === sellerInfo?.agencyId)?.name || 'Matriz';
+                                    return (
+                                        <tr key={c.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-all group">
+                                            <td className="p-6 first:pl-8">
+                                                <div className="flex flex-col">
+                                                    <span className="font-black text-sm text-pure-black dark:text-off-white">{sellerName}</span>
+                                                    <span className="text-[10px] font-bold text-electric-blue/70 uppercase tracking-widest">{agencyName}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-6 font-bold text-xs text-muted-foreground">{c.car}</td>
+                                            <td className="p-6 text-right last:pr-8 group-hover:scale-105 transition-transform">
+                                                <span className="font-mono-numbers font-black text-lg text-emerald-500">{formatCurrency(c.comission)}</span>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -234,23 +244,33 @@ export default function Financeiro() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {commissions.map((c, i) => (
-                                <TableRow key={c.id} className={cn('border-none transition-colors h-20', i % 2 === 0 ? 'bg-transparent' : 'bg-black/[0.01] dark:bg-white/[0.01]', 'hover:bg-emerald-500/[0.03] group')}>
-                                    <TableCell className="font-black text-base py-4 pl-10 text-pure-black dark:text-off-white">{c.seller}</TableCell>
-                                    <TableCell className="font-bold text-sm text-muted-foreground py-4">{c.car}</TableCell>
-                                    <TableCell className="font-bold text-sm text-muted-foreground py-4">{c.date}</TableCell>
-                                    <TableCell className="text-right py-4">
-                                        <Badge className={cn("font-mono-numbers font-black text-sm border-none rounded-xl px-4 py-1.5",
-                                            parseFloat(c.margin) > 9 ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                                        )}>
-                                            {c.margin}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right font-mono-numbers font-black text-xl text-emerald-600 py-4 pr-10 group-hover:translate-x-[-4px] transition-transform">
-                                        {formatCurrency(c.comission)}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {commissions.map((c, i) => {
+                                const sellerInfo = team.find(t => t.id === c.sellerId);
+                                const sellerName = sellerInfo?.name || c.seller || 'N/A';
+                                const agencyName = agencies?.find(a => a.id === sellerInfo?.agencyId)?.name || 'Matriz';
+                                return (
+                                    <TableRow key={c.id} className={cn('border-none transition-colors h-20', i % 2 === 0 ? 'bg-transparent' : 'bg-black/[0.01] dark:bg-white/[0.01]', 'hover:bg-emerald-500/[0.03] group')}>
+                                        <TableCell className="py-4 pl-10">
+                                            <div className="flex flex-col">
+                                                <span className="font-black text-base text-pure-black dark:text-off-white">{sellerName}</span>
+                                                <span className="text-[10px] font-bold text-electric-blue/70 uppercase tracking-widest">{agencyName}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-bold text-sm text-muted-foreground py-4">{c.car}</TableCell>
+                                        <TableCell className="font-bold text-sm text-muted-foreground py-4">{c.date}</TableCell>
+                                        <TableCell className="text-right py-4">
+                                            <Badge className={cn("font-mono-numbers font-black text-sm border-none rounded-xl px-4 py-1.5",
+                                                parseFloat(c.margin) > 9 ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                                            )}>
+                                                {c.margin}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono-numbers font-black text-xl text-emerald-600 py-4 pr-10 group-hover:translate-x-[-4px] transition-transform">
+                                            {formatCurrency(c.comission)}
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                         </TableBody>
                     </Table>
                 </div>

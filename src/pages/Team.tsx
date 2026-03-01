@@ -38,7 +38,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function Team() {
     const { role } = useAuth()
-    const { team, leads, goals, addTeamMember, updateTeamMember, deleteTeamMember, activeAgencyId } = useAppStore()
+    const { team, leads, goals, agencies, addTeamMember, updateTeamMember, deleteTeamMember, activeAgencyId } = useAppStore()
     const [open, setOpen] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [search, setSearch] = useState('')
@@ -150,6 +150,7 @@ export default function Team() {
                                 rank={index + 1}
                                 isLead={index === 0}
                                 leadsCount={leads.filter(l => l.sellerId === member.id).length}
+                                agencyName={agencies?.find(a => a.id === member.agencyId)?.name || 'Matriz'}
                                 onEdit={() => openDialog(member)}
                                 onDelete={() => deleteTeamMember(member.id)}
                             />
@@ -218,11 +219,12 @@ function SummaryCard({ title, value, trend, icon }: { title: string, value: stri
     )
 }
 
-function MemberCard({ member, rank, isLead, leadsCount, onEdit, onDelete }: {
+function MemberCard({ member, rank, isLead, leadsCount, agencyName, onEdit, onDelete }: {
     member: TeamMember,
     rank: number,
     isLead: boolean,
     leadsCount: number,
+    agencyName: string,
     onEdit: () => void,
     onDelete: () => void
 }) {
@@ -263,9 +265,12 @@ function MemberCard({ member, rank, isLead, leadsCount, onEdit, onDelete }: {
                     </div>
 
                     <h3 className="text-xl font-extrabold tracking-tight text-pure-black dark:text-off-white">{member.name}</h3>
-                    <div className="flex items-center gap-2 mt-2">
-                        <Briefcase className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="text-xs font-bold text-muted-foreground">{member.role}</span>
+                    <div className="flex flex-col items-center gap-1.5 mt-2">
+                        <div className="flex items-center gap-2">
+                            <Briefcase className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span className="text-xs font-bold text-muted-foreground">{member.role}</span>
+                        </div>
+                        <Badge variant="outline" className="text-[9px] bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 uppercase tracking-widest text-muted-foreground font-bold">{agencyName}</Badge>
                     </div>
                 </div>
 

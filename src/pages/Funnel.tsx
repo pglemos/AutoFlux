@@ -19,7 +19,7 @@ export default function Funnel() {
   const { role } = useAuth()
   const {
     leads, addLead, updateLead, deleteLead,
-    team, commissionRules, addCommission, chainedFunnel, activeAgencyId,
+    team, agencies, commissionRules, addCommission, chainedFunnel, activeAgencyId,
     dailyVolumes, addDailyVolume, updateDailyVolume
   } = useAppStore()
   const [lossDialogOpen, setLossDialogOpen] = useState(false)
@@ -307,6 +307,7 @@ export default function Funnel() {
                                 <LeadCard
                                   lead={lead}
                                   sellerName={team.find((t) => t.id === lead.sellerId)?.name}
+                                  agencyName={agencies?.find(a => a.id === lead.agencyId)?.name || agencies?.find(a => a.id === team.find((t) => t.id === lead.sellerId)?.agencyId)?.name || 'Matriz'}
                                   onLost={() => { setSelectedLeadId(lead.id); setLossDialogOpen(true) }}
                                   onEdit={() => openLeadDialog(lead)}
                                   onDelete={() => deleteLead(lead.id)}
@@ -447,8 +448,8 @@ export default function Funnel() {
   )
 }
 
-function LeadCard({ lead, sellerName, onLost, onEdit, onDelete, isDragging }: {
-  lead: Lead; sellerName?: string; onLost: () => void; onEdit: () => void; onDelete: () => void; isDragging?: boolean
+function LeadCard({ lead, sellerName, agencyName, onLost, onEdit, onDelete, isDragging }: {
+  lead: Lead; sellerName?: string; agencyName?: string; onLost: () => void; onEdit: () => void; onDelete: () => void; isDragging?: boolean
 }) {
   return (
     <Card className={cn('shadow-elevation transition-all duration-300 group rounded-[2rem] overflow-hidden relative border-none bg-white dark:bg-black',
@@ -468,13 +469,16 @@ function LeadCard({ lead, sellerName, onLost, onEdit, onDelete, isDragging }: {
 
         <div className="space-y-3 mb-5">
           <div className="flex justify-between items-center bg-black/[0.03] dark:bg-white/[0.03] p-3 rounded-2xl">
-            <span className="text-electric-blue font-bold text-xs">{lead.car}</span>
+            <span className="text-electric-blue font-bold text-xs truncate max-w-[120px]">{lead.car}</span>
             <span className="font-mono-numbers font-extrabold text-sm text-pure-black dark:text-off-white">R$ {(lead.value / 1000).toLocaleString()}k</span>
           </div>
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest px-1">
-            <span className="bg-muted px-1.5 py-0.5 rounded italic lowercase">{lead.source}</span>
-            <span className="opacity-40">•</span>
-            <span>{sellerName || 'S/ Vendedor'}</span>
+            <span className="bg-muted px-1.5 py-0.5 rounded italic lowercase shrink-0">{lead.source}</span>
+            <span className="opacity-40 shrink-0">•</span>
+            <div className="flex flex-col min-w-0">
+              <span className="truncate">{sellerName || 'S/ Vendedor'}</span>
+              <span className="text-[9px] text-electric-blue/70 mt-0.5 truncate">{agencyName}</span>
+            </div>
           </div>
         </div>
 
